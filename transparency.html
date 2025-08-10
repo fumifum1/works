@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transparency</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <h1>Transparency</h1>
+        <p>画像から指定した色とその近似色を取り除き、背景が透明な画像を簡単に作成できます。</p>
+    </header>
+
+    <main>
+        <section id="uploadSection" class="section-box">
+            <h2>1. 画像をアップロード</h2>
+            <input type="file" id="imageInput" accept="image/*">
+        </section>
+
+        <section id="processingSection" class="section-box">
+            <h2>2. 色を選択して背景を削除</h2>
+            <div id="processingContent">
+                <div id="canvas-wrapper">
+                    <canvas id="canvas"></canvas>
+                </div>
+                <div id="controls">
+                    <div id="colorPickersWrapper">
+                        <div id="colorPickerContainer1" class="color-picker-box active-picker">
+                            <label for="colorPicker1">色 1</label>
+                            <input type="color" id="colorPicker1" value="#ffffff">
+                        </div>
+                        <div id="colorPickerContainer2" class="color-picker-box">
+                            <label for="colorPicker2">色 2</label>
+                            <input type="color" id="colorPicker2" value="#000000">
+                        </div>
+                    </div>
+                    <p class="picker-instruction">アクティブな色を画像から抽出できます</p>
+                    <div id="toleranceContainer">
+                        <label for="toleranceSlider">色の許容範囲: <span id="toleranceValue">20</span></label>
+                        <input type="range" id="toleranceSlider" min="0" max="100" value="20">
+                    </div>
+                    <button id="processButton">背景を削除</button>
+                    <div id="loader" class="loader"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="downloadSection" class="section-box">
+            <h2>3. 画像をダウンロード</h2>
+            <div id="resizeControls">
+                <h3 class="resize-title">リサイズ (アスペクト比維持)</h3>
+                <div class="resize-percentage-group">
+                    <label for="resizePercentage">スケール</label>
+                    <input type="range" id="resizeSlider" min="1" max="200" value="100">
+                    <input type="number" id="resizePercentage" min="1" value="100">
+                    <span>%</span>
+                </div>
+            </div>
+            <button id="downloadButton" class="download-btn">画像をダウンロード</button>
+        </section>
+    </main>
+
+    <script src="main.js"></script>
+</body>
+</html>

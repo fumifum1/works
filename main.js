@@ -16,9 +16,12 @@ const uploadSection = document.getElementById('uploadSection');
 const processingSection = document.getElementById('processingSection');
 const downloadSection = document.getElementById('downloadSection');
 
-let originalImage = null;
-let processingCanvas = null; // 処理用の非表示Canvas
-let processingCtx = null;    // 処理用の非表示コンテキスト
+// アプリケーションの状態を管理するオブジェクト
+const appState = {
+    originalImage: null,
+    processingCanvas: null, // 処理用の非表示Canvas
+    processingCtx: null,    // 処理用の非表示コンテキスト
+};
 
 // カラーピッカーのアクティブ状態を切り替える
 const pickerBoxes = [
@@ -45,14 +48,14 @@ imageInput.addEventListener('change', (e) => {
 
     const reader = new FileReader();
     reader.onload = (event) => {
-        originalImage = new Image();
-        originalImage.onload = () => {
+        appState.originalImage = new Image();
+        appState.originalImage.onload = () => {
             // 1. 処理用Canvasを元のサイズで作成
-            processingCanvas = document.createElement('canvas');
-            processingCtx = processingCanvas.getContext('2d');
-            processingCanvas.width = originalImage.width;
-            processingCanvas.height = originalImage.height;
-            processingCtx.drawImage(originalImage, 0, 0);
+            appState.processingCanvas = document.createElement('canvas');
+            appState.processingCtx = appState.processingCanvas.getContext('2d');
+            appState.processingCanvas.width = appState.originalImage.width;
+            appState.processingCanvas.height = appState.originalImage.height;
+            appState.processingCtx.drawImage(appState.originalImage, 0, 0);
 
             // 画像が読み込まれたら処理セクションを表示して、コンテナのサイズを計算できるようにする
             processingSection.style.display = 'block';
@@ -62,14 +65,14 @@ imageInput.addEventListener('change', (e) => {
             const canvasWrapper = document.getElementById('canvas-wrapper');
             const availableWidth = canvasWrapper.clientWidth;
 
-            const scale = Math.min(1, availableWidth / originalImage.width);
-            canvas.width = originalImage.width * scale;
-            canvas.height = originalImage.height * scale;
+            const scale = Math.min(1, availableWidth / appState.originalImage.width);
+            canvas.width = appState.originalImage.width * scale;
+            canvas.height = appState.originalImage.height * scale;
 
             // 表示用Canvasに縮小して描画
-            ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
+            ctx.drawImage(appState.originalImage, 0, 0, canvas.width, canvas.height);
         };
-        originalImage.src = event.target.result;
+        appState.originalImage.src = event.target.result;
     };
     reader.readAsDataURL(file);
 });
@@ -88,7 +91,7 @@ resizePercentage.addEventListener('input', () => {
 
 // Canvasクリックで色を取得するスポイト機能
 canvas.addEventListener('click', (event) => {
-    if (!processingCtx) return;
+    if (!appState.processingCtx) return;
 
     // 表示Canvas上のクリック座標を取得
     const rect = canvas.getBoundingClientRect();
@@ -96,15 +99,15 @@ canvas.addEventListener('click', (event) => {
     const y = event.clientY - rect.top;
 
     // 表示Canvasと処理Canvasのスケールを計算
-    const scaleX = processingCanvas.width / canvas.width;
-    const scaleY = processingCanvas.height / canvas.height;
+    const scaleX = appState.processingCanvas.width / canvas.width;
+    const scaleY = appState.processingCanvas.height / canvas.height;
 
     // 処理Canvas上の対応する座標を計算
     const processingX = Math.floor(x * scaleX);
     const processingY = Math.floor(y * scaleY);
 
     // 処理Canvasからピクセルの色情報を取得
-    const pixelData = processingCtx.getImageData(processingX, processingY, 1, 1).data;
+    const pixelData = appState.processingCtx.getImageData(processingX, processingY, 1, 1).data;
 
     const hexColor = rgbToHex(pixelData[0], pixelData[1], pixelData[2]);
 
@@ -115,9 +118,31 @@ canvas.addEventListener('click', (event) => {
     }
 });
 
+// 指定された色を透明にする画像処理関数
+function processImageTransparency(imageData, colorToRemove1, colorToRemove2, tolerance) {
+    const data = imageData.data;
+    if (!colorToRemove1 || !colorToRemove2) {
+        alert('無効な色が選択されています。');
+        return null;
+    }
+
+    for (let i = 0; i < data.length; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        const currentPixelColor = { r, g, b };
+        
+        // 色の距離を計算し、許容範囲内であれば透明にする
+        if (colorDistance(currentPixelColor, colorToRemove1) <= tolerance || colorDistance(currentPixelColor, colorToRemove2) <= tolerance) {
+            data[i + 3] = 0; // アルファ値を0にして透明にする
+        }
+    }
+    return imageData;
+}
+
 // 背景削除ボタンのイベントリスナー
 processButton.addEventListener('click', () => {
-    if (!originalImage) {
+    if (!appState.originalImage) {
         alert('最初に画像をアップロードしてください。');
         return;
     }
@@ -129,36 +154,23 @@ processButton.addEventListener('click', () => {
     // UIの更新を確実にするため、重い処理を少し遅延させる
     setTimeout(() => {
         // 元の画像を処理用キャンバスに再描画して処理を開始
-        processingCtx.drawImage(originalImage, 0, 0);
-        const imageData = processingCtx.getImageData(0, 0, processingCanvas.width, processingCanvas.height);
-        const data = imageData.data;
+        appState.processingCtx.drawImage(appState.originalImage, 0, 0);
+        let imageData = appState.processingCtx.getImageData(0, 0, appState.processingCanvas.width, appState.processingCanvas.height);
+        
         const colorToRemove1 = hexToRgb(colorPicker1.value);
         const colorToRemove2 = hexToRgb(colorPicker2.value);
         const tolerance = parseInt(toleranceSlider.value, 10);
 
-        if (!colorToRemove1 || !colorToRemove2) {
-            alert('無効な色が選択されています。');
-            return;
+        const processedImageData = processImageTransparency(imageData, colorToRemove1, colorToRemove2, tolerance);
+
+        if (processedImageData) {
+            // 処理結果を処理用キャンバスに書き戻す
+            appState.processingCtx.putImageData(processedImageData, 0, 0);
+            // 表示用Canvasにも処理結果を縮小して反映
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(appState.processingCanvas, 0, 0, canvas.width, canvas.height);
         }
-        
-        for (let i = 0; i < data.length; i += 4) {
-            const r = data[i];
-            const g = data[i + 1];
-            const b = data[i + 2];
-            const currentPixelColor = { r, g, b };
-            
-            // 色の距離を計算し、許容範囲内であれば透明にする
-            if (colorDistance(currentPixelColor, colorToRemove1) <= tolerance || colorDistance(currentPixelColor, colorToRemove2) <= tolerance) {
-                data[i + 3] = 0; // アルファ値を0にして透明にする
-            }
-        }
-        
-        // 処理結果を処理用キャンバスに書き戻す
-        processingCtx.putImageData(imageData, 0, 0);
-        // 表示用Canvasにも処理結果を縮小して反映
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(processingCanvas, 0, 0, canvas.width, canvas.height);
-        
+
         // リサイズコントロールを100%にリセット
         resizeSlider.value = 100;
         resizePercentage.value = 100;
@@ -180,8 +192,8 @@ downloadButton.addEventListener('click', () => {
     }
 
     // スケールに基づいて目標の幅と高さを計算
-    const targetWidth = Math.round(processingCanvas.width * scale);
-    const targetHeight = Math.round(processingCanvas.height * scale);
+    const targetWidth = Math.round(appState.processingCanvas.width * scale);
+    const targetHeight = Math.round(appState.processingCanvas.height * scale);
 
     // リサイズ用の一次的なCanvasを作成
     const tempCanvas = document.createElement('canvas');
@@ -190,7 +202,7 @@ downloadButton.addEventListener('click', () => {
     tempCanvas.height = targetHeight;
 
     // 処理済み画像をリサイズして描画
-    tempCtx.drawImage(processingCanvas, 0, 0, targetWidth, targetHeight);
+    tempCtx.drawImage(appState.processingCanvas, 0, 0, targetWidth, targetHeight);
 
     const link = document.createElement('a');
     link.download = 'transparent_resized_image.png';

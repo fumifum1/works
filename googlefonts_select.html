@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Fonts Selector</title>
+    <!-- Google Fonts Link -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Raleway:wght@700&family=Zen+Maru+Gothic:wght@400;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<body id="font-test-page">
+
+<!-- Hamburger Menu -->
+<button class="hamburger-menu" id="hamburgerMenu" aria-label="メニューを開く">
+    <span></span>
+    <span></span>
+    <span></span>
+</button>
+<nav class="global-nav" id="globalNav">
+    <ul>
+        <li><a href="https://fumifum1.github.io/profile/index.html">profile</a></li>
+        <li><a href="https://fumifum1.github.io/profile/game.html">game</a></li>
+        <li><a href="https://fumifum1.github.io/profile/music.html">music</a></li>
+        <li><a href="https://fumifum1.github.io/profile/other.html">other</a></li>
+    </ul>
+</nav>
+<div class="nav-overlay" id="navOverlay"></div>
+
+<div class="container">
+    <h1>Google Fonts Selector</h1>
+    <p>フォント名の横に **(Ja)** とあるものが日本語対応フォントです。</p>
+
+    <div class="controls">
+        <textarea id="sampleText" maxlength="100" placeholder="100文字以内で文章を入力してください。"></textarea>
+        
+        <select id="fontSelector">
+            <option value="" disabled selected>フォントを選択してください</option>
+        </select>
+        
+        <div class="action-buttons">
+            <button id="recordButton">記録する</button>
+            <button id="clearButton">すべてクリア</button>
+        </div>
+    </div>
+    
+    <div class="preview">
+        <h2>プレビュー</h2>
+        <p id="previewText" class="preview-text"></p>
+    </div>
+
+    <div id="history">
+        <h2>比較リスト</h2>
+    </div>
+</div>
+
+<script>
+    const googleFonts = [
+        // 日本語フォント (Japanese Fonts) - (Ja)マーク付き
+        { name: 'Noto Sans JP (Ja)', family: "'Noto Sans JP', sans-serif" },
+        { name: 'M PLUS Rounded 1c (Ja)', family: "'M PLUS Rounded 1c', sans-serif" },
+        { name: 'Sawarabi Mincho (Ja)', family: "'Sawarabi Mincho', serif" },
+        { name: 'Kosugi Maru (Ja)', family: "'Kosugi Maru', sans-serif" },
+        { name: 'Yusei Magic (Ja)', family: "'Yusei Magic', sans-serif" },
+        { name: 'Hina Mincho (Ja)', family: "'Hina Mincho', serif" },
+        { name: 'Shippori Mincho B1 (Ja)', family: "'Shippori Mincho B1', serif" },
+        { name: 'Zen Maru Gothic (Ja)', family: "'Zen Maru Gothic', sans-serif" },
+        { name: 'Potta One (Ja)', family: "'Potta One', sans-serif" },
+        { name: 'Kaisei Opti (Ja)', family: "'Kaisei Opti', serif" },
+        { name: 'Stick (Ja)', family: "'Stick', sans-serif" },
+        { name: 'Train One (Ja)', family: "'Train One', cursive" },
+        { name: 'DotGothic16 (Ja)', family: "'DotGothic16', sans-serif" },
+        { name: 'Klee One (Ja)', family: "'Klee One', cursive" },
+        { name: 'Zen Old Mincho (Ja)', family: "'Zen Old Mincho', serif" },
+        { name: 'Zen Kaku Gothic New (Ja)', family: "'Zen Kaku Gothic New', sans-serif" },
+        { name: 'Kiwi Maru (Ja)', family: "'Kiwi Maru', sans-serif" },
+        { name: 'Reggae One (Ja)', family: "'Reggae One', cursive" },
+        { name: 'Yomogi (Ja)', family: "'Yomogi', cursive" },
+        { name: 'RocknRoll One (Ja)', family: "'RocknRoll One', sans-serif" },
+        { name: 'Rampart One (Ja)', family: "'Rampart One', cursive" },
+        { name: 'Nico Moji (Ja)', family: "'Nico Moji', sans-serif" },
+        { name: 'Tsukimi Rounded (Ja)', family: "'Tsukimi Rounded', sans-serif" },
+        { name: 'M PLUS 1p (Ja)', family: "'M PLUS 1p', sans-serif" },
+        { name: 'Sawarabi Gothic (Ja)', family: "'Sawarabi Gothic', sans-serif" },
+        { name: 'Kosugi (Ja)', family: "'Kosugi', sans-serif" },
+        { name: 'Hannari Mincho (Ja)', family: "'Hannari Mincho', serif" },
+        { name: 'Yuji Syuku (Ja)', family: "'Yuji Syuku', serif" },
+        { name: 'Mochiy Pop One (Ja)', family: "'Mochiy Pop One', sans-serif" },
+        { name: 'Shippori Mincho (Ja)', family: "'Shippori Mincho', serif" },
+        { name: 'Yuji Mai (Ja)', family: "'Yuji Mai', serif" },
+        { name: 'Yuji Boku (Ja)', family: "'Yuji Boku', serif" },
+        { name: 'Zen Kaku Gothic Antique (Ja)', family: "'Zen Kaku Gothic Antique', sans-serif" },
+        { name: 'Shippori Antique (Ja)', family: "'Shippori Antique', sans-serif" },
+        { name: 'Shippori Antique B1 (Ja)', family: "'Shippori Antique B1', sans-serif" },
+
+        // 欧文フォント (English Fonts) - 160種類以上
+        { name: 'Roboto', family: "'Roboto', sans-serif" },
+        { name: 'Open Sans', family: "'Open Sans', sans-serif" },
+        { name: 'Lato', family: "'Lato', sans-serif" },
+        { name: 'Oswald', family: "'Oswald', sans-serif" },
+        { name: 'Montserrat', family: "'Montserrat', sans-serif" },
+        { name: 'Playfair Display', family: "'Playfair Display', serif" },
+        { name: 'Merriweather', family: "'Merriweather', serif" },
+        { name: 'Dancing Script', family: "'Dancing Script', cursive" },
+        { name: 'Pacifico', family: "'Pacifico', cursive" },
+        { name: 'Comfortaa', family: "'Comfortaa', cursive" },
+        { name: 'Poppins', family: "'Poppins', sans-serif" },
+        { name: 'Lora', family: "'Lora', serif" },
+        { name: 'Nunito', family: "'Nunito', sans-serif" },
+        { name: 'Rubik', family: "'Rubik', sans-serif" },
+        { name: 'Ubuntu', family: "'Ubuntu', sans-serif" },
+        { name: 'Bebas Neue', family: "'Bebas Neue', cursive" },
+        { name: 'Fjalla One', family: "'Fjalla One', sans-serif" },
+        { name: 'Anton', family: "'Anton', sans-serif" },
+        { name: 'Shadows Into Light', family: "'Shadows Into Light', cursive" },
+        { name: 'Permanent Marker', family: "'Permanent Marker', cursive" },
+        { name: 'Lobster', family: "'Lobster', cursive" },
+        { name: 'Josefin Sans', family: "'Josefin Sans', sans-serif" },
+        { name: 'Kanit', family: "'Kanit', sans-serif" },
+        { name: 'Quicksand', family: "'Quicksand', sans-serif" },
+        { name: 'Caveat', family: "'Caveat', cursive" },
+        { name: 'Indie Flower', family: "'Indie Flower', cursive" },
+        { name: 'Teko', family: "'Teko', sans-serif" },
+        { name: 'Alfa Slab One', family: "'Alfa Slab One', cursive" },
+        { name: 'Bungee', family: "'Bungee', cursive" },
+        { name: 'Press Start 2P', family: "'Press Start 2P', cursive" },
+        { name: 'Barlow', family: "'Barlow', sans-serif" },
+        { name: 'Cabin', family: "'Cabin', sans-serif" },
+        { name: 'Exo 2', family: "'Exo 2', sans-serif" },
+        { name: 'Fira Sans', family: "'Fira Sans', sans-serif" },
+        { name: 'Heebo', family: "'Heebo', sans-serif" },
+        { name: 'Hind', family: "'Hind', sans-serif" },
+        { name: 'Inconsolata', family: "'Inconsolata', monospace" },
+        { name: 'Karla', family: "'Karla', sans-serif" },
+        { name: 'Libre Baskerville', family: "'Libre Baskerville', serif" },
+        { name: 'Maven Pro', family: "'Maven Pro', sans-serif" },
+        { name: 'Nanum Gothic', family: "'Nanum Gothic', sans-serif" },
+        { name: 'Noto Serif', family: "'Noto Serif', serif" },
+        { name: 'Old Standard TT', family: "'Old Standard TT', serif" },
+        { name: 'PT Sans', family: "'PT Sans', sans-serif" },
+        { name: 'Raleway', family: "'Raleway', sans-serif" },
+        { name: 'Righteous', family: "'Righteous', cursive" },
+        { name: 'Saira', family: "'Saira', sans-serif" },
+        { name: 'Space Mono', family: "'Space Mono', monospace" },
+        { name: 'Titillium Web', family: "'Titillium Web', sans-serif" },
+        { name: 'Varela Round', family: "'Varela Round', sans-serif" },
+        { name: 'Work Sans', family: "'Work Sans', sans-serif" },
+        { name: 'Zilla Slab', family: "'Zilla Slab', serif" },
+        { name: 'Cinzel', family: "'Cinzel', serif" },
+        { name: 'EB Garamond', family: "'EB Garamond', serif" },
+        { name: 'Faustina', family: "'Faustina', serif" },
+        { name: 'Cormorant Garamond', family: "'Cormorant Garamond', serif" },
+        { name: 'Cardo', family: "'Cardo', serif" },
+        { name: 'Forum', family: "'Forum', cursive" },
+        { name: 'Goudy Bookletter 1911', family: "'Goudy Bookletter 1911', serif" },
+        { name: 'Libre Franklin', family: "'Libre Franklin', sans-serif" },
+        { name: 'Merriweather Sans', family: "'Merriweather Sans', sans-serif" },
+        { name: 'Source Sans Pro', family: "'Source Sans Pro', sans-serif" },
+        { name: 'Source Serif Pro', family: "'Source Serif Pro', serif" },
+        { name: 'Alegreya Sans', family: "'Alegreya Sans', sans-serif" },
+        { name: 'Arvo', family: "'Arvo', serif" },
+        { name: 'Bitter', family: "'Bitter', serif" },
+        { name: 'Fira Sans Condensed', family: "'Fira Sans Condensed', sans-serif" },
+        { name: 'IBM Plex Sans', family: "'IBM Plex Sans', sans-serif" },
+        { name: 'Josefin Slab', family: "'Josefin Slab', serif" },
+        { name: 'Laila', family: "'Laila', serif" },
+        { name: 'Libre Caslon Display', family: "'Libre Caslon Display', serif" },
+        { name: 'Mukta', family: "'Mukta', sans-serif" },
+        { name: 'Noto Serif JP', family: "'Noto Serif JP', serif" },
+        { name: 'Oxygen', family: "'Oxygen', sans-serif" },
+        { name: 'Play', family: "'Play', sans-serif" },
+        { name: 'Questrial', family: "'Questrial', sans-serif" },
+        { name: 'Slabo 27px', family: "'Slabo 27px', serif" },
+        { name: 'Spectral', family: "'Spectral', serif" },
+        { name: 'Tinos', family: "'Tinos', serif" },
+        { name: 'Vollkorn', family: "'Vollkorn', serif" },
+        { name: 'Yantramanav', family: "'Yantramanav', sans-serif" },
+        { name: 'Zeyada', family: "'Zeyada', cursive" },
+        { name: 'Amatic SC', family: "'Amatic SC', cursive" },
+        { name: 'Concert One', family: "'Concert One', cursive" },
+        { name: 'Creepster', family: "'Creepster', cursive" },
+        { name: 'Kalam', family: "'Kalam', cursive" },
+        { name: 'Limelight', family: "'Limelight', cursive" },
+        { name: 'Monoton', family: "'Monoton', cursive" },
+        { name: 'Orbitron', family: "'Orbitron', sans-serif" },
+        { name: 'Pangolin', family: "'Pangolin', cursive" },
+        { name: 'Russo One', family: "'Russo One', sans-serif" },
+        { name: 'Aclonica', family: "'Aclonica', sans-serif" },
+        { name: 'Acme', family: "'Acme', sans-serif" },
+        { name: 'Aladin', family: "'Aladin', cursive" },
+        { name: 'Amita', family: "'Amita', cursive" },
+        { name: 'Bad Script', family: "'Bad Script', cursive" },
+        { name: 'Belanosima', family: "'Belanosima', sans-serif" },
+        { name: 'Bellefair', family: "'Bellefair', serif" },
+        { name: 'Bree Serif', family: "'Bree Serif', serif" },
+        { name: 'Calligraffitti', family: "'Calligraffitti', cursive" },
+        { name: 'Carter One', family: "'Carter One', cursive" },
+        { name: 'Changa', family: "'Changa', sans-serif" },
+        { name: 'Chivo', family: "'Chivo', sans-serif" },
+        { name: 'Cinzel Decorative', family: "'Cinzel Decorative', cursive" },
+        { name: 'Cutive Mono', family: "'Cutive Mono', monospace" },
+        { name: 'Dosis', family: "'Dosis', sans-serif" },
+        { name: 'Economica', family: "'Economica', sans-serif" },
+        { name: 'Encode Sans', family: "'Encode Sans', sans-serif" },
+        { name: 'Exo', family: "'Exo', sans-serif" },
+        { name: 'Fascinate Inline', family: "'Fascinate Inline', cursive" },
+        { name: 'Frank Ruhl Libre', family: "'Frank Ruhl Libre', serif" },
+        { name: 'Fresca', family: "'Fresca', sans-serif" },
+        { name: 'Gabriela', family: "'Gabriela', serif" },
+        { name: 'Glory', family: "'Glory', sans-serif" },
+        { name: 'Gotu', family: "'Gotu', sans-serif" },
+        { name: 'Gowun Batang', family: "'Gowun Batang', serif" },
+        { name: 'Gruppo', family: "'Gruppo', sans-serif" },
+        { name: 'Gugi', family: "'Gugi', sans-serif" },
+        { name: 'Handjet', family: "'Handjet', sans-serif" },
+        { name: 'Hedvig Letters Sans', family: "'Hedvig Letters Sans', sans-serif" },
+        { name: 'Hi Melody', family: "'Hi Melody', cursive" },
+        { name: 'Hachi Maru Pop', family: "'Hachi Maru Pop', cursive" },
+        { name: 'IBM Plex Mono', family: "'IBM Plex Mono', monospace" },
+        { name: 'Inder', family: "'Inder', sans-serif" },
+        { name: 'Istok Web', family: "'Istok Web', sans-serif" },
+        { name: 'Jost', family: "'Jost', sans-serif" },
+        { name: 'Krona One', family: "'Krona One', sans-serif" },
+        { name: 'Kufam', family: "'Kufam', sans-serif" },
+        { name: 'Kumar One', family: "'Kumar One', cursive" },
+        { name: 'Lexend', family: "'Lexend', sans-serif" },
+        { name: 'Libre Bodoni', family: "'Libre Bodoni', serif" },
+        { name: 'Lilita One', family: "'Lilita One', cursive" },
+        { name: 'Livvic', family: "'Livvic', sans-serif" },
+        { name: 'Mada', family: "'Mada', sans-serif" },
+        { name: 'Manrope', family: "'Manrope', sans-serif" },
+        { name: 'Martian Mono', family: "'Martian Mono', monospace" },
+        { name: 'Maven Pro', family: "'Maven Pro', sans-serif" },
+        { name: 'Moirai One', family: "'Moirai One', cursive" },
+        { name: 'Molengo', family: "'Molengo', sans-serif" },
+        { name: 'Montserrat Alternates', family: "'Montserrat Alternates', sans-serif" },
+        { name: 'Nanum Pen Script', family: "'Nanum Pen Script', cursive" },
+        { name: 'Nova Square', family: "'Nova Square', cursive" },
+        { name: 'Odibee Sans', family: "'Odibee Sans', sans-serif" },
+        { name: 'Onest', family: "'Onest', sans-serif" },
+        { name: 'Outfit', family: "'Outfit', sans-serif" },
+        { name: 'Overpass', family: "'Overpass', sans-serif" },
+        { name: 'Pathway Gothic One', family: "'Pathway Gothic One', sans-serif" },
+        { name: 'Pixelify Sans', family: "'Pixelify Sans', sans-serif" },
+        { name: 'Prompt', family: "'Prompt', sans-serif" },
+        { name: 'Questrial', family: "'Questrial', sans-serif" },
+        { name: 'Recursive', family: "'Recursive', cursive" },
+        { name: 'Red Hat Display', family: "'Red Hat Display', sans-serif" },
+        { name: 'REM', family: "'REM', sans-serif" },
+        { name: 'Roboto Condensed', family: "'Roboto Condensed', sans-serif" },
+        { name: 'Rufina', family: "'Rufina', serif" },
+        { name: 'Sen', family: "'Sen', sans-serif" },
+        { name: 'Shizuru', family: "'Shizuru', cursive" },
+        { name: 'Smooch Sans', family: "'Smooch Sans', sans-serif" },
+        { name: 'Sofia Sans', family: "'Sofia Sans', sans-serif" },
+        { name: 'Staatliches', family: "'Staatliches', cursive" },
+        { name: 'Syne', family: "'Syne', sans-serif" },
+        { name: 'Tanuki Magic (Ja)', family: "'Tanuki Magic', cursive" },
+        { name: 'Tenor Sans', family: "'Tenor Sans', sans-serif" },
+        { name: 'Tomorrow', family: "'Tomorrow', sans-serif" },
+        { name: 'Urbanist', family: "'Urbanist', sans-serif" },
+        { name: 'Varela', family: "'Varela', sans-serif" },
+        { name: 'Viaoda Libre', family: "'Viaoda Libre', cursive" },
+        { name: 'Volkhov', family: "'Volkhov', serif" },
+        { name: 'Walter Turncoat', family: "'Walter Turncoat', cursive" },
+        { name: 'ZCOOL KuaiLe', family: "'ZCOOL KuaiLe', cursive" },
+        { name: 'Zen Dots (Ja)', family: "'Zen Dots', cursive" }
+    ];
+
+    const fontSelector = document.getElementById('fontSelector');
+    const sampleText = document.getElementById('sampleText');
+    const recordButton = document.getElementById('recordButton');
+    const clearButton = document.getElementById('clearButton');
+    const historyDiv = document.getElementById('history');
+    const previewText = document.getElementById('previewText');
+
+    function createFontOptions() {
+        const linkTag = document.createElement('link');
+        linkTag.rel = 'stylesheet';
+        const fontList = googleFonts.map(font => font.name.replace(/\(Ja\)/g, '').trim().replace(/ /g, '+')).join('&family=');
+        linkTag.href = `https://fonts.googleapis.com/css2?family=${fontList}&display=swap`;
+        document.head.appendChild(linkTag);
+        
+        googleFonts.forEach(font => {
+            const option = document.createElement('option');
+            option.value = font.family;
+            option.textContent = font.name;
+            option.style.fontFamily = font.family;
+            fontSelector.appendChild(option);
+        });
+    }
+
+    function renderHistory() {
+        historyDiv.innerHTML = '<h2>比較リスト</h2>';
+        const history = JSON.parse(sessionStorage.getItem('fontHistory')) || [];
+        
+        if (history.length === 0) {
+            const emptyMessage = document.createElement('p');
+            emptyMessage.textContent = '記録されたフォントはありません。';
+            historyDiv.appendChild(emptyMessage);
+        } else {
+            history.forEach((item, index) => {
+                const historyItem = document.createElement('div');
+                historyItem.classList.add('history-item');
+                
+                const historyHeader = document.createElement('div');
+                historyHeader.classList.add('history-header');
+
+                const historyFontName = document.createElement('span');
+                historyFontName.classList.add('history-font-name');
+                historyFontName.textContent = item.fontName;
+
+                const deleteButton = document.createElement('button');
+                deleteButton.classList.add('delete-button');
+                deleteButton.textContent = '削除';
+                deleteButton.onclick = () => {
+                    deleteHistoryItem(index);
+                };
+
+                historyHeader.appendChild(historyFontName);
+                historyHeader.appendChild(deleteButton);
+
+                const historyText = document.createElement('p');
+                historyText.classList.add('history-text');
+                historyText.style.fontFamily = item.fontFamily;
+                historyText.textContent = item.text;
+                
+                historyItem.appendChild(historyHeader);
+                historyItem.appendChild(historyText);
+                historyDiv.appendChild(historyItem);
+            });
+        }
+    }
+
+    function recordCurrentFont() {
+        const text = sampleText.value.length > 0 ? sampleText.value : 'ここに文字が表示されます';
+        const selectedOption = fontSelector.options[fontSelector.selectedIndex];
+        const fontFamily = selectedOption.value;
+        const fontName = selectedOption.textContent;
+        
+        if (!fontFamily) {
+            alert('フォントを選択してください。');
+            return;
+        }
+
+        const history = JSON.parse(sessionStorage.getItem('fontHistory')) || [];
+        history.push({ text: text, fontFamily: fontFamily, fontName: fontName });
+        sessionStorage.setItem('fontHistory', JSON.stringify(history));
+        
+        renderHistory();
+    }
+
+    function deleteHistoryItem(index) {
+        const history = JSON.parse(sessionStorage.getItem('fontHistory')) || [];
+        history.splice(index, 1);
+        sessionStorage.setItem('fontHistory', JSON.stringify(history));
+        
+        renderHistory();
+    }
+
+    function clearHistory() {
+        sessionStorage.removeItem('fontHistory');
+        renderHistory();
+    }
+
+    function updatePreview() {
+        const text = sampleText.value.length > 0 ? sampleText.value : 'ここに文字が表示されます';
+        const fontFamily = fontSelector.value;
+        
+        previewText.textContent = text;
+        previewText.style.fontFamily = fontFamily;
+    }
+
+    sampleText.addEventListener('input', updatePreview);
+    fontSelector.addEventListener('change', updatePreview);
+    recordButton.addEventListener('click', recordCurrentFont);
+    clearButton.addEventListener('click', clearHistory);
+
+    document.addEventListener('DOMContentLoaded', () => {
+        createFontOptions();
+        updatePreview();
+        renderHistory();
+    });
+</script>
+
+<script src="menu.js"></script>
+</body>
+</html>

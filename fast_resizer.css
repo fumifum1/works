@@ -1,0 +1,258 @@
+body {
+    font-family: 'Zen Maru Gothic', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    text-align: center;
+    padding: 20px;
+    background: #f0f2f5;
+    color: #333;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+header {
+    margin-bottom: 30px;
+    max-width: 900px;
+    width: 100%;
+}
+
+header p {
+    color: #606770;
+    font-size: 1.1em;
+    margin-top: 0;
+}
+
+main {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* 各セクションの共通ボックススタイル */
+.section-box {
+    margin-bottom: 30px;
+    padding: 20px;
+}
+
+/* 実際のファイル入力はアクセス性を保ちつつ隠す */
+#imageInput {
+    border: 0;
+    clip: rect(0, 0, 0, 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+}
+
+/* ボタンの共通スタイル */
+.section-box button,
+label[for="imageInput"] {
+    /* Styles for the new "button" label */
+    display: block;
+    padding: 0.5rem 2rem;
+    border: 3px solid #000;
+    border-radius: 0;
+    background: #fff;
+    color: #000;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+    text-align: center;
+    box-sizing: border-box; /* paddingとborderを含めて幅を計算 */
+    margin: 0 auto;
+}
+
+.section-box button:hover,
+label[for="imageInput"]:hover {
+    background: #000;
+    color: #fff;
+}
+.section-box button:disabled {
+    background-color: #e0e0e0;
+    border-color: #ccc;
+    color: #666;
+    font-weight: 600;
+    cursor: not-allowed;
+}
+
+/* 各セクションの初期表示設定 */
+#processingSection, #downloadSection {
+    display: none;
+}
+
+/* ローディングスピナー */
+.loader {
+    border: 5px solid #f3f3f3; /* Light grey */
+    border-top: 5px solid #007bff; /* Blue */
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+    display: none; /* 初期状態では非表示 */
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Styles for fast_resizer.html */
+/* The group containing a label and its inputs */
+.input-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 320px; /* 操作しやすいように幅を確保 */
+    margin: 0 auto;
+}
+
+/* A wrapper for the input elements to group them on the right */
+.input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.input-wrapper input[type="number"] {
+    width: 65px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 16px;
+}
+
+.input-wrapper input[type="range"] {
+    width: 120px;
+}
+
+#download-actions {
+    margin-top: 25px;
+    display: flex;
+    justify-content: center;
+}
+
+#output {
+    margin-top: 20px;
+    width: 100%;
+}
+
+/* Styles for Fast Resizer Previews */
+.preview-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.preview-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background: #fdfdfd;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.preview-list-item:last-child {
+    border-bottom: none;
+}
+
+.preview-list-item .file-info-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.preview-list-item .file-name {
+    font-weight: 500;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 15px;
+    margin-bottom: 4px;
+}
+
+.preview-list-item .size-info {
+    font-size: 0.9em;
+    color: #666;
+    white-space: nowrap;
+    background-color: #f0f2f5;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.download-individual-link {
+    padding: 6px 12px;
+    font-size: 0.9em;
+    font-weight: 600;
+    color: #007bff;
+    background-color: transparent;
+    border: 1px solid #007bff;
+    border-radius: 6px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.2s, color 0.2s;
+}
+.download-individual-link:hover {
+    background-color: #007bff;
+    color: #fff;
+}
+
+/* --- Media Queries for Responsive Design --- */
+
+@media (max-width: 767px) { /* Consolidated media query for mobile */
+    body {
+        padding: 15px;
+    }
+
+    header {
+        margin-bottom: 20px;
+    }
+
+    .section-box {
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 1.8rem; /* スマホ表示に適したタイトルサイズ */
+    }
+
+    /* スマホではボタンを画面幅いっぱいに広げ、タップしやすくする */
+    .section-box button,
+    label[for="imageInput"] {
+        width: 100%;
+    }
+
+    .input-group {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+
+    /* Fast Resizer Specifics */
+    .preview-list-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .preview-list-item .file-name {
+        white-space: normal; /* Allow file names to wrap */
+    }
+
+    .download-individual-link {
+        align-self: flex-end; /* Move button to the right */
+    }
+}

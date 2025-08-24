@@ -1,0 +1,274 @@
+/* General Body and Typography */
+body {
+    font-family: sans-serif;
+    padding: 20px;
+    background-color: #f4f4f9;
+    color: #333;
+}
+
+h1 {
+    font-family: 'Zen Dots', sans-serif;
+    font-size: 30px;
+    color: #4a4a4a;
+    border-bottom: 2px solid #ccc;
+    padding-bottom: 10px;
+    letter-spacing: 2px;
+}
+
+p {
+    margin-bottom: 20px;
+}
+
+/* Form Elements */
+div {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+/* Specific label styling inside a div, e.g., for text inputs */
+div > label {
+    margin-top: 15px;
+}
+
+/* Hide the actual file input */
+input[type="file"] {
+    display: none;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+}
+
+/* Common Button Style */
+.btn,
+.file-label-button {
+    display: inline-block;
+    padding: 12px 24px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #fff;
+    color: #333 !important; /* Ensure text color is consistent */
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.btn:hover,
+.file-label-button:hover {
+    color: #fff !important;
+    background: #000;
+    transform: translateY(-2px);
+    border-color: #000;
+}
+
+.btn:disabled {
+    background-color: #e0e0e0;
+    border-color: #e0e0e0;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.file-label-button + span {
+    margin-left: 15px;
+    font-style: italic;
+    color: #555;
+    vertical-align: middle;
+}
+
+/* Drag and Drop List Styles */
+#pageListContainer,
+#fileListContainer {
+    margin-top: 20px;
+    border: 1px dashed #ccc;
+    padding: 10px;
+    border-radius: 5px;
+    min-height: 100px;
+}
+
+#fileListContainer.dragover {
+    background-color: #e8f0fe;
+    border-color: #4285f4;
+}
+
+#pageList li,
+#fileList li {
+    padding: 10px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    margin-bottom: 5px;
+    cursor: grab;
+}
+
+#pageList li.dragging,
+#fileList li.dragging {
+    opacity: 0.5;
+    background: #cde;
+}
+
+/* Log Area */
+#log {
+    border: 1px solid #ccc;
+    background-color: #fff;
+    padding: 15px;
+    margin-top: 20px;
+    min-height: 50px;
+    border-radius: 5px;
+    overflow-y: auto;
+}
+
+#log a {
+    display: block;
+    margin: 5px 0;
+    color: #007bff;
+    text-decoration: none;
+}
+
+#log a:hover {
+    text-decoration: underline;
+}
+
+.button-group {
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+
+/* Footer Styles */
+footer {
+    text-align: center;
+    margin-top: 50px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    color: #777;
+    font-size: 0.9em;
+}
+
+/* Hamburger Menu */
+.hamburger-menu {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 30px;
+    height: 21px;
+    cursor: pointer;
+    z-index: 1001; /* Overlayよりも手前に */
+    background-color: transparent;
+    border: none;
+    padding: 0;
+}
+
+.hamburger-menu span {
+    display: block;
+    position: absolute;
+    width: 100%;
+    height: 3px;
+    background-color: #333;
+    border-radius: 2px;
+    transition: all 0.3s ease-in-out;
+}
+
+.hamburger-menu:hover {
+    background-color: transparent;
+    transform: none;
+}
+
+.hamburger-menu span:nth-child(1) { top: 0; }
+.hamburger-menu span:nth-child(2) { top: 9px; }
+.hamburger-menu span:nth-child(3) { top: 18px; }
+
+/* Nav Menu */
+.nav-menu {
+    position: fixed;
+    top: 0;
+    right: -300px; /* Start off-screen */
+    width: 250px;
+    height: 100%;
+    background-color: #fff;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+    padding: 60px 20px 20px;
+    transition: right 0.3s ease-in-out;
+    z-index: 1000;
+}
+
+.nav-menu.open {
+    right: 0; /* Slide in */
+}
+
+.nav-menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.nav-menu li {
+    margin-bottom: 20px;
+}
+
+.nav-menu a {
+    text-decoration: none;
+    color: #333;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.nav-menu a:hover {
+    color: #007bff;
+}
+
+/* Overlay for when menu is open */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+    z-index: 999;
+}
+
+.overlay.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Hamburger animation to "X" */
+.hamburger-menu.open span:nth-child(1) {
+    top: 9px;
+    transform: rotate(45deg);
+}
+
+.hamburger-menu.open span:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger-menu.open span:nth-child(3) {
+    top: 9px;
+    transform: rotate(-45deg);
+}
+
+/* General Container */
+.container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}

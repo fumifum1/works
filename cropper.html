@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cropper-画像トリミング</title>
+    <link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/fumifum1/main/main/jpg/ico.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Dots&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="cropper.css">
+    <link rel="stylesheet" href="common.css">
+</head>
+<body>
+ <header>
+        <button class="hamburger-menu" aria-label="メニューを開閉する">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <nav class="nav-menu">
+            <ul>
+                <li><a href="menu.html">HOME</a></li>
+                <li><a href="transparency.html">Image背景透明化</a></li>
+                <li><a href="fast_resizer.html">Imageサイズ変更</a></li>
+                <li><a href="cropper.html">Imageトリミング</a></li>
+                <li class="nav-menu__divider" aria-hidden="true"></li>
+                <li><a href="https://fumifum1.github.io/main/index.html">Creator</a></li>
+            </ul>
+        </nav>
+    </header>
+<!-- Overlay for background -->
+<div class="overlay"></div>
+
+<div class="container">
+    <h1>Cropper</h1>
+    <p>画像を単純に四角型か丸型にトリミングします。</p>
+
+    <div class="controls">
+        <!-- ファイルアップロードボタン用の新しいラッパー -->
+        <div class="file-input-container">
+            <label for="image-upload" class="file-label">画像をアップロード</label>
+            <input type="file" id="image-upload" accept="image/*">
+            <p id="file-name"></p>
+        </div>
+
+        <div class="input-group">
+            <label for="width-input">幅 (px)</label>
+            <input type="number" id="width-input" value="200" min="10">
+        </div>
+
+        <div class="input-group">
+            <label for="height-input">高さ (px)</label>
+            <input type="number" id="height-input" value="200" min="10">
+        </div>
+        
+        <div class="shape-selection">
+            <button id="square-btn" class="shape-btn active">Square</button>
+            <button id="circle-btn" class="shape-btn">Circle</button>
+        </div>
+        
+        <button id="cropButton" class="btn">トリミング処理</button>
+    </div>
+
+    <div id="image-container" class="hidden">
+        <img id="original-image" src="" alt="Uploaded image">
+        <div id="cropper"></div>
+        <div class="zoom-controls">
+            <button id="zoom-out-btn" class="zoom-btn">&minus;</button>
+            <button id="zoom-in-btn" class="zoom-btn">&plus;</button>
+        </div>
+    </div>
+
+    <div id="output-container" class="hidden">
+        <h3>Preview</h3>
+        <canvas id="preview-canvas"></canvas>
+        <button id="download-btn" class="action-btn">Download</button>
+    </div>
+
+</div>
+
+<div id="message-box" class="message-box">
+    <p id="message-text"></p>
+    <button onclick="document.getElementById('message-box').style.display='none'">OK</button>
+</div>
+    <footer>
+        &copy; 2025 Synapse Creations. Aug.ShapeShift_ver2.0.0
+    </footer>
+<script src="cropper.js"></script>
+<script src="common.js"></script>
+</body>
+</html>

@@ -375,7 +375,6 @@ main {
 .hamburger-menu.is-active span:nth-child(3) {
     transform: translateY(-8px) rotate(-45deg);
 }
-
 /* Navigation Menu (Sidebar) */
 .global-nav {
     position: fixed;

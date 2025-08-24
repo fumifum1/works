@@ -4,242 +4,87 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fast Resizer</title>
+    <link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/fumifum1/main/main/jpg/ico.ico">
     <!-- Link to the main stylesheet -->
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="fast_resizer.css">
+    <link rel="stylesheet" href="common.css">
     <!-- Link to Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Dots&display=swap" rel="stylesheet">
     <!-- JSZip library for creating ZIP files -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="jszip.min.js"></script>
+    <!-- Load scripts in head with defer for better performance and reliability -->
+    <script src="common.js" defer></script>
+    <script src="resizer.js" defer></script>
 </head>
 <body>
 
     <!-- Hamburger Menu -->
-    <button class="hamburger-menu" id="hamburgerMenu" aria-label="メニューを開く">
+    <button class="hamburger-menu" aria-label="メニューを開閉する">
         <span></span>
         <span></span>
         <span></span>
     </button>
-    <nav class="global-nav" id="globalNav">
+    <nav class="nav-menu">
         <ul>
-            <li><a href="https://fumifum1.github.io/main/index.html">profile</a></li>
-            <li><a href="https://fumifum1.github.io/main/game.html">game</a></li>
-            <li><a href="https://fumifum1.github.io/main/music.html">music</a></li>
-            <li><a href="https://fumifum1.github.io/main/other.html">other</a></li>
+            <li><a href="menu.html">HOME</a></li>
+            <li><a href="transparency.html">Image背景透明化</a></li>
+            <li><a href="fast_resizer.html">Imageサイズ変更</a></li>
+            <li><a href="cropper.html">Imageトリミング</a></li>
+            <li class="nav-menu__divider" aria-hidden="true"></li>
+            <li><a href="https://fumifum1.github.io/main/index.html">Creator</a></li>
         </ul>
     </nav>
-    <div class="nav-overlay" id="navOverlay"></div>
+    <!-- Overlay for background -->
+    <div class="overlay"></div>
 
-    <!-- Header -->
-    <header>
-        <h1>Fast Resizer</h1>
-        <p>画像をアップロードして、特定の大きさに素早くリサイズします。</p>
-    </header>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>Fast Resizer</h1>
+            <p>画像をアップロードして、特定の大きさに素早くリサイズします。</p>
+        </header>
 
-    <main>
-        <section class="section-box">
-            <h2>1. 画像を選択</h2>
-            <input type="file" id="imageInput" accept="image/*" multiple>
-        </section>
+        <main>
+            <section class="section-box">
+                <p>画像を選択してください。※複数も可</p>
+                <input type="file" id="imageInput" class="file-input" accept="image/*" multiple>
+                <label for="imageInput" class="btn">画像を選択</label>
+            </section>
 
-        <section id="resizeSection" class="section-box" style="display: none;">
-            <h2>2. サイズを指定してリサイズ</h2>
-            <div class="resize-controls">
-                <div class="resize-percentage-group">
-                    <label for="resizePercentage">スケール:</label>
-                    <input type="range" id="resizeSlider" min="1" max="200" value="100">
-                    <input type="number" id="resizePercentage" min="1" max="200" value="100">
-                    <span>%</span>
+            <section id="resizeSection" class="section-box" style="display: none;">
+                <p>サイズを指定してリサイズ実行をクリック</p>
+                <div class="resize-controls">
+                    <div class="input-group">
+                        <label for="resizePercentage">スケール:</label>
+                        <div class="input-wrapper">
+                            <input type="range" id="resizeSlider" min="1" max="200" value="100">
+                            <input type="number" id="resizePercentage" min="1" max="200" value="100">
+                            <span>%</span>
+                        </div>
+                    </div>
+                    <button id="resizeButton" class="btn">リサイズ実行</button>
+                    <div id="loader" class="loader"></div>
                 </div>
-                <button id="resizeButton">リサイズ実行</button>
-                <div id="loader" class="loader"></div>
-            </div>
+                <div id="output">
+                    <h3>リサイズ後のプレビュー</h3>
+                    <div id="preview-area">
+                        <!-- Previews will be dynamically added here -->
+                    </div>
 
-            <div id="output">
-                <h3>リサイズ後のプレビュー</h3>
-                <div id="preview-area">
-                    <!-- Previews will be dynamically added here -->
+                    <div id="download-actions" style="display: none;">
+                        <button id="downloadZipButton" class="btn" disabled>All Zip Download</button>
+                    </div>
                 </div>
 
-                <div id="download-actions" style="display: none;">
-                    <button id="downloadZipButton">すべてをZIPでダウンロード</button>
-                </div>
-            </div>
-
-            <!-- This link is now used programmatically -->
-            <a id="downloadLink" style="display: none;"></a>
-        </section>
-    </main>
-
-    <script src="menu.js"></script>
-    <script>
-        // --- DOM Elements ---
-        const imageInput = document.getElementById('imageInput');
-        const resizeSection = document.getElementById('resizeSection');
-        const resizeSlider = document.getElementById('resizeSlider');
-        const resizePercentage = document.getElementById('resizePercentage');
-        const resizeButton = document.getElementById('resizeButton');
-        const previewArea = document.getElementById('preview-area');
-        const downloadLink = document.getElementById('downloadLink');
-        const loader = document.getElementById('loader');
-        const downloadActions = document.getElementById('download-actions');
-        const downloadZipButton = document.getElementById('downloadZipButton');
-        let selectedFiles = [];
-
-        // Store resized image data
-        let resizedImages = [];
-
-        // --- Resizer Logic ---
-        imageInput.addEventListener('change', (e) => {
-            selectedFiles = Array.from(e.target.files);
-            if (selectedFiles.length > 0) {
-                resizeSection.style.display = 'block';
-                previewArea.innerHTML = '<p>' + selectedFiles.length + '個のファイルが選択されました。サイズを指定してボタンを押してください。</p>';
-                downloadActions.style.display = 'none'; // Hide download buttons on new selection
-            } else {
-                resizeSection.style.display = 'none';
-            }
-        });
-
-        // Sync slider and number input
-        resizeSlider.addEventListener('input', () => {
-            resizePercentage.value = resizeSlider.value;
-        });
-
-        resizePercentage.addEventListener('input', () => {
-            let value = parseInt(resizePercentage.value, 10);
-            if (isNaN(value)) return;
-            value = Math.max(1, Math.min(200, value)); // Clamp value
-            resizeSlider.value = value;
-        });
-        
-        // Function to resize a single image file and return a Blob with dimensions
-        function resizeImage(file, scale) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    const img = new Image();
-                    img.onload = () => {
-                        const originalWidth = img.width;
-                        const originalHeight = img.height;
-                        const newWidth = Math.round(originalWidth * scale);
-                        const newHeight = Math.round(originalHeight * scale);
-
-                        const tempCanvas = document.createElement('canvas');
-                        tempCanvas.width = newWidth;
-                        tempCanvas.height = newHeight;
-                        const tempCtx = tempCanvas.getContext('2d');
-                        tempCtx.drawImage(img, 0, 0, newWidth, newHeight);
-
-                        tempCanvas.toBlob((blob) => {
-                            if (blob) {
-                                resolve({
-                                    blob,
-                                    fileName: file.name,
-                                    originalWidth,
-                                    originalHeight,
-                                    newWidth,
-                                    newHeight
-                                });
-                            } else {
-                                reject(new Error(`Failed to create blob for ${file.name}`));
-                            }
-                        }, 'image/png'); // Output as PNG
-                    };
-                    img.onerror = () => reject(new Error(`Failed to load image ${file.name}`));
-                    img.src = event.target.result;
-                };
-                reader.onerror = () => reject(new Error(`Failed to read file ${file.name}`));
-                reader.readAsDataURL(file);
-            });
-        }
-
-        // Function to create a preview list item
-        function createPreviewListItem(data) {
-            const list = previewArea.querySelector('.preview-list');
-            if (!list) return;
-
-            const listItem = document.createElement('li');
-            listItem.className = 'preview-list-item';
-            
-            const infoContainer = document.createElement('div');
-            infoContainer.className = 'file-info-container';
-
-            const fileNameSpan = document.createElement('span');
-            fileNameSpan.className = 'file-name';
-            fileNameSpan.textContent = data.fileName;
-
-            const sizeInfoSpan = document.createElement('span');
-            sizeInfoSpan.className = 'size-info';
-            sizeInfoSpan.textContent = `(${data.originalWidth}x${data.originalHeight}) → (${data.newWidth}x${data.newHeight})`;
-            
-            infoContainer.appendChild(fileNameSpan);
-            infoContainer.appendChild(sizeInfoSpan);
-
-            const individualDownloadLink = document.createElement('a');
-            individualDownloadLink.href = URL.createObjectURL(data.blob);
-            individualDownloadLink.download = data.fileName;
-            individualDownloadLink.className = 'download-individual-link';
-            individualDownloadLink.textContent = '個別ダウンロード';
-
-            listItem.appendChild(infoContainer);
-            listItem.appendChild(individualDownloadLink);
-            list.appendChild(listItem);
-        }
-
-        resizeButton.addEventListener('click', async () => {
-            if (selectedFiles.length === 0) {
-                alert('画像が選択されていません。');
-                return;
-            }
-            const scale = parseInt(resizePercentage.value, 10) / 100;
-
-            resizeButton.disabled = true;
-            loader.style.display = 'block';
-            previewArea.innerHTML = ''; // Clear previous previews
-            downloadActions.style.display = 'none';
-            resizedImages = []; // Clear previous results
-
-            // Create a list container
-            const list = document.createElement('ul');
-            list.className = 'preview-list';
-            previewArea.appendChild(list);
-
-            const resizePromises = selectedFiles.map(file => resizeImage(file, scale));
-
-            try {
-                const results = await Promise.all(resizePromises);
-                resizedImages = results; // Store results
-
-                if (resizedImages.length > 0) {
-                    resizedImages.forEach(result => createPreviewListItem(result));
-                    downloadActions.style.display = 'block'; // Show download buttons
-                } else {
-                    previewArea.innerHTML = '<p>リサイズ処理が可能な画像がありませんでした。</p>';
-                }
-
-            } catch (error) {
-                console.error(error);
-                alert('画像のリサイズ中にエラーが発生しました。\n' + error.message);
-            } finally {
-                resizeButton.disabled = false;
-                loader.style.display = 'none';
-            }
-        });
-
-        downloadZipButton.addEventListener('click', async () => {
-            if (resizedImages.length === 0) return;
-
-            const zip = new JSZip();
-            resizedImages.forEach(image => zip.file(image.fileName, image.blob));
-
-            const zipBlob = await zip.generateAsync({ type: 'blob' });
-            downloadLink.href = URL.createObjectURL(zipBlob);
-            downloadLink.download = 'resized_images.zip';
-            downloadLink.click();
-        });
-
-    </script>
+                <!-- This link is now used programmatically -->
+                <a id="downloadLink" style="display: none;"></a>
+            </section>
+        </main>
+    </div>
+    <footer>
+        &copy; 2025 Synapse Creations. Aug.ShapeShift_ver2.0.0
+    </footer>
 </body>
 </html>

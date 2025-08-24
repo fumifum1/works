@@ -4,83 +4,90 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Transparency</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/fumifum1/main/main/jpg/ico.ico">
+    <link rel="stylesheet" href="common.css">
+    <link rel="stylesheet" href="transparency.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Dots&display=swap" rel="stylesheet">
 </head>
 <body>
-    <button class="hamburger-menu" id="hamburgerMenu" aria-label="メニューを開く">
+    <button class="hamburger-menu" aria-label="メニューを開閉する">
         <span></span>
         <span></span>
         <span></span>
     </button>
-
-    <nav class="global-nav" id="globalNav">
+    <nav class="nav-menu">
         <ul>
-            <li><a href="https://fumifum1.github.io/main/index.html">profile</a></li>
-            <li><a href="https://fumifum1.github.io/main/game.html">game</a></li>
-            <li><a href="https://fumifum1.github.io/main/music.html">music</a></li>
-            <li><a href="https://fumifum1.github.io/main/other.html">other</a></li>
+            <li><a href="menu.html">HOME</a></li>
+            <li><a href="transparency.html">Image背景透明化</a></li>
+            <li><a href="fast_resizer.html">Imageサイズ変更</a></li>
+            <li><a href="cropper.html">Imageトリミング</a></li>
+            <li class="nav-menu__divider" aria-hidden="true"></li>
+            <li><a href="https://fumifum1.github.io/main/index.html">Creator</a></li>
         </ul>
     </nav>
-    <div class="nav-overlay" id="navOverlay"></div>
+    <div class="overlay"></div>
 
-    <header>
-        <h1>Transparency</h1>
-        <p>画像から指定した色とその近似色を取り除き、背景が透明な画像を簡単に作成できます。</p>
-    </header>
+    <div class="container">
+        <header>
+            <h1>Transparency</h1>
+            <p>画像から指定した色とその近似色を取り除き、背景が透明な画像を簡単に作成できます。</p>
+        </header>
 
-    <main>
-        <section id="uploadSection" class="section-box">
-            <h2>1. 画像をアップロード</h2>
-            <input type="file" id="imageInput" accept="image/*">
-        </section>
+        <main>
+            <section id="uploadSection" class="section-box">
+                <h2>1. 画像をアップロード</h2>
+                <input type="file" id="imageInput" class="file-input" accept="image/*">
+                <label for="imageInput" class="btn">画像をアップロード</label>
+            </section>
 
-        <section id="processingSection" class="section-box">
-            <h2>2. 色を選択して背景を削除</h2>
-            <div id="processingContent">
-                <div id="canvas-wrapper">
-                    <canvas id="canvas"></canvas>
-                </div>
-                <div id="controls">
-                    <div id="colorPickersWrapper">
-                        <div id="colorPickerContainer1" class="color-picker-box active-picker">
-                            <label for="colorPicker1">色 1</label>
-                            <input type="color" id="colorPicker1" value="#ffffff">
-                        </div>
-                        <div id="colorPickerContainer2" class="color-picker-box">
-                            <label for="colorPicker2">色 2</label>
-                            <input type="color" id="colorPicker2" value="#000000">
-                        </div>
+            <section id="processingSection" class="section-box">
+                <h2>2. 色を選択して背景を削除</h2>
+                <div id="processingContent">
+                    <div id="canvas-wrapper">
+                        <canvas id="canvas"></canvas>
                     </div>
-                    <p class="picker-instruction">アクティブな色を画像から抽出できます</p>
-                    <div id="toleranceContainer">
-                        <label for="toleranceSlider">色の許容範囲: <span id="toleranceValue">20</span></label>
-                        <input type="range" id="toleranceSlider" min="0" max="100" value="20">
+                    <div id="controls">
+                        <div id="colorPickersWrapper">
+                            <div id="colorPickerContainer1" class="color-picker-box active-picker">
+                                <label for="colorPicker1">色 1</label>
+                                <input type="color" id="colorPicker1" value="#ffffff">
+                            </div>
+                            <div id="colorPickerContainer2" class="color-picker-box">
+                                <label for="colorPicker2">色 2</label>
+                                <input type="color" id="colorPicker2" value="#000000">
+                            </div>
+                        </div>
+                        <p class="picker-instruction">アクティブな色を画像から抽出できます</p>
+                        <div id="toleranceContainer">
+                            <label for="toleranceSlider">色の許容範囲: <span id="toleranceValue">20</span></label>
+                            <input type="range" id="toleranceSlider" min="0" max="100" value="20">
+                        </div>
+                        <button id="processButton" class="btn">背景を削除</button>
+                        <div id="loader" class="loader"></div>
                     </div>
-                    <button id="processButton">背景を削除</button>
-                    <div id="loader" class="loader"></div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <section id="downloadSection" class="section-box">
-            <h2>3. 画像をダウンロード</h2>
-            <div id="resizeControls">
-                <h3 class="resize-title">リサイズ (アスペクト比維持)</h3>
-                <div class="resize-percentage-group">
-                    <label for="resizePercentage">スケール</label>
-                    <input type="range" id="resizeSlider" min="1" max="200" value="100">
-                    <input type="number" id="resizePercentage" min="1" value="100">
-                    <span>%</span>
+            <section id="downloadSection" class="section-box">
+                <h2>3. 画像をダウンロード</h2>
+                <div class="input-group">
+                    <label for="resizePercentage">リサイズ (スケール):</label>
+                    <div class="input-wrapper">
+                        <input type="range" id="resizeSlider" min="1" max="200" value="100">
+                        <input type="number" id="resizePercentage" min="1" value="100">
+                        <span>%</span>
+                    </div>
                 </div>
-            </div>
-            <button id="downloadButton" class="download-btn">画像をダウンロード</button>
-        </section>
-    </main>
-
-    <script src="main.js"></script>
-    <script src="menu.js"></script>
+                <button id="downloadButton" class="btn">画像をダウンロード</button>
+            </section>
+        </main>
+    </div>
+    <footer>
+        &copy; 2025 Synapse Creations. Aug.ShapeShift_ver2.0.0
+    </footer>
+    <script src="common.js"></script>
+    <script src="transparency.js"></script>
 </body>
 </html>

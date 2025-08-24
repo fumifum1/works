@@ -1,0 +1,196 @@
+/* Initial state: hide sections that are shown via JavaScript */
+#processingSection,
+#downloadSection {
+    display: none;
+}
+
+/* 画像表示とコントロールを横並びに配置するコンテナ */
+#processingContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+@media (min-width: 768px) {
+    #processingContent {
+        flex-direction: row;
+        justify-content: center;
+        align-items: flex-start;
+    }
+}
+
+#canvas-wrapper {
+    flex: 1; /* 利用可能なスペースを埋める */
+    min-width: 0; /* flexアイテムがコンテンツサイズ以下に縮小できるようにする */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#canvas {
+    border: 1px solid #ddd;
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    cursor: crosshair;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    /* チェッカーボード背景 */
+    background-image:
+        linear-gradient(45deg, #ccc 25%, transparent 25%),
+        linear-gradient(-45deg, #ccc 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #ccc 75%),
+        linear-gradient(-45deg, transparent 75%, #ccc 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+}
+
+/* コントロール（カラーピッカーとボタン）のコンテナ */
+#controls {
+    flex: none; /* コントロールの幅は固定 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+    width: 100%;
+    max-width: 400px;
+}
+
+/* 複数カラーピッカーのラッパー */
+#colorPickersWrapper {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    width: 100%;
+}
+
+/* 個々のカラーピッカーボックス */
+.color-picker-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border: 2px solid transparent;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color 0.2s ease-in-out;
+}
+
+.color-picker-box.active-picker {
+    border-color: #007bff;
+}
+
+.color-picker-box label {
+    font-size: 1.1em;
+    font-weight: 500;
+    color: #333;
+}
+
+/* input[type=color] の共通スタイル */
+.color-picker-box input[type="color"] {
+    width: 70px;
+    height: 70px;
+    padding: 0;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 4px solid #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.color-picker-box input[type="color"]::-webkit-color-swatch {
+    border: none;
+    border-radius: 50%;
+}
+
+.color-picker-box input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+/* スポイト機能の説明文 */
+.picker-instruction {
+    font-size: 0.9em;
+    color: #606770;
+    margin-top: -15px;
+    margin-bottom: 0;
+}
+
+/* 許容範囲スライダー */
+#toleranceContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+#toleranceContainer label {
+    font-size: 1.1em;
+    font-weight: 500;
+    color: #333;
+}
+
+#toleranceSlider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 80%;
+    height: 8px;
+    background: #ddd;
+    outline: none;
+    border-radius: 5px;
+    transition: opacity .2s;
+}
+
+#toleranceSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    background: #007bff;
+    cursor: pointer;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+}
+
+#toleranceSlider::-moz-range-thumb {
+    width: 22px;
+    height: 22px;
+    background: #007bff;
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+/* ==========================================================================
+   Responsive Design for Mobile
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    /*
+     * The following rules ensure the layout is usable on mobile devices.
+    */
+
+    /* Ensure long titles do not get cut off by wrapping them */
+    h1, h2 {
+        overflow-wrap: break-word;
+        word-wrap: break-word; /* Legacy property for compatibility */
+    }
+
+    /* Adjust typography for smaller screens */
+    h1 {
+        font-size: 1.5rem; /* メインタイトルのフォントサイズを調整 */
+    }
+    h2 {
+        font-size: 1.0rem; /* セクションタイトルのフォントサイズを調整 */
+    }
+
+    /* Adjust controls for a better touch experience */
+    #controls {
+        width: 100%;
+        max-width: none; /* Allow controls to take full width */
+        gap: 30px;
+    }
+
+    #toleranceSlider {
+        width: 90%;
+    }
+}

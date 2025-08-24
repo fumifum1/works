@@ -10,6 +10,25 @@
     <link href="https://fonts.googleapis.com/css2?family=Zen+Dots&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="cropper.css">
     <link rel="stylesheet" href="common.css">
+    <style>
+        /* フッターを常に最下部に固定するためのスタイル */
+        body {
+            /* フッターの高さ(padding 20px * 2 + テキスト1行分)に合わせて約70pxの余白を確保 */
+            /* この余白がないと、ページ最下部のコンテンツがフッターに隠れてしまいます */
+            padding-bottom: 70px; 
+        }
+        footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #2c3e50; /* 背景色を設定しないと下のコンテンツが透けます */
+            color: white; /* 背景色に合わせて文字色を変更 */
+            text-align: center;
+            padding: 20px 0;
+            z-index: 1000; /* 他の要素より手前に表示 */
+        }
+    </style>
 </head>
 <body>
  <header>
@@ -83,7 +102,7 @@
     <p id="message-text"></p>
     <button onclick="document.getElementById('message-box').style.display='none'">OK</button>
 </div>
-    <footer style="width: 100%; text-align: center; padding: 20px 0; margin-top: 20px; clear: both;">
+    <footer>
         &copy; 2025 Synapse Creations. Aug.ShapeShift_ver2.0.1
     </footer>
 <script src="cropper.js"></script>

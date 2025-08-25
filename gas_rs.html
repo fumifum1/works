@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>レシートスキャナー</title>
+    <title>Receipt Scanner</title>
     <!-- Tailwind CSSを読み込みます -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -150,7 +150,7 @@
             // 記録されたデータのリストをレンダリング
             receiptsList.innerHTML = '';
             if (receipts.length === 0) {
-                receiptsList.innerHTML = '<div class="p-4 text-center text-gray-500">まだデータがありません。</div>';
+                receiptsList.innerHTML = '<div class="p-4 text-center text-gray-500">No data yet</div>';
             } else {
                 receipts.forEach((receipt, index) => {
                     const receiptItem = document.createElement('div');
@@ -160,7 +160,7 @@
                             <div class="text-sm font-semibold text-gray-800">${receipt.date}</div>
                             <div class="text-xl font-bold text-gray-900">¥${receipt.amount.toLocaleString()}</div>
                             <div class="text-xs text-gray-500">
-                                ${receipt.unitPrice ? `単価: ¥${receipt.unitPrice}` : '単価: -'}
+                                ${receipt.unitPrice ? `@: ¥${receipt.unitPrice}` : '@: -'}
                             </div>
                         </div>
                         <button class="text-red-500 hover:text-red-700 transition-colors" data-index="${index}">
@@ -177,7 +177,7 @@
             monthlySummaryContainer.innerHTML = '';
             const monthlySummary = getMonthlySummary();
             if (monthlySummary.length === 0) {
-                monthlySummaryContainer.innerHTML = '<div class="p-4 text-center text-gray-500">まだデータがありません。</div>';
+                monthlySummaryContainer.innerHTML = '<div class="p-4 text-center text-gray-500">No data yet</div>';
             } else {
                 monthlySummary.forEach(item => {
                     const summaryItem = document.createElement('div');

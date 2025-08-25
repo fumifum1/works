@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>レシートスキャナー</title>
+    <!-- Tailwind CSSを読み込みます -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .btn-primary {
+            @apply bg-blue-500 text-white font-semibold py-2 px-4 rounded-xl shadow hover:bg-blue-600 transition-colors duration-200;
+        }
+        .btn-secondary {
+            @apply bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-xl shadow hover:bg-gray-400 transition-colors duration-200;
+        }
+        .input-field {
+            @apply w-full p-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-6">
+
+    <div class="bg-white p-4 sm:p-6 rounded-xl shadow-lg max-w-xl mx-auto my-8">
+        <h1 class="text-2xl sm:text-3xl font-bold text-center mb-6 text-gray-800">
+            Receipt Scanner
+        </h1>
+
+        <div class="mb-6">
+            <div id="image-container" class="relative w-full h-80 flex items-center justify-center bg-gray-200 rounded-xl overflow-hidden shadow-inner">
+                <span id="placeholder-text" class="text-gray-500">
+                    Please upload an image
+                </span>
+                <img id="uploaded-image" src="" alt="Uploaded receipt" class="hidden max-w-full max-h-full object-contain" />
+                <div id="loading-overlay" class="absolute inset-0 bg-black bg-opacity-70 hidden items-center justify-center flex-col text-white">
+                    <svg class="animate-spin -ml-1 mr-3 h-8 w-8 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span id="message-text" class="mt-2 text-sm"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex justify-center space-x-4 mb-6">
+            <label for="file-upload" class="btn-primary flex-1 text-center cursor-pointer">
+                Select an image
+            </label>
+            <input
+                id="file-upload"
+                type="file"
+                class="hidden"
+                accept="image/*"
+            />
+            <button id="reset-btn" class="btn-secondary flex-1">
+                Reset
+            </button>
+        </div>
+
+        <div class="mb-6">
+            <h2 class="text-xl font-semibold mb-4 text-gray-700">Preview</h2>
+            <div class="space-y-4">
+                <div>
+                    <label for="date-input" class="block text-sm font-medium text-gray-700 mb-1">
+                        Date
+                    </label>
+                    <input type="text" id="date-input" class="input-field" placeholder="YYYY/MM/DD">
+                </div>
+                <div>
+                    <label for="amount-input" class="block text-sm font-medium text-gray-700 mb-1">
+                        Total
+                    </label>
+                    <input type="number" id="amount-input" class="input-field" placeholder="0">
+                </div>
+                <div>
+                    <label for="unit-price-input" class="block text-sm font-medium text-gray-700 mb-1">
+                        Unit price@
+                    </label>
+                    <input type="number" id="unit-price-input" class="input-field" placeholder="0">
+                </div>
+            </div>
+            <div class="flex justify-end mt-4">
+                <button id="save-btn" class="btn-primary">
+                    Record
+                </button>
+            </div>
+        </div>
+        
+        <div class="mt-8">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold text-gray-700">Monthly total</h2>
+            </div>
+            <div id="monthly-summary-container" class="bg-white rounded-lg shadow overflow-hidden">
+                <div class="p-4 text-center text-gray-500">No data yet</div>
+            </div>
+        </div>
+
+        <div class="mt-8">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold text-gray-700">Recorded Data</h2>
+                <button id="export-btn" class="btn-secondary text-sm">
+                    CSV Export
+                </button>
+            </div>
+            <div id="receipts-list" class="bg-white rounded-lg shadow overflow-hidden">
+                <div class="p-4 text-center text-gray-500">No data yet</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM要素への参照を取得します
+        const fileInput = document.getElementById('file-upload');
+        const resetBtn = document.getElementById('reset-btn');
+        const saveBtn = document.getElementById('save-btn');
+        const exportBtn = document.getElementById('export-btn');
+        const dateInput = document.getElementById('date-input');
+        const amountInput = document.getElementById('amount-input');
+        const unitPriceInput = document.getElementById('unit-price-input');
+        const uploadedImage = document.getElementById('uploaded-image');
+        const placeholderText = document.getElementById('placeholder-text');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const messageText = document.getElementById('message-text');
+        const receiptsList = document.getElementById('receipts-list');
+        const monthlySummaryContainer = document.getElementById('monthly-summary-container');
+
+        let receipts = JSON.parse(localStorage.getItem('receipts')) || [];
+        
+        /**
+         * すべての状態をクリアし、UIをリセットします。
+         */
+        function handleNewScan() {
+            uploadedImage.classList.add('hidden');
+            uploadedImage.src = '';
+            placeholderText.classList.remove('hidden');
+            dateInput.value = '';
+            amountInput.value = '';
+            unitPriceInput.value = '';
+            fileInput.value = null;
+            messageText.innerText = '';
+        }
+
+        /**
+         * 画面にデータをレンダリングします。
+         */
+        function renderUI() {
+            // 記録されたデータのリストをレンダリング
+            receiptsList.innerHTML = '';
+            if (receipts.length === 0) {
+                receiptsList.innerHTML = '<div class="p-4 text-center text-gray-500">まだデータがありません。</div>';
+            } else {
+                receipts.forEach((receipt, index) => {
+                    const receiptItem = document.createElement('div');
+                    receiptItem.className = 'flex items-center justify-between p-4 border-b border-gray-200 last:border-b-0';
+                    receiptItem.innerHTML = `
+                        <div>
+                            <div class="text-sm font-semibold text-gray-800">${receipt.date}</div>
+                            <div class="text-xl font-bold text-gray-900">¥${receipt.amount.toLocaleString()}</div>
+                            <div class="text-xs text-gray-500">
+                                ${receipt.unitPrice ? `単価: ¥${receipt.unitPrice}` : '単価: -'}
+                            </div>
+                        </div>
+                        <button class="text-red-500 hover:text-red-700 transition-colors" data-index="${index}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    `;
+                    receiptsList.appendChild(receiptItem);
+                });
+            }
+
+            // 月別合計をレンダリング
+            monthlySummaryContainer.innerHTML = '';
+            const monthlySummary = getMonthlySummary();
+            if (monthlySummary.length === 0) {
+                monthlySummaryContainer.innerHTML = '<div class="p-4 text-center text-gray-500">まだデータがありません。</div>';
+            } else {
+                monthlySummary.forEach(item => {
+                    const summaryItem = document.createElement('div');
+                    summaryItem.className = 'flex items-center justify-between p-4 border-b border-gray-200 last:border-b-0';
+                    summaryItem.innerHTML = `
+                        <div class="text-sm font-semibold text-gray-800">${item.month}</div>
+                        <div class="text-xl font-bold text-gray-900">¥${item.total.toLocaleString()}</div>
+                    `;
+                    monthlySummaryContainer.appendChild(summaryItem);
+                });
+            }
+        }
+
+        /**
+         * 画像をGemini APIに送信して分析します。
+         * @param {string} base64Image - Base64エンコードされた画像データ。
+         */
+        async function processImage(base64Image) {
+            loadingOverlay.classList.remove('hidden');
+            loadingOverlay.classList.add('flex');
+            messageText.innerText = '画像データを解析中...';
+
+            try {
+                const prompt = "Please extract the date, total amount, and the unit price of gasoline which is often preceded by a '@' symbol. Return the result as a JSON object with 'date', 'amount', and 'unitPrice' keys. The amount and unitPrice should be numbers (without currency symbols or commas).";
+                const base64Data = base64Image.split(',')[1];
+                
+                const payload = {
+                    contents: [
+                        {
+                            role: "user",
+                            parts: [
+                                { text: prompt },
+                                { inlineData: { mimeType: "image/jpeg", data: base64Data } }
+                            ]
+                        }
+                    ],
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "OBJECT",
+                            properties: {
+                                date: { type: "STRING" },
+                                amount: { type: "NUMBER" },
+                                unitPrice: { type: "NUMBER" }
+                            },
+                            propertyOrdering: ["date", "amount", "unitPrice"]
+                        }
+                    }
+                };
+                
+                const apiKey = ""; // Canvas will provide this key automatically
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+                let response;
+                let retries = 0;
+                const maxRetries = 5;
+                const baseDelay = 1000;
+
+                while (retries < maxRetries) {
+                    try {
+                        response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (response.status === 429) {
+                            retries++;
+                            const delay = baseDelay * Math.pow(2, retries);
+                            console.warn(`Rate limit exceeded. Retrying in ${delay}ms...`);
+                            await new Promise(res => setTimeout(res, delay));
+                            continue;
+                        }
+                        break;
+                    } catch (err) {
+                        retries++;
+                        const delay = baseDelay * Math.pow(2, retries);
+                        console.error(`Fetch failed: ${err.message}. Retrying in ${delay}ms...`);
+                        await new Promise(res => setTimeout(res, delay));
+                    }
+                }
+
+                if (!response || !response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`API error: ${response.status} - ${errorText}`);
+                }
+
+                const result = await response.json();
+                const content = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                
+                if (content) {
+                    const extractedData = JSON.parse(content);
+                    if (extractedData.date && extractedData.amount !== undefined) {
+                        dateInput.value = extractedData.date;
+                        amountInput.value = extractedData.amount;
+                        unitPriceInput.value = extractedData.unitPrice;
+                        messageText.innerText = 'データが正常に抽出されました。';
+                    } else {
+                        throw new Error('モデルが有効なデータを返しませんでした。');
+                    }
+                } else {
+                    throw new Error('モデルの応答にデータが含まれていませんでした。');
+                }
+
+            } catch (error) {
+                console.error("Error processing image:", error);
+                messageText.innerText = 'データの抽出に失敗しました。' + error.message;
+            } finally {
+                loadingOverlay.classList.add('hidden');
+                loadingOverlay.classList.remove('flex');
+            }
+        }
+
+        /**
+         * 抽出されたデータをローカルストレージに保存します。
+         */
+        function handleSave() {
+            const date = dateInput.value;
+            const amount = parseFloat(amountInput.value);
+            const unitPrice = parseFloat(unitPriceInput.value);
+
+            if (date && !isNaN(amount)) {
+                const newReceipt = { date, amount, unitPrice: isNaN(unitPrice) ? null : unitPrice };
+                receipts.push(newReceipt);
+                localStorage.setItem('receipts', JSON.stringify(receipts));
+                
+                // メッセージを更新し、UIをリセットして再レンダリング
+                messageText.innerText = 'レシート情報が保存されました！';
+                handleNewScan();
+                renderUI();
+            } else {
+                messageText.innerText = '日付と合計金額の両方を入力してください。';
+            }
+        }
+
+        /**
+         * 保存されたレシートをCSVファイルとしてエクスポートします。
+         */
+        function handleExport() {
+            if (receipts.length === 0) {
+                messageText.innerText = 'エクスポートするデータがありません。';
+                return;
+            }
+
+            const csvHeader = '日付,合計金額,単価\n';
+            const csvRows = receipts.map(r => `${r.date},${r.amount},${r.unitPrice || ''}`).join('\n');
+            const csvData = csvHeader + csvRows;
+
+            const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'receipts.csv');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            messageText.innerText = 'レシートデータがCSVファイルとしてダウンロードされました。';
+        }
+
+        /**
+         * 月別合計を計算します。
+         */
+        function getMonthlySummary() {
+            const summary = {};
+            receipts.forEach(receipt => {
+                const [year, month] = receipt.date.split('/').map(Number);
+                const key = `${year}年${month}月`;
+                if (!summary[key]) {
+                    summary[key] = 0;
+                }
+                summary[key] += receipt.amount;
+            });
+            const sortedKeys = Object.keys(summary).sort((a, b) => {
+                const [aYear, aMonth] = a.replace(/年|月/g, ' ').trim().split(' ').map(Number);
+                const [bYear, bMonth] = b.replace(/年|月/g, ' ').trim().split(' ').map(Number);
+                if (aYear !== bYear) return bYear - aYear;
+                return bMonth - aMonth;
+            });
+            return sortedKeys.map(key => ({ month: key, total: summary[key] }));
+        }
+
+        // イベントリスナーをセットアップします
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    uploadedImage.src = reader.result;
+                    uploadedImage.classList.remove('hidden');
+                    placeholderText.classList.add('hidden');
+                    processImage(reader.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        resetBtn.addEventListener('click', handleNewScan);
+        saveBtn.addEventListener('click', handleSave);
+        exportBtn.addEventListener('click', handleExport);
+
+        // デリゲートを使用して削除ボタンを処理します
+        receiptsList.addEventListener('click', (e) => {
+            if (e.target.closest('button')) {
+                const index = e.target.closest('button').dataset.index;
+                if (index !== undefined) {
+                    receipts.splice(index, 1);
+                    localStorage.setItem('receipts', JSON.stringify(receipts));
+                    messageText.innerText = 'レシート情報が削除されました。';
+                    renderUI();
+                }
+            }
+        });
+
+        // ページ読み込み時にUIを初期化します
+        window.onload = renderUI;
+
+    </script>
+</body>
+</html>

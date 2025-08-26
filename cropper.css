@@ -1,287 +1,264 @@
+/* cropper.css */
 
-        body {
-            font-family: 'Zen Dots', sans-serif;
-            background-color: #f3f4f6;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-        }
+/* General container and controls styling */
+.container {
+    max-width: 900px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
 
-        .container {
-            background-color: #ffffff;
-            padding: 2.5rem;
-            border-radius: 1.5rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            max-width: 900px;
-            width: 100%;
-            text-align: center;
-        }
+h1 {
+    text-align: center;
+    color: #2c3e50;
+    font-family: 'Zen Dots', cursive;
+}
 
-        /* Adjust container padding for mobile devices */
-        @media (max-width: 600px) {
-            .container {
-                padding: 1.5rem;
-            }
-        }
+p {
+    text-align: center;
+    color: #34495e;
+    margin-bottom: 20px;
+}
 
-        h1 {
-            color: #1f2937;
-            font-size: 2.25rem;
-            margin-bottom: 2rem;
-            font-weight: 600;
-        }
-        
-        .controls {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-            align-items: center;
-        }
-        
-        /* Set max-width for controls and make them full width on small screens */
-        .input-group,
-        .file-label,
-        .shape-selection,
-        .action-btn {
-            width: 100%;
-            max-width: 250px; /* Limit width on larger screens */
-        }
-        
-        .input-group {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
 
-        /* New file input styling */
-        .file-input-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.5rem;
-        }
+.file-input-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
 
-        input[type="file"] {
-            display: none; /* Hide the default file input */
-        }
-        
-        label.file-label {
-            /* Styles for the new "button" label */
-            display: block;
-            padding: 0.5rem 2rem;
-            border: 3px solid #000;
-            border-radius: 0;
-            background: #fff;
-            color: #000;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.2s, color 0.2s;
-            text-align: center;
-            box-sizing: border-box; /* paddingとborderを含めて幅を計算 */
-            margin: 0 auto;
-        }
-        
-        label.file-label:hover {
-            background: #000;
-            color: #fff;
-        }
+#image-upload {
+    display: none;
+}
 
-        .input-group label {
-            font-size: 1rem;
-            color: #374151;
-            font-weight: 600;
-        }
+#file-name {
+    font-size: 0.9em;
+    color: #555;
+    /* flexコンテナ内でファイル名が正しく省略されるようにする */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* flexアイテムの省略に不可欠な設定 */
+    min-width: 0;
+}
 
-        .input-group input[type="number"] {
-            padding: 0.5rem; /* 入力ボックスのパディングを調整 */
-            border: 2px solid #e5e7eb;
-            border-radius: 0.75rem;
-            font-size: 1rem;
-            color: #374151;
-            width: 100px; /* 入力ボックスの幅を調整 */
-        }
+.input-group {
+    display: flex;
+    flex-direction: column;
+}
 
-        .input-group input[type="file"]:focus,
-        .input-group input[type="number"]:focus {
-            outline: none;
-            border-color: #3b82f6;
-        }
-        
-        .shape-selection {
-            display: flex;
-            gap: 0; /* ボタン間の隙間をなくす */
-            justify-content: center;
-        }
+.input-group label {
+    font-size: 0.9em;
+    color: #555;
+    margin-bottom: 5px;
+}
 
-        .shape-btn {
-            padding: 0.5rem 0.5rem;
-            border: 3px solid #000;
-            border-radius: 0;
-            background-color: #fff;
-            color: #000;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.2s, color 0.2s;
-            flex: 1; /* 親要素内で均等に幅を占める */
-            box-sizing: border-box;
-        }
+.input-group input[type="number"] {
+    width: 80px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
 
-        .shape-btn:hover,
-        .shape-btn.active {
-            background-color: #000;
-            color: #fff;
-        }
+/* .btn のアクティブ状態のスタイル（選択された形状ボタンに適用） */
+.btn.active {
+    /* ボタンが押されている（選択されている）ことを示すために内側の影を追加します */
+    box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.2);
+}
 
-        .action-btn {
-            padding: 0.5rem 2rem;
-            border: 3px solid #000;
-            border-radius: 0;
-            background: #fff;
-            color: #000;
-            font-size: 1.125rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s, color 0.2s;
-            box-sizing: border-box;
-        }
+/* Cropper Area Styling */
+#image-container {
+    position: relative;
+    width: 100%;
+    max-width: 800px; /* Or any size you prefer */
+    height: 500px; /* Fixed height for the container */
+    margin: 20px auto;
+    background-color: #222;
+    border-radius: 8px;
+    overflow: hidden; /* This is crucial */
+    cursor: grab;
+    touch-action: none; /* Prevent default touch actions like scrolling */
+}
 
-        .action-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-            background: #000;
-            color: #fff;
-        }
-        
-        #image-container {
-            position: relative;
-            max-width: 100%;
-            overflow: hidden;
-            background-color: #e5e7eb;
-            border-radius: 0.75rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 2rem;
-            touch-action: none;
-        }
+#image-container.hidden {
+    display: none;
+}
 
-        #original-image {
-            max-width: 100%;
-            height: auto;
-            display: block;
-            transform: scale(1);
-            transform-origin: center center;
-        }
+#original-image {
+    position: absolute; /* Crucial for positioning */
+    top: 0;
+    left: 0;
+    transform-origin: top left; /* Simplifies transform calculations */
+    will-change: transform; /* Performance hint for the browser */
+}
 
-        #cropper {
-            position: absolute;
-            top: 0;
-            left: 0;
-            border: 2px dashed #ffffff;
-            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
-            cursor: grab;
-            display: none;
-            z-index: 10;
-        }
-        
-        #cropper.circle {
-            border-radius: 50%;
-        }
+#cropper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 250px; /* Example size */
+    height: 250px; /* Example size */
+    transform: translate(-50%, -50%);
+    /* This creates the dark overlay with a see-through hole */
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6);
+    border: 2px dashed #fff;
+    pointer-events: none; /* Allows clicks to pass through to the image */
+    box-sizing: border-box;
+}
 
-        #output-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1rem;
-        }
+.zoom-controls {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    z-index: 10;
+    display: flex;
+    gap: 5px;
+}
 
-        #output-container h3 {
-            color: #1f2937;
-            font-size: 1.5rem;
-            margin: 0;
-        }
+.zoom-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    background-color: rgba(255, 255, 255, 0.8);
+    color: #333;
+    font-size: 1.2em;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+}
 
-        #preview-canvas {
-            border: 2px solid #e5e7eb;
-            border-radius: 0.75rem;
-            max-width: 100%;
-        }
-        
-        .hidden {
-            display: none;
-        }
-        
-        /* Message box styling */
-        .message-box {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: #fff;
-            padding: 2rem;
-            border-radius: 1rem;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            z-index: 100;
-            text-align: center;
-            display: none;
-        }
+/* Output Area */
+#output-container {
+    margin-top: 20px;
+    text-align: center;
+}
 
-        .message-box p {
-            margin: 0 0 1rem 0;
-            font-size: 1.125rem;
-            color: #333;
-        }
+#output-container.hidden {
+    display: none;
+}
 
-        .message-box button {
-            background-color: #3b82f6;
-            color: #fff;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.75rem;
-            cursor: pointer;
-            font-size: 1rem;
-        }
-        
-        .zoom-controls {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            margin-top: 1rem;
-            position: absolute;
-            top: 1rem;
-            z-index: 20;
-        }
-        
-        .zoom-btn {
-            background-color: rgba(243, 244, 246, 0.8);
-            color: #4b5563;
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            font-size: 1.5rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.2s, transform 0.2s;
-        }
-        
-        .zoom-btn:hover {
-            background-color: rgba(229, 231, 235, 0.8);
-            transform: scale(1.1);
-        }
+#preview-canvas {
+    border: 1px solid #ccc;
+    max-width: 100%;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
 
-        /* File name display style */
-        #file-name {
-            margin-top: 0.5rem;
-            color: #4b5563;
-            font-style: italic;
-            font-size: 0.9rem;
-            height: 1.2rem; /* Reserve space to prevent layout shift */
-        }
+/* Message Box */
+.message-box {
+    display: none; /* Initially hidden */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.message-box div {
+    background-color: white;
+    padding: 20px 30px;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.message-box p {
+    margin: 0 0 15px 0;
+    color: #333;
+}
+
+.message-box button {
+    padding: 8px 25px;
+    border: none;
+    border-radius: 5px;
+    background-color: #3498db;
+    color: white;
+    cursor: pointer;
+}
+
+/* Sticky Footer Styles */
+html {
+    height: 100%;
+}
+body {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 0; /* Remove old padding */
+}
+.container {
+    flex-grow: 1; /* Make container grow to fill available space */
+}
+footer {
+    position: static; /* Change from fixed to static */
+    width: 100%;
+    background-color: #2c3e50;
+    color: white;
+    text-align: center;
+    padding: 20px 0;
+    margin-top: auto; /* Push footer to the bottom */
+}
+
+/* === Responsive Design === */
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+        margin: 10px;
+        width: auto; /* Let it be fluid */
+    }
+
+    h1 {
+        font-size: 1.8em;
+        margin-bottom: 15px;
+    }
+
+    .controls {
+        flex-direction: column;
+        align-items: stretch; /* Make child items take full width */
+        gap: 15px;
+    }
+
+    .file-input-container {
+        flex-direction: column;
+        align-items: center; /* ボタンとファイル名を中央揃え */
+    }
+
+    .input-group {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    #image-container {
+        height: 350px;
+    }
+
+    #cropper {
+        width: 200px;
+        height: 200px;
+    }
+
+    #file-name {
+        max-width: 100%; /* Allow it to use the full width of the container */
+        text-align: center; /* Center the text */
+        margin-top: 8px; /* ボタンとの間隔を調整 */
+    }
+}

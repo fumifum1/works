@@ -38,6 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let startX, startY, startImageX, startImageY;
     let sourceImage; // Canvasに描画するための元のImageオブジェクト
 
+    let initialPinchDistance = 0; // ピンチズーム用の初期距離
     // --- イベントリスナーの設定 ---
 
     // Hamburger Menu Logic
@@ -155,11 +156,37 @@ document.addEventListener('DOMContentLoaded', () => {
         cropper.style.borderRadius = (shape === 'circle') ? '50%' : '0';
     }
 
-    function zoom(factor) {
+    function zoom(factor, zoomOrigin = null) {
         if (!imageLoaded) return;
+        
         const newScale = currentScale * factor;
         // minScaleは常に1なので、それより小さくならないようにする
-        currentScale = Math.max(minScale, newScale);
+        const scale = Math.max(minScale, newScale);
+
+        if (scale === currentScale) {
+            return; // スケールが変わらない場合は何もしない
+        }
+
+        let origin;
+        if (zoomOrigin) {
+            origin = zoomOrigin;
+        } else {
+            // デフォルトでは、トリミング枠の中心をズームの基点とする
+            const cropperRect = cropper.getBoundingClientRect();
+            origin = {
+                x: cropperRect.left + cropperRect.width / 2,
+                y: cropperRect.top + cropperRect.height / 2
+            };
+        }
+
+        const imageRect = originalImage.getBoundingClientRect();
+        
+        // ズーム基点が動かないように、画像の表示位置を調整する
+        // (基点の座標 - 画像の左上の座標) * (スケール変化率 - 1)
+        imageX -= (origin.x - imageRect.left) * (scale / currentScale - 1);
+        imageY -= (origin.y - imageRect.top) * (scale / currentScale - 1);
+
+        currentScale = scale;
         updateImageTransform();
         enforceBounds(); // ズーム後に位置を再調整
     }
@@ -168,7 +195,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!imageLoaded) return;
         e.preventDefault();
         const delta = e.deltaY > 0 ? 0.95 : 1.05;
-        zoom(delta);
+        // マウスカーソルの位置をズームの基点とする
+        const zoomOrigin = { x: e.clientX, y: e.clientY };
+        zoom(delta, zoomOrigin);
     }
 
     function updateImageTransform() {
@@ -178,26 +207,57 @@ document.addEventListener('DOMContentLoaded', () => {
     function startDrag(e) {
         if (!imageLoaded) return;
         e.preventDefault();
-        dragging = true;
-        const touch = e.touches ? e.touches[0] : e;
-        startX = touch.clientX;
-        startY = touch.clientY;
-        startImageX = imageX;
-        startImageY = imageY;
-        imageContainer.style.cursor = 'grabbing';
+
+        if (e.touches && e.touches.length === 2) {
+            // 2本指でのタッチ（ピンチ操作）の開始
+            dragging = false; // ドラッグは無効化
+            const touch1 = e.touches[0];
+            const touch2 = e.touches[1];
+            initialPinchDistance = Math.hypot(touch1.clientX - touch2.clientX, touch1.clientY - touch2.clientY);
+        } else {
+            // 1本指でのタッチまたはマウスでのドラッグ開始
+            dragging = true;
+            const touch = e.touches ? e.touches[0] : e;
+            startX = touch.clientX;
+            startY = touch.clientY;
+            startImageX = imageX;
+            startImageY = imageY;
+            imageContainer.style.cursor = 'grabbing';
+        }
     }
 
     function drag(e) {
-        if (!dragging) return;
+        if (!imageLoaded) return; // 画像が読み込まれていない場合は何もしない
+
         e.preventDefault();
-        const touch = e.touches ? e.touches[0] : e;
-        const dx = touch.clientX - startX;
-        const dy = touch.clientY - startY;
-        imageX = startImageX + dx;
-        imageY = startImageY + dy;
-        
-        enforceBounds();
-        updateImageTransform();
+
+        if (e.touches && e.touches.length === 2) {
+            // ピンチ操作によるズーム
+            const touch1 = e.touches[0];
+            const touch2 = e.touches[1];
+            const currentPinchDistance = Math.hypot(touch1.clientX - touch2.clientX, touch1.clientY - touch2.clientY);
+
+            if (initialPinchDistance > 0) {
+                const zoomFactor = currentPinchDistance / initialPinchDistance;
+                const pinchCenter = {
+                    x: (touch1.clientX + touch2.clientX) / 2,
+                    y: (touch1.clientY + touch2.clientY) / 2
+                };
+                zoom(zoomFactor, pinchCenter);
+                // 次のフレームのために現在の距離を保存
+                initialPinchDistance = currentPinchDistance;
+            }
+        } else if (dragging) {
+            // ドラッグによる移動
+            const touch = e.touches ? e.touches[0] : e;
+            const dx = touch.clientX - startX;
+            const dy = touch.clientY - startY;
+            imageX = startImageX + dx;
+            imageY = startImageY + dy;
+            
+            enforceBounds();
+            updateImageTransform();
+        }
     }
     
     function enforceBounds() {
@@ -230,6 +290,8 @@ document.addEventListener('DOMContentLoaded', () => {
             dragging = false;
             imageContainer.style.cursor = 'grab';
         }
+        // ピンチ操作の状態もリセット
+        initialPinchDistance = 0;
     }
 
     function cropImage() {

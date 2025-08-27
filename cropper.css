@@ -1,5 +1,10 @@
 /* cropper.css */
 
+*, *::before, *::after {
+    box-sizing: inherit;
+}
+
+
 /* General container and controls styling */
 .container {
     max-width: 900px;
@@ -14,6 +19,7 @@ h1 {
     text-align: center;
     color: #2c3e50;
     font-family: 'Zen Dots', cursive;
+    word-break: break-word;
 }
 
 p {
@@ -197,6 +203,7 @@ p {
 /* Sticky Footer Styles */
 html {
     height: 100%;
+    box-sizing: border-box;
 }
 body {
     min-height: 100%;
@@ -241,12 +248,6 @@ footer {
         align-items: center; /* ボタンとファイル名を中央揃え */
     }
 
-    .input-group {
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-    }
-
     #image-container {
         height: 350px;
     }
@@ -260,5 +261,25 @@ footer {
         max-width: 100%; /* Allow it to use the full width of the container */
         text-align: center; /* Center the text */
         margin-top: 8px; /* ボタンとの間隔を調整 */
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 1.5em;
+    }
+
+    .controls {
+        padding: 10px;
+        gap: 10px;
+    }
+
+    #image-container {
+        height: 300px;
+    }
+
+    #cropper {
+        width: 150px;
+        height: 150px;
     }
 }

@@ -9,11 +9,12 @@
     <link rel="stylesheet" href="common.css">
     <style>
         /*
-         * スマートフォンで画像をアップロードした後にスクロールできなくなる問題の修正。
-         * JavaScriptによってbodyにインラインスタイルが適用されても、!importantで上書きしてスクロールを確保します。
+         * スマートフォンで画像をアップロード後にスクロールできなくなる問題の最終対策。
+         * htmlとbodyの両方にスタイルを適用し、JavaScriptによるスクロール無効化を強制的に上書きします。
         */
-        body {
+        html, body {
             overflow-y: auto !important;
+            height: auto !important;
         }
     </style>
 </head>

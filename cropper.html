@@ -9,14 +9,20 @@
     <link rel="stylesheet" href="common.css">
     <style>
         /*
-         * スマートフォンで画像をアップロード後にスクロールできなくなる問題の最終対策。
-         * htmlとbodyの両方にスタイルを適用し、JavaScriptによるスクロール無効化を強制的に上書きします。
+         * スマートフォンでのスクロール問題を解決するための総合的な対策。
+         * cropper.jsライブラリが適用するスタイルを強制的に上書きし、ページのスクロールを確保します。
         */
         html, body {
+            /* 1. ページ全体のスクロールを最優先で確保する */
             overflow-y: auto !important;
             height: auto !important;
-            /* ライブラリがbody等の位置を固定(position: fixed)してスクロールを無効化するのを防ぎます */
             position: static !important;
+        }
+
+        /* 2. cropper.jsが生成するUIコンテナが画面を固定化するのを防ぐ（これが最重要） */
+        .cropper-container {
+            position: static !important;
+            overflow: visible !important;
         }
     </style>
 </head>
@@ -99,7 +105,7 @@
         </div>
     </div>
     <footer>
-        &copy; 2025 Synapse Creations. Aug.ShapeShift_ver2.3.2
+        &copy; 2025 Synapse Creations. Aug.ShapeShift_ver2.3.3
     </footer>
     <script src="common.js"></script>
     <script src="cropper.js"></script>

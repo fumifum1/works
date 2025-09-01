@@ -9,22 +9,18 @@
     <link rel="stylesheet" href="common.css">
     <style>
         /*
-         * スマートフォンでの表示崩れ・拡大・スクロール不可問題に対する最終対策。
-         * 原因であるcropper.jsの内部要素を直接制御し、強制的に画面内に収めます。
+         * スマートフォンでの表示崩れ・スクロール問題を解決するためのスタイル。
+         * JavaScriptでの対策を主とし、CSSはレイアウトの安定化を補助します。
         */
         html, body {
-            /* ページ全体のスクロールを確保し、意図しない固定化を防ぐ */
-            overflow-y: auto !important;
-            height: auto !important;
-            position: static !important;
+            /* ページの横方向のはみ出しを防ぎ、スクロールを可能にする */
+            overflow-x: hidden; 
         }
 
-        /* cropper.jsが生成するコンテナと、その内部の画像表示エリアの幅を画面幅に強制する */
-        /* これが「画面が急に大きくなる」現象を直接防ぎます。 */
-        .cropper-container, .cropper-canvas, .cropper-canvas img {
-            max-width: 100% !important;
-            /* heightもautoにしないとアスペクト比が崩れる */
-            height: auto !important;
+        /* 画像コンテナと、その中の画像が画面幅を超えないようにする */
+        #image-container, #original-image {
+            max-width: 100%;
+            box-sizing: border-box;
         }
     </style>
 </head>
@@ -107,7 +103,7 @@
         </div>
     </div>
     <footer>
-        &copy; 2025 Synapse Creations. Aug.ShapeShift_ver2.3.5
+        &copy; 2025 Synapse Creations. Aug.ShapeShift_ver2.3.6
     </footer>
     <script src="common.js"></script>
     <script src="cropper.js"></script>

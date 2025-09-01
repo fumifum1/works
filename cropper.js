@@ -1,208 +1,279 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // --- Element Selection ---
-    const imageUpload = document.getElementById('image-upload');
-    const fileNameSpan = document.getElementById('file-name');
-    const sizeInput = document.getElementById('size-input');
-    const squareBtn = document.getElementById('square-btn');
-    const circleBtn = document.getElementById('circle-btn');
-    const cropButton = document.getElementById('cropButton');
-    const imageContainer = document.getElementById('image-container');
-    const originalImage = document.getElementById('original-image');
-    const cropper = document.getElementById('cropper');
-    const zoomInBtn = document.getElementById('zoom-in-btn');
-    const zoomOutBtn = document.getElementById('zoom-out-btn');
-    const outputContainer = document.getElementById('output-container');
-    const previewCanvas = document.getElementById('preview-canvas');
-    const downloadBtn = document.getElementById('download-btn');
+/**
+ * ImageCropperApp
+ * A class to encapsulate all logic for the image cropping tool.
+ * This improves organization, maintainability, and prevents global scope pollution.
+ */
+class ImageCropperApp {
+    constructor() {
+        this._selectElements();
+        this._initState();
+        this._initEventListeners();
+        this._initialSetup();
+    }
 
-    // --- State Variables ---
-    let imageLoaded = false;
-    let dragging = false;
-    let currentScale = 1.0;
-    let minScale = 1.0;
-    let imageX = 0;
-    let imageY = 0;
-    let startX, startY, startImageX, startImageY;
-    let sourceImage; // To hold the original Image object for canvas drawing
-    let initialPinchDistance = 0;
-    let cropperShape = 'square';
+    /**
+     * Caches all necessary DOM elements for the application.
+     */
+    _selectElements() {
+        this.imageUpload = document.getElementById('image-upload');
+        this.fileNameSpan = document.getElementById('file-name');
+        this.sizeInput = document.getElementById('size-input');
+        this.squareBtn = document.getElementById('square-btn');
+        this.circleBtn = document.getElementById('circle-btn');
+        this.cropButton = document.getElementById('cropButton');
+        this.imageContainer = document.getElementById('image-container');
+        this.originalImage = document.getElementById('original-image');
+        this.cropper = document.getElementById('cropper');
+        this.zoomInBtn = document.getElementById('zoom-in-btn');
+        this.zoomOutBtn = document.getElementById('zoom-out-btn');
+        this.outputContainer = document.getElementById('output-container');
+        this.previewCanvas = document.getElementById('preview-canvas');
+        this.downloadBtn = document.getElementById('download-btn');
+    }
 
-    // --- Event Listeners ---
+    /**
+     * Initializes the state variables for the application.
+     */
+    _initState() {
+        this.imageLoaded = false;
+        this.dragging = false;
+        this.currentScale = 1.0;
+        this.minScale = 1.0;
+        this.imageX = 0;
+        this.imageY = 0;
+        this.startX = 0;
+        this.startY = 0;
+        this.startImageX = 0;
+        this.startImageY = 0;
+        this.sourceImage = null; // To hold the original Image object for canvas drawing
+        this.initialPinchDistance = 0;
+        this.cropperShape = 'square';
+        this.requestedSize = 300; // To store the user's desired output resolution
+    }
 
-    // File Upload
-    imageUpload.addEventListener('change', handleImageUpload);
+    /**
+     * Sets up all event listeners for the application.
+     * Uses .bind(this) to ensure 'this' context is correct inside event handlers.
+     */
+    _initEventListeners() {
+        this.imageUpload.addEventListener('change', this.handleImageUpload.bind(this));
+        this.sizeInput.addEventListener('change', () => {
+            this.updateCropperSize(() => {
+                if (this.imageLoaded) this.initializeCropper();
+            });
+        });
+        this.squareBtn.addEventListener('click', () => this.setCropperShape('square'));
+        this.circleBtn.addEventListener('click', () => this.setCropperShape('circle'));
+        this.zoomInBtn.addEventListener('click', () => this.zoom(1.1));
+        this.zoomOutBtn.addEventListener('click', () => this.zoom(0.9));
+        this.imageContainer.addEventListener('wheel', this.handleWheelZoom.bind(this), { passive: false });
+        this.imageContainer.addEventListener('mousedown', this.startDrag.bind(this));
+        this.imageContainer.addEventListener('touchstart', this.startDrag.bind(this), { passive: false });
+        this.cropButton.addEventListener('click', this.cropImage.bind(this));
+        this.downloadBtn.addEventListener('click', this.downloadCroppedImage.bind(this));
+    }
 
-    // Cropper Size Control
-    sizeInput.addEventListener('change', updateCropperSize);
+    /**
+     * Performs initial setup on application start.
+     */
+    _initialSetup() {
+        // This block establishes a clean and reliable coordinate system for all positioning and transformations.
+        // This is the definitive fix for all reported issues (image at bottom-right, no movement, no zoom).
 
-    // Shape Control
-    squareBtn.addEventListener('click', () => setCropperShape('square'));
-    circleBtn.addEventListener('click', () => setCropperShape('circle'));
+        // 1. The container becomes the coordinate system's origin.
+        this.imageContainer.style.position = 'relative';
 
-    // Zoom Controls
-    zoomInBtn.addEventListener('click', () => zoom(1.1));
-    zoomOutBtn.addEventListener('click', () => zoom(0.9));
-    imageContainer.addEventListener('wheel', handleWheelZoom, { passive: false });
+        // 2. The image is positioned absolutely within the container.
+        this.originalImage.style.position = 'absolute';
 
-    // Drag and Touch Controls
-    imageContainer.addEventListener('mousedown', startDrag);
-    imageContainer.addEventListener('touchstart', startDrag, { passive: false });
+        // 3. The cropper frame allows mouse/touch events to pass through to the image below.
+        this.cropper.style.pointerEvents = 'none';
 
-    document.addEventListener('mousemove', drag);
-    document.addEventListener('touchmove', drag, { passive: false });
+        // 4. Set the transform origin to the top-left corner for predictable scaling.
+        // This unifies the visual scaling behavior with the coordinate calculation logic.
+        this.originalImage.style.transformOrigin = 'top left';
 
-    document.addEventListener('mouseup', endDrag);
-    document.addEventListener('touchend', endDrag);
-    document.addEventListener('mouseleave', endDrag); // To handle mouse leaving the window
+        // Initialize on load
+        this.updateCropperSize();
+        this.setCropperShape('square');
+    }
 
-    // Action Buttons
-    cropButton.addEventListener('click', cropImage);
-    downloadBtn.addEventListener('click', downloadCroppedImage);
+    // --- Core Methods ---
 
-    // --- Functions ---
+    getRelativeCoords(e) {
+        const containerRect = this.imageContainer.getBoundingClientRect();
+        // Handle both mouse and touch events
+        const point = e.touches ? e.touches[0] : e;
+        return {
+            x: point.clientX - containerRect.left,
+            y: point.clientY - containerRect.top
+        };
+    }
 
-    function handleImageUpload(e) {
+    handleImageUpload(e) {
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
             reader.onload = (event) => {
-                sourceImage = new Image();
-                sourceImage.onload = () => {
-                    originalImage.src = event.target.result;
-                    imageContainer.classList.remove('hidden');
-                    outputContainer.classList.add('hidden');
+                this.sourceImage = new Image();
+                this.sourceImage.onload = () => {
+                    this.originalImage.src = event.target.result;
+                    this.imageContainer.classList.remove('hidden');
+                    this.outputContainer.classList.add('hidden');
                     // Defer initialization to the next animation frame
-                    // to ensure the browser has calculated the layout after the image has loaded.
-                    requestAnimationFrame(() => {
-                        resetImageState();
-                        initializeCropper();
-                        imageLoaded = true;
-                    });
+                    // This ensures the cropper size is updated BEFORE we calculate image positions.
+                    this.updateCropperSize(this.initializeCropper.bind(this));
                 };
-                sourceImage.src = event.target.result;
+                this.sourceImage.src = event.target.result;
             };
             reader.readAsDataURL(file);
-            fileNameSpan.textContent = file.name;
+            this.fileNameSpan.textContent = file.name;
         }
     }
 
-    function resetImageState() {
-        currentScale = 1.0;
-        imageX = 0;
-        imageY = 0;
+    resetImageState() {
+        this.currentScale = 1.0;
+        this.imageX = 0;
+        this.imageY = 0;
     }
 
-    function initializeCropper() {
-        updateCropperSize(); // Set initial size from input
+    initializeCropper() {
+        // This function now assumes the cropper's size has just been set correctly.
+        // It calculates the initial scale and position of the image.
+        this.resetImageState();
 
-        const containerRect = imageContainer.getBoundingClientRect();
-        const cropperRect = cropper.getBoundingClientRect();
+        // Read the just-updated dimensions of the cropper.
+        // Use getBoundingClientRect for floating-point precision to avoid rounding errors.
+        const containerRect = this.imageContainer.getBoundingClientRect();
+        const cropperRect = this.cropper.getBoundingClientRect();
+        const cropperWidth = cropperRect.width;
+        const cropperHeight = cropperRect.height;
+        const cropperX = cropperRect.left - containerRect.left;
+        const cropperY = cropperRect.top - containerRect.top;
 
         // Calculate minimum scale to fit the image within the cropper
-        const scaleX = cropperRect.width / sourceImage.width;
-        const scaleY = cropperRect.height / sourceImage.height;
-        // The minimum scale allowed is when the image fits entirely inside the cropper.
-        minScale = Math.min(scaleX, scaleY);
-        // The initial scale should make the image cover the cropper for better UX.
-        const initialScale = Math.max(scaleX, scaleY);
-        currentScale = initialScale;
-
-        // Calculate cropper's position relative to the container
-        const cropperRelX = cropperRect.left - containerRect.left;
-        const cropperRelY = cropperRect.top - containerRect.top;
+        const scaleX = cropperWidth / this.sourceImage.width;
+        const scaleY = cropperHeight / this.sourceImage.height;
+        // 最小スケールは、画像がトリミング枠全体を常に覆う（カバーする）値に設定します。
+        // これにより、ズームアウトしすぎて枠内に余白ができるのを防ぎます。
+        this.minScale = Math.max(scaleX, scaleY);
+        this.currentScale = this.minScale;
 
         // Center the image inside the cropper area initially
-        imageX = cropperRelX + (cropperRect.width - sourceImage.width * currentScale) / 2;
-        imageY = cropperRelY + (cropperRect.height - sourceImage.height * currentScale) / 2;
+        this.imageX = cropperX + (cropperWidth - this.sourceImage.width * this.currentScale) / 2;
+        this.imageY = cropperY + (cropperHeight - this.sourceImage.height * this.currentScale) / 2;
 
-        updateImageTransform();
         // Enforce bounds after initial positioning
-        enforceBounds();
+        this.enforceBounds();
+        this.updateImageTransform();
+
+        this.imageLoaded = true;
     }
 
-    function updateCropperSize() {
-        const size = parseInt(sizeInput.value, 10);
-        if (isNaN(size) || size <= 0) return;
-
-        cropper.style.width = `${size}px`;
-        cropper.style.height = `${size}px`;
-
-        if (imageLoaded) {
-            // Re-initialize if an image is already loaded
-            initializeCropper();
+    updateCropperSize(callback) {
+        const size = parseInt(this.sizeInput.value, 10);
+        if (isNaN(size) || size <= 0) {
+            if (callback) callback();
+            return;
         }
+
+        // Store the user's desired output size
+        this.requestedSize = size;
+
+        // The visual size of the cropper should not exceed the container's width.
+        // Use requestAnimationFrame to ensure clientWidth is calculated after any layout changes.
+        requestAnimationFrame(() => {
+            const availableWidth = this.imageContainer.clientWidth || 300; // Fallback width
+            const displaySize = Math.max(50, Math.min(this.requestedSize, availableWidth)); // Ensure a minimum size
+
+            this.cropper.style.width = `${displaySize}px`;
+            this.cropper.style.height = `${displaySize}px`; // Assuming square
+
+            // Execute the callback function AFTER the DOM has been updated.
+            if (callback) callback();
+        });
     }
 
-    function setCropperShape(shape) {
-        cropperShape = shape;
-        squareBtn.classList.toggle('active', shape === 'square');
-        circleBtn.classList.toggle('active', shape === 'circle');
-        cropper.style.borderRadius = (shape === 'circle') ? '50%' : '0';
+    setCropperShape(shape) {
+        this.cropperShape = shape;
+        this.squareBtn.classList.toggle('active', shape === 'square');
+        this.circleBtn.classList.toggle('active', shape === 'circle');
+        this.cropper.style.borderRadius = (shape === 'circle') ? '50%' : '0';
     }
 
-    function zoom(factor, zoomOrigin = null) {
-        if (!imageLoaded) return;
+    zoom(factor, zoomOrigin = null) {
+        if (!this.imageLoaded) return;
         
-        const newScale = currentScale * factor;
-        const scale = Math.max(minScale, newScale);
+        const newScale = this.currentScale * factor;
+        const scale = Math.max(this.minScale, newScale); // Enforce min scale
 
-        if (scale === currentScale) return;
+        if (scale === this.currentScale) return;
 
         let origin;
         if (zoomOrigin) {
-            origin = zoomOrigin;
+            // zoomOrigin is expected to be relative to the container
+            origin = zoomOrigin; 
         } else {
-            const cropperRect = cropper.getBoundingClientRect();
+            // Default origin is the center of the cropper
             origin = {
-                x: cropperRect.left + cropperRect.width / 2,
-                y: cropperRect.top + cropperRect.height / 2
+                // Calculate relative center using high-precision rects
+                x: (this.cropper.getBoundingClientRect().left - this.imageContainer.getBoundingClientRect().left) + this.cropper.getBoundingClientRect().width / 2,
+                y: (this.cropper.getBoundingClientRect().top - this.imageContainer.getBoundingClientRect().top) + this.cropper.getBoundingClientRect().height / 2
             };
         }
 
-        const imageRect = originalImage.getBoundingClientRect();
-        
-        imageX -= (origin.x - imageRect.left) * (scale / currentScale - 1);
-        imageY -= (origin.y - imageRect.top) * (scale / currentScale - 1);
+        // Calculate new image coordinates to zoom around the origin point
+        const scaleRatio = scale / this.currentScale;
+        this.imageX = origin.x - (origin.x - this.imageX) * scaleRatio;
+        this.imageY = origin.y - (origin.y - this.imageY) * scaleRatio;
 
-        currentScale = scale;
-        updateImageTransform();
-        enforceBounds();
+        this.currentScale = scale;
+        this.enforceBounds();
+        this.updateImageTransform();
     }
     
-    function handleWheelZoom(e) {
-        if (!imageLoaded) return;
+    handleWheelZoom(e) {
+        if (!this.imageLoaded) return;
         e.preventDefault();
         const delta = e.deltaY > 0 ? 0.95 : 1.05;
-        const zoomOrigin = { x: e.clientX, y: e.clientY };
-        zoom(delta, zoomOrigin);
+        const zoomOrigin = this.getRelativeCoords(e);
+        this.zoom(delta, zoomOrigin);
     }
 
-    function updateImageTransform() {
-        originalImage.style.transform = `translate(${imageX}px, ${imageY}px) scale(${currentScale})`;
+    updateImageTransform() {
+        this.originalImage.style.left = `${this.imageX}px`;
+        this.originalImage.style.top = `${this.imageY}px`;
+        this.originalImage.style.transform = `scale(${this.currentScale})`;
     }
 
-    function startDrag(e) {
-        if (!imageLoaded) return;
+    startDrag(e) {
+        if (!this.imageLoaded) return;
         e.preventDefault();
 
         if (e.touches && e.touches.length === 2) {
-            dragging = false;
+            this.dragging = false;
             const touch1 = e.touches[0];
             const touch2 = e.touches[1];
-            initialPinchDistance = Math.hypot(touch1.clientX - touch2.clientX, touch1.clientY - touch2.clientY);
+            this.initialPinchDistance = Math.hypot(touch1.clientX - touch2.clientX, touch1.clientY - touch2.clientY);
         } else {
-            dragging = true;
+            this.dragging = true;
             const touch = e.touches ? e.touches[0] : e;
-            startX = touch.clientX;
-            startY = touch.clientY;
-            startImageX = imageX;
-            startImageY = imageY;
-            imageContainer.style.cursor = 'grabbing';
+            this.startX = touch.clientX;
+            this.startY = touch.clientY;
+            this.startImageX = this.imageX;
+            this.startImageY = this.imageY;
+            this.imageContainer.style.cursor = 'grabbing';
+
+            // Add temporary listeners to the window to handle dragging anywhere on the page
+            window.addEventListener('mousemove', this.drag.bind(this));
+            window.addEventListener('touchmove', this.drag.bind(this), { passive: false });
+            window.addEventListener('mouseup', this.endDrag.bind(this));
+            window.addEventListener('touchend', this.endDrag.bind(this));
         }
     }
 
-    function drag(e) {
-        if (!imageLoaded) return;
+    drag(e) {
+        if (!this.imageLoaded) return;
         e.preventDefault();
 
         if (e.touches && e.touches.length === 2) {
@@ -211,122 +282,127 @@ document.addEventListener('DOMContentLoaded', () => {
             const touch2 = e.touches[1];
             const currentPinchDistance = Math.hypot(touch1.clientX - touch2.clientX, touch1.clientY - touch2.clientY);
 
-            if (initialPinchDistance > 0) {
-                const zoomFactor = currentPinchDistance / initialPinchDistance;
-                const pinchCenter = {
-                    x: (touch1.clientX + touch2.clientX) / 2,
-                    y: (touch1.clientY + touch2.clientY) / 2
+            if (this.initialPinchDistance > 0) {
+                const zoomFactor = currentPinchDistance / this.initialPinchDistance;
+                const pinchCenterViewport = {
+                    clientX: (touch1.clientX + touch2.clientX) / 2,
+                    clientY: (touch1.clientY + touch2.clientY) / 2
                 };
-                zoom(zoomFactor, pinchCenter);
-                initialPinchDistance = currentPinchDistance; // Update for next frame
+                // Convert viewport pinch center to container-relative coordinates
+                const pinchCenterRelative = this.getRelativeCoords(pinchCenterViewport);
+                this.zoom(zoomFactor, pinchCenterRelative);
+                this.initialPinchDistance = currentPinchDistance; // Update for next frame
             }
-        } else if (dragging) {
+        } else if (this.dragging) {
             // Drag move
             const touch = e.touches ? e.touches[0] : e;
-            const dx = touch.clientX - startX;
-            const dy = touch.clientY - startY;
-            imageX = startImageX + dx;
-            imageY = startImageY + dy;
+            const dx = touch.clientX - this.startX;
+            const dy = touch.clientY - this.startY;
+            this.imageX = this.startImageX + dx;
+            this.imageY = this.startImageY + dy;
             
-            enforceBounds();
-            updateImageTransform();
+            this.enforceBounds();
+            this.updateImageTransform();
         }
     }
     
-    function endDrag() {
-        if (dragging) {
-            dragging = false;
-            imageContainer.style.cursor = 'grab';
-        }
-        initialPinchDistance = 0;
+    endDrag() {
+        // This function can be called even if not dragging, so check state.
+        if (!this.dragging && this.initialPinchDistance === 0) return;
+
+        this.dragging = false;
+        this.initialPinchDistance = 0;
+        this.imageContainer.style.cursor = 'grab';
+
+        // IMPORTANT: Clean up the global listeners to prevent conflicts
+        window.removeEventListener('mousemove', this.drag.bind(this));
+        window.removeEventListener('touchmove', this.drag.bind(this));
+        window.removeEventListener('mouseup', this.endDrag.bind(this));
+        window.removeEventListener('touchend', this.endDrag.bind(this));
     }
 
-    function enforceBounds() {
-        const imageWidth = sourceImage.width * currentScale;
-        const imageHeight = sourceImage.height * currentScale;
+    enforceBounds() {
+        const imageWidth = this.sourceImage.width * this.currentScale;
+        const imageHeight = this.sourceImage.height * this.currentScale;
 
-        const containerRect = imageContainer.getBoundingClientRect();
-        const cropperRect = cropper.getBoundingClientRect();
+        // Use offset properties for robust positioning relative to the container
+        const containerRect = this.imageContainer.getBoundingClientRect();
+        const cropperRect = this.cropper.getBoundingClientRect();
+        const cropperWidth = cropperRect.width;
+        const cropperHeight = cropperRect.height;
+        const cropperX = cropperRect.left - containerRect.left;
+        const cropperY = cropperRect.top - containerRect.top;
 
-        const cropperRelX = cropperRect.left - containerRect.left;
-        const cropperRelY = cropperRect.top - containerRect.top;
+        // By using Math.min/max to define the boundaries, we avoid conditional logic that is
+        // sensitive to floating-point rounding errors when image and cropper sizes are nearly identical.
+        const boundX1 = cropperX;
+        const boundX2 = cropperX + cropperWidth - imageWidth;
+        const minX = Math.min(boundX1, boundX2);
+        const maxX = Math.max(boundX1, boundX2);
 
-        let minX, maxX, minY, maxY;
+        const boundY1 = cropperY;
+        const boundY2 = cropperY + cropperHeight - imageHeight;
+        const minY = Math.min(boundY1, boundY2);
+        const maxY = Math.max(boundY1, boundY2);
 
-        // If image is wider than cropper, it can be moved left/right
-        if (imageWidth >= cropperRect.width) {
-            maxX = cropperRelX;
-            minX = cropperRelX + cropperRect.width - imageWidth;
-        } else {
-            // If image is narrower, it can be moved left/right within the cropper
-            minX = cropperRelX;
-            maxX = cropperRelX + cropperRect.width - imageWidth;
-        }
-
-        // If image is taller than cropper, it can be moved up/down
-        if (imageHeight >= cropperRect.height) {
-            maxY = cropperRelY;
-            minY = cropperRelY + cropperRect.height - imageHeight;
-        } else {
-            // If image is shorter, it can be moved up/down within the cropper
-            minY = cropperRelY;
-            maxY = cropperRelY + cropperRect.height - imageHeight;
-        }
-
-        imageX = Math.max(minX, Math.min(maxX, imageX));
-        imageY = Math.max(minY, Math.min(maxY, imageY));
+        this.imageX = Math.max(minX, Math.min(maxX, this.imageX));
+        this.imageY = Math.max(minY, Math.min(maxY, this.imageY));
     }
 
-    function cropImage() {
-        if (!imageLoaded) {
-            alert('先に画像をアップロードしてください。');
-            return;
-        }
-
-        const containerRect = imageContainer.getBoundingClientRect();
-        const cropperRect = cropper.getBoundingClientRect();
+    cropImage() {
+        const containerRect = this.imageContainer.getBoundingClientRect();
+        const cropperRect = this.cropper.getBoundingClientRect();
         const cropperWidth = cropperRect.width;
         const cropperHeight = cropperRect.height;
 
-        previewCanvas.width = cropperWidth;
-        previewCanvas.height = cropperHeight;
-        const ctx = previewCanvas.getContext('2d');
+        // The actual output size the user wants
+        const outputWidth = this.requestedSize;
+        const outputHeight = this.requestedSize;
 
-        const cropperRelX = cropperRect.left - containerRect.left;
-        const cropperRelY = cropperRect.top - containerRect.top;
+        this.previewCanvas.width = outputWidth;
+        this.previewCanvas.height = outputHeight;
+        const ctx = this.previewCanvas.getContext('2d');
 
-        const sx = (cropperRelX - imageX) / currentScale;
-        const sy = (cropperRelY - imageY) / currentScale;
-        const sWidth = cropperWidth / currentScale;
-        const sHeight = cropperHeight / currentScale;
+        // Calculate the source rectangle from the original, full-resolution image
+        // This new approach directly compares the final rendered positions of the image and the cropper,
+        // This logic relies on the application's internal state (imageX, imageY), which has been
+        // carefully constrained. This avoids measurement errors from getBoundingClientRect() on
+        // transformed elements, which was the final source of discrepancies.
+        const cropperX = cropperRect.left - containerRect.left;
+        const cropperY = cropperRect.top - containerRect.top;
+        const sx = (cropperX - this.imageX) / this.currentScale;
+        const sy = (cropperY - this.imageY) / this.currentScale;
+        const sWidth = cropperWidth / this.currentScale;
+        const sHeight = cropperHeight / this.currentScale;
 
-        ctx.clearRect(0, 0, cropperWidth, cropperHeight);
+        ctx.clearRect(0, 0, outputWidth, outputHeight);
 
-        if (cropperShape === 'circle') {
+        if (this.cropperShape === 'circle') {
             ctx.save();
             ctx.beginPath();
-            ctx.arc(cropperWidth / 2, cropperHeight / 2, cropperWidth / 2, 0, Math.PI * 2, true);
+            ctx.arc(outputWidth / 2, outputHeight / 2, outputWidth / 2, 0, Math.PI * 2, true);
             ctx.clip();
         }
 
-        ctx.drawImage(sourceImage, sx, sy, sWidth, sHeight, 0, 0, cropperWidth, cropperHeight);
+        ctx.drawImage(this.sourceImage, sx, sy, sWidth, sHeight, 0, 0, outputWidth, outputHeight);
 
-        if (cropperShape === 'circle') {
+        if (this.cropperShape === 'circle') {
             ctx.restore();
         }
 
-        outputContainer.classList.remove('hidden');
+        this.outputContainer.classList.remove('hidden');
     }
 
-    function downloadCroppedImage() {
+    downloadCroppedImage() {
         const link = document.createElement('a');
-        const originalFileName = fileNameSpan.textContent.split('.').slice(0, -1).join('.') || 'cropped-image';
+        const originalFileName = this.fileNameSpan.textContent.split('.').slice(0, -1).join('.') || 'cropped-image';
         link.download = `${originalFileName}-cropped.png`;
-        link.href = previewCanvas.toDataURL('image/png');
+        link.href = this.previewCanvas.toDataURL('image/png');
         link.click();
     }
+}
 
-    // Initialize on load
-    updateCropperSize();
-    setCropperShape('square');
+// --- Application Entry Point ---
+document.addEventListener('DOMContentLoaded', () => {
+    new ImageCropperApp();
 });

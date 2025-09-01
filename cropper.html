@@ -9,20 +9,28 @@
     <link rel="stylesheet" href="common.css">
     <style>
         /*
-         * スマートフォンでのスクロール問題を解決するための総合的な対策。
-         * cropper.jsライブラリが適用するスタイルを強制的に上書きし、ページのスクロールを確保します。
+         * スマートフォンでの表示崩れとスクロール問題を解決するための新アプローチ。
+         * 画像アップロード時に画面が拡大したり、トリミング枠が消える問題に対応します。
         */
         html, body {
-            /* 1. ページ全体のスクロールを最優先で確保する */
+            /* 1. ページ全体のスクロールを常に有効にする（基本設定） */
             overflow-y: auto !important;
             height: auto !important;
             position: static !important;
         }
 
-        /* 2. cropper.jsが生成するUIコンテナが画面を固定化するのを防ぐ（これが最重要） */
+        /* 2. 画像コンテナと画像自体をレスポンシブにする（最重要） */
+        /* これにより、cropper.jsが初期化される前に画像の表示幅が画面内に収まります。 */
+        #image-container,
+        #original-image {
+            max-width: 100%;
+            box-sizing: border-box; /* はみ出し防止 */
+        }
+
+        /* 3. cropper.jsが生成するコンテナもレスポンシブに保つ */
+        /* これが画面からはみ出して「急に大きくなる」現象を防ぎます。 */
         .cropper-container {
-            position: static !important;
-            overflow: visible !important;
+            max-width: 100% !important;
         }
     </style>
 </head>
@@ -105,7 +113,7 @@
         </div>
     </div>
     <footer>
-        &copy; 2025 Synapse Creations. Aug.ShapeShift_ver2.3.3
+        &copy; 2025 Synapse Creations. Aug.ShapeShift_ver2.3.4
     </footer>
     <script src="common.js"></script>
     <script src="cropper.js"></script>

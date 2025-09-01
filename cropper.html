@@ -2,35 +2,29 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Cropper</title>
     <link href="https://fonts.googleapis.com/css2?family=Zen+Dots&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="cropper.css">
     <link rel="stylesheet" href="common.css">
     <style>
         /*
-         * スマートフォンでの表示崩れとスクロール問題を解決するための新アプローチ。
-         * 画像アップロード時に画面が拡大したり、トリミング枠が消える問題に対応します。
+         * スマートフォンでの表示崩れ・拡大・スクロール不可問題に対する最終対策。
+         * 原因であるcropper.jsの内部要素を直接制御し、強制的に画面内に収めます。
         */
         html, body {
-            /* 1. ページ全体のスクロールを常に有効にする（基本設定） */
+            /* ページ全体のスクロールを確保し、意図しない固定化を防ぐ */
             overflow-y: auto !important;
             height: auto !important;
             position: static !important;
         }
 
-        /* 2. 画像コンテナと画像自体をレスポンシブにする（最重要） */
-        /* これにより、cropper.jsが初期化される前に画像の表示幅が画面内に収まります。 */
-        #image-container,
-        #original-image {
-            max-width: 100%;
-            box-sizing: border-box; /* はみ出し防止 */
-        }
-
-        /* 3. cropper.jsが生成するコンテナもレスポンシブに保つ */
-        /* これが画面からはみ出して「急に大きくなる」現象を防ぎます。 */
-        .cropper-container {
+        /* cropper.jsが生成するコンテナと、その内部の画像表示エリアの幅を画面幅に強制する */
+        /* これが「画面が急に大きくなる」現象を直接防ぎます。 */
+        .cropper-container, .cropper-canvas, .cropper-canvas img {
             max-width: 100% !important;
+            /* heightもautoにしないとアスペクト比が崩れる */
+            height: auto !important;
         }
     </style>
 </head>
@@ -113,7 +107,7 @@
         </div>
     </div>
     <footer>
-        &copy; 2025 Synapse Creations. Aug.ShapeShift_ver2.3.4
+        &copy; 2025 Synapse Creations. Aug.ShapeShift_ver2.3.5
     </footer>
     <script src="common.js"></script>
     <script src="cropper.js"></script>

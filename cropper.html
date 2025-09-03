@@ -2,110 +2,78 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Cropper</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>シンプルなトリミングアプリ</title>
+    <link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/fumifum1/main/main/jpg/ico.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Zen+Dots&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="cropper.css">
-    <link rel="stylesheet" href="common.css">
-    <style>
-        /*
-         * スマートフォンでの表示崩れ・スクロール問題を解決するためのスタイル。
-         * JavaScriptでの対策を主とし、CSSはレイアウトの安定化を補助します。
-        */
-        html, body {
-            /* ページの横方向のはみ出しを防ぎ、スクロールを可能にする */
-            overflow-x: hidden; 
-        }
-
-        /* 画像コンテナと、その中の画像が画面幅を超えないようにする */
-        #image-container, #original-image {
-            max-width: 100%;
-            box-sizing: border-box;
-        }
-    </style>
 </head>
 <body>
-    <!-- Hamburger Menu -->
-    <button class="hamburger-menu" id="hamburgerMenu" aria-label="メニューを開く">
-        <span></span>
-        <span></span>
-        <span></span>
-    </button>
-    <nav class="nav-menu" id="globalNav">
-        <ul>
-                <li><a href="menu.html">HOME</a></li>
-                <li><a href="transparency.html">Image背景透明化</a></li>
-                <li><a href="fast_resizer.html">Imageサイズ変更</a></li>
-                <li><a href="cropper.html">Imageトリミング</a></li>
-                <hr>
-                <li><a href="https://fumifum1.github.io/main/index.html">Creator</a></li>
-        </ul>
-    </nav>
-    <div class="overlay"></div>
+    <h1>CroppeR</h1>
+    <p>画像を取り込み、好きな範囲を切り抜いてダウンロードできます。</p>
 
-    <header>
-        <!-- header content from common.html -->
-    </header>
+    <!-- View 1: Upload -->
+    <div id="view-upload" class="view active">
+        <div class="upload-area">
+            <p>トリミングしたい画像をアップしてください。</p>
+            <label for="image-upload" class="file-upload-label">
+                ファイルを選択
+            </label>
+            <input type="file" id="image-upload" accept="image/*" class="visually-hidden">
+        </div>
+    </div>
 
-    <div class="container">
-        <h1>Cropper</h1>
-        <p>画像をアップロードして、好きなサイズと形で切り抜きましょう。</p>
-
-        <!-- The controls are wrapped in a flex container that stacks items vertically and centers them -->
-        <div class="controls">
-            <!-- File selection -->
-            <div class="file-input-container">
-                <!-- The label acts as a custom-styled button -->
-                <label for="image-upload" class="btn">画像を選択</label>
-                <input type="file" id="image-upload">
-                <span id="file-name"></span>
-            </div>
-
-            <!-- Width and Height inputs, grouped to appear on the same line -->
-            <div class="controls-group">
-                <div class="input-group">
-                    <label for="size-input">サイズ (px)</label>
-                    <input type="number" id="size-input" value="300">
+    <!-- View 2: Crop -->
+    <div id="view-crop" class="view">
+        <div class="main-container">
+            <div class="canvas-container">
+                <canvas id="image-canvas"></canvas>
+                <div id="crop-area">
+                    <div id="resize-handle"></div>
                 </div>
             </div>
-
-            <!-- Shape selection buttons, grouped to appear on the same line -->
-            <div class="controls-group">
-                <button id="square-btn" class="btn active">四角型</button>
-                <button id="circle-btn" class="btn">丸形</button>
-            </div>
-
-            <!-- Crop action button -->
-            <button id="cropButton" class="btn">トリミング処理</button>
         </div>
-
-        <div id="image-container" class="hidden">
-            <img id="original-image" alt="Original Image">
-            <div id="cropper"></div>
-            <div class="zoom-controls">
-                <button id="zoom-in-btn" class="zoom-btn">+</button>
-                <button id="zoom-out-btn" class="zoom-btn">-</button>
+        <div class="controls">
+            <div class="shape-select">
+                <input type="radio" id="square-radio" name="shape" value="square" checked>
+                <label for="square-radio">正方形</label>
+                <input type="radio" id="circle-radio" name="shape" value="circle">
+                <label for="circle-radio">正円</label>
+            </div>
+            <div class="button-group">
+                <button id="back-to-upload-btn" class="secondary-btn arrow-btn">≪</button>
+                <button id="crop-button" class="arrow-btn">≫</button>
             </div>
         </div>
-
-        <div id="output-container" class="hidden">
-            <h3>Preview</h3>
-            <canvas id="preview-canvas"></canvas>
-            <button id="download-btn" class="btn">Download</button>
-        </div>
-
     </div>
 
-    <div id="message-box" class="message-box">
-        <div>
-            <p id="message-text"></p>
-            <button>OK</button>
+    <!-- View 3: Preview & Download -->
+    <div id="view-preview" class="view">
+        <div class="preview-container">
+            <h2>Preview</h2>
+            <div id="preview-image-container"></div>
+            <div class="download-options">
+                <label for="download-size">ダウンロードサイズ:</label>
+                <div class="input-with-unit">
+                    <input type="number" id="download-size" value="300" min="50">
+                    <span>px</span>
+                </div>
+            </div>
+            <div class="button-group">
+                <button id="back-to-crop-btn" class="secondary-btn arrow-btn">≪</button>
+                <div class="download-action-group">
+                    <span>Download</span>
+                    <button id="download-button" class="arrow-btn">▼</button>
+                </div>
+            </div>
         </div>
     </div>
-    <footer>
-        &copy; 2025 Synapse Creations. Aug.ShapeShift_ver2.3.7
-    </footer>
-    <script src="common.js"></script>
+
     <script src="cropper.js"></script>
+    <footer>
+        &copy; 2025 Synapse Creations. Sep.ShapeShifT_ver2.0.0
+    </footer>
 </body>
 </html>

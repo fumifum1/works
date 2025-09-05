@@ -1,36 +1,3 @@
-body {
-    font-family: 'Zen Maru Gothic', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    text-align: center;
-    padding: 20px;
-    background: #f0f2f5;
-    color: #333;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 100vh;
-    box-sizing: border-box;
-}
-
-header {
-    margin-bottom: 30px;
-    max-width: 900px;
-    width: 100%;
-}
-
-header p {
-    color: #606770;
-    font-size: 1.1em;
-    margin-top: 0;
-}
-
-main {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
 /* 各セクションの共通ボックススタイル */
 .section-box {
     margin-bottom: 30px;
@@ -50,9 +17,8 @@ main {
 }
 
 /* ボタンの共通スタイル */
-.section-box button,
-label[for="imageInput"] {
-    /* Styles for the new "button" label */
+.section-box button {
+    /* Styles for buttons within a section-box */
     display: block;
     padding: 0.5rem 2rem;
     border: 3px solid #000;
@@ -68,8 +34,7 @@ label[for="imageInput"] {
     margin: 0 auto;
 }
 
-.section-box button:hover,
-label[for="imageInput"]:hover {
+.section-box button:hover {
     background: #000;
     color: #fff;
 }
@@ -230,8 +195,7 @@ label[for="imageInput"]:hover {
     }
 
     /* スマホではボタンを画面幅いっぱいに広げ、タップしやすくする */
-    .section-box button,
-    label[for="imageInput"] {
+    .section-box button {
         width: 100%;
     }
 

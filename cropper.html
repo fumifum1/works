@@ -31,64 +31,69 @@
     </nav>
     <div class="overlay"></div>
     
-    <h1>CroppeR</h1>
-    <p>画像を取り込み、好きな範囲を切り抜いてダウンロードできます。</p>
-
-    <!-- View 1: Upload -->
-    <div id="view-upload" class="view active">
-        <div class="upload-area">
-            <p>トリミングしたい画像をアップしてください。</p>
-            <label for="image-upload" class="file-upload-label">
-                ファイルを選択
-            </label>
-            <input type="file" id="image-upload" accept="image/*" class="visually-hidden">
-        </div>
-    </div>
-
-    <!-- View 2: Crop -->
-    <div id="view-crop" class="view">
-        <div class="main-container">
-            <div class="canvas-container">
-                <canvas id="image-canvas"></canvas>
-                <div id="crop-area">
-                    <div id="resize-handle"></div>
+    <div class="container">
+        <header>
+            <h1>CroppeR</h1>
+            <p>画像を取り込み、好きな範囲を切り抜いてダウンロードできます。</p>
+        </header>
+        <main>
+            <!-- View 1: Upload -->
+            <div id="view-upload" class="view active">
+                <div class="upload-area">
+                    <p>トリミングしたい画像をアップしてください。</p>
+                    <label for="image-upload" class="upload-btn">
+                        画像をアップロード
+                    </label>
+                    <input type="file" id="image-upload" accept="image/*" class="visually-hidden">
                 </div>
             </div>
-        </div>
-        <div class="controls">
-            <div class="shape-select">
-                <input type="radio" id="square-radio" name="shape" value="square" checked>
-                <label for="square-radio">正方形</label>
-                <input type="radio" id="circle-radio" name="shape" value="circle">
-                <label for="circle-radio">正円</label>
-            </div>
-            <div class="button-group">
-                <button id="back-to-upload-btn" class="secondary-btn arrow-btn">≪</button>
-                <button id="crop-button" class="arrow-btn">≫</button>
-            </div>
-        </div>
-    </div>
 
-    <!-- View 3: Preview & Download -->
-    <div id="view-preview" class="view">
-        <div class="preview-container">
-            <h2>Preview</h2>
-            <div id="preview-image-container"></div>
-            <div class="download-options">
-                <label for="download-size">ダウンロードサイズ:</label>
-                <div class="input-with-unit">
-                    <input type="number" id="download-size" value="300" min="50">
-                    <span>px</span>
+            <!-- View 2: Crop -->
+            <div id="view-crop" class="view">
+                <div class="main-container">
+                    <div class="canvas-container">
+                        <canvas id="image-canvas"></canvas>
+                        <div id="crop-area">
+                            <div id="resize-handle"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="controls">
+                    <div class="shape-select">
+                        <input type="radio" id="square-radio" name="shape" value="square" checked>
+                        <label for="square-radio">正方形</label>
+                        <input type="radio" id="circle-radio" name="shape" value="circle">
+                        <label for="circle-radio">正円</label>
+                    </div>
+                    <div class="button-group">
+                        <button id="back-to-upload-btn" class="secondary-btn arrow-btn">≪</button>
+                        <button id="crop-button" class="arrow-btn">≫</button>
+                    </div>
                 </div>
             </div>
-            <div class="button-group">
-                <button id="back-to-crop-btn" class="secondary-btn arrow-btn">≪</button>
-                <div class="download-action-group">
-                    <span>Download</span>
-                    <button id="download-button" class="arrow-btn">▼</button>
+
+            <!-- View 3: Preview & Download -->
+            <div id="view-preview" class="view">
+                <div class="preview-container">
+                    <h2>Preview</h2>
+                    <div id="preview-image-container"></div>
+                    <div class="download-options">
+                        <label for="download-size">ダウンロードサイズ:</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="download-size" value="300" min="50">
+                            <span>px</span>
+                        </div>
+                    </div>
+                    <div class="button-group">
+                        <button id="back-to-crop-btn" class="secondary-btn arrow-btn">≪</button>
+                        <div class="download-action-group">
+                            <span>Download</span>
+                            <button id="download-button" class="arrow-btn">▼</button>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </main>
     </div>
 
     <script src="cropper.js"></script>

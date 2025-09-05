@@ -15,16 +15,10 @@ body {
 }
 
 /* --- Typography --- */
-h1, h2 {
+h2 { /* h1はcommon.cssでスタイル付けされます */
     font-family: 'Zen Dots', sans-serif;
     color: #1c1e21;
     text-align: center;
-}
-
-p {
-    text-align: center;
-    max-width: 90vw;
-    margin: 1em auto;
 }
 
 /* --- Layout: The new, simplified structure --- */
@@ -33,9 +27,6 @@ p {
     max-width: 540px; /* A bit wider for modern phones */
     margin: 20px auto; /* Centering and vertical space */
     padding: 20px;     /* All inner padding is handled here */
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     display: none; /* Hide all views by default */
 }
 
@@ -143,9 +134,7 @@ p {
     border: 0;
 }
 
-/* --- Forms & Buttons --- */
-/* Keep original input styles, but separate from buttons */
-input[type="number"] {
+input[type="number"] { /* Keep original input styles, but separate from buttons */
     padding: 12px 15px;
     border-radius: 5px;
     border: 1px solid #ccc;
@@ -154,9 +143,7 @@ input[type="number"] {
     width: 100%;
 }
 
-button,
-.file-upload-label {
-    /* Base styles for all buttons */
+button {
     display: block; /* To apply width and padding correctly to label */
     padding: 7px 12px; /* ボタンの縦幅をさらに小さくします */
     font-size: 0.9em;  /* 文字サイズをさらに小さくします */
@@ -172,10 +159,7 @@ button,
     color: #000;
 }
 
-button:hover,
-.file-upload-label:hover,
-button:active,
-.file-upload-label:active {
+button:hover, button:active {
     color: #fff;
     background: #000;
 }

@@ -145,6 +145,28 @@ input[type="text"] {
     gap: 15px;
 }
 
+/* Common Upload Button Style */
+.upload-btn {
+    display: inline-block;
+    padding: 12px 24px;
+    border: 2px solid #000;
+    border-radius: 0;
+    background: #fff;
+    color: #000 !important;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    transition: background-color 0.2s, color 0.2s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.upload-btn:hover {
+    background: #000;
+    color: #fff !important;
+    transform: none; /* Reset transform from other button styles */
+}
 
 /* Footer Styles */
 footer {

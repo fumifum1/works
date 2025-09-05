@@ -123,6 +123,7 @@ p {
 
 .button-group {
     display: flex;
+    flex-direction: row; /* 要素を横並びにします */
     justify-content: space-between; /* 両端に配置します */
     width: 100%; /* コンテナの全幅を使います */
     align-self: stretch; /* 親の align-items: center を上書きして、全幅を確保します */

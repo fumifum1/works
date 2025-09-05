@@ -8,9 +8,29 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Zen+Dots&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="common.css">
     <link rel="stylesheet" href="cropper.css">
 </head>
 <body>
+
+        <!-- Hamburger Menu -->
+    <button class="hamburger-menu" id="hamburgerMenu" aria-label="メニューを開く">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+    <nav class="nav-menu" id="globalNav">
+        <ul>
+                <li><a href="menu.html">HOME</a></li>
+                <li><a href="transparency.html">Image背景透明化</a></li>
+                <li><a href="fast_resizer.html">Imageサイズ変更</a></li>
+                <li><a href="cropper.html">Imageトリミング</a></li>
+                <hr>
+                <li><a href="https://fumifum1.github.io/main/index.html">Creator</a></li>
+        </ul>
+    </nav>
+    <div class="overlay"></div>
+    
     <h1>CroppeR</h1>
     <p>画像を取り込み、好きな範囲を切り抜いてダウンロードできます。</p>
 
@@ -72,8 +92,9 @@
     </div>
 
     <script src="cropper.js"></script>
+    <script src="common.js"></script>
     <footer>
-        &copy; 2025 Synapse Creations. Sep.ShapeShifT_ver2.0.0
+        &copy; 2025 Synapse Creations. Sep.ShapeShifT_ver2.1.0
     </footer>
 </body>
 </html>

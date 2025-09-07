@@ -1,0 +1,517 @@
+/* General Body Styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f2f5;
+    color: #333;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.page-header {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* --- Mobile First Layout (default) --- */
+.main-container {
+    width: 100%;
+    max-width: 600px;
+}
+
+.settings-panel {
+    display: flex;
+    flex-direction: column;
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.preview-panel {
+    order: -1; /* スマホ表示で設定項目より上に表示 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 20px;
+}
+
+/* --- Desktop Layout --- */
+@media (min-width: 901px) {
+    .main-container {
+        max-width: 1200px;
+    }
+
+    .settings-panel {
+        display: grid;
+        grid-template-columns: 1fr minmax(320px, 420px);
+        grid-template-areas: "body preview";
+        gap: 30px;
+    }
+
+    .settings-body { grid-area: body; }
+
+    .preview-panel {
+        grid-area: preview;
+        order: 0; /* PC表示では順序をリセット */
+        background-color: #ffffff;
+        padding: 30px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        position: sticky;
+        top: 30px;
+        align-self: start;
+    }
+
+    #url-settings > div {
+        max-width: 550px;
+    }
+}
+
+h1 {
+    font-family: 'Righteous', cursive;
+    font-weight: 400; /* Righteousは1ウェイトのみ */
+    font-size: 3em; /* タイトルのサイズを大きくします */
+    color: #1c1e21;
+    margin-top: 0;
+    margin-bottom: 10px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #dddfe2;
+}
+
+p {
+    color: #606770; margin-bottom: 2px; /* この値を小さくすると間隔が詰まります */
+}
+
+/* Tab Navigation */
+.tab-nav {
+    display: flex;
+    margin-bottom: 20px;
+    overflow-x: auto;
+    white-space: nowrap;
+    gap: 8px; /* ボタン間のスペースを追加 */
+}
+
+.tab-button {
+    padding: 10px 20px;
+    cursor: pointer;
+    border: none;
+    background-color: #e4e6eb;
+    font-size: 16px;
+    font-weight: 600;
+    color: #3c4043;
+    border-radius: 20px; /* 丸みを強くする */
+    transition: color 0.2s, border-color 0.2s, background-color 0.2s;
+}
+
+.tab-button:hover:not(.active) {
+    background-color: #d8dadf;
+}
+
+.tab-button.active {
+    color: #ffffff;
+    background-color: #5856d6;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Tab Content */
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.hidden {
+    display: none !important;
+}
+
+fieldset {
+    border: 1px solid #dddfe2;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    margin-top: 0;
+}
+
+.setting-row {
+    justify-content: center;
+}
+
+/* Form elements */
+fieldset > div {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+label {
+    margin-right: 10px;
+    font-weight: 500;
+    color: #4b4f56;
+    min-width: 150px;
+}
+
+input[type="text"],
+select {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ccd0d5;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: border-color 0.2s;
+}
+
+input[type="text"]:focus,
+select:focus {
+    outline: none;
+    border-color: #5856d6;
+    box-shadow: 0 0 0 2px rgba(88, 86, 214, 0.2);
+}
+
+input[type="color"] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 36px;
+    height: 36px;
+    background-color: transparent;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    padding: 0;
+}
+input[type="color"]::-webkit-color-swatch {
+    border-radius: 50%;
+    border: 1px solid #ddd;
+}
+input[type="color"]::-moz-color-swatch {
+    border-radius: 50%;
+    border: 1px solid #ddd;
+}
+
+input[type="file"] {
+    border: 1px solid #ccd0d5;
+    border-radius: 6px;
+    padding: 8px;
+}
+
+input[type="checkbox"] {
+    margin-right: 8px;
+    transform: scale(1.2);
+}
+
+input[type="range"] {
+    flex-grow: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 8px;
+    background: #ddd;
+    border-radius: 5px;
+    outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #5856d6;
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: #5856d6;
+    cursor: pointer;
+    border-radius: 50%;
+    border: none;
+}
+
+#logo-size-value {
+    margin-left: 15px;
+    font-weight: bold;
+    min-width: 40px;
+}
+
+hr {
+    width: 100%;
+    border: none;
+    border-top: 1px solid #dddfe2;
+    margin: 25px 0;
+}
+
+/* Buttons */
+button {
+    background-color: #5856d6;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    margin-top: 10px;
+}
+
+button:hover {
+    background-color: #4c4ab8;
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+button:disabled {
+    background-color: #a9a9a9;
+    cursor: not-allowed;
+}
+
+.preview-panel button {
+    width: 100%;
+}
+
+#download-button {
+    background-color: #34c759;
+}
+
+#download-button:hover:not(:disabled) {
+    background-color: #2ca34a;
+}
+
+/* QR Code container */
+#qr-container {
+    margin-bottom: 20px;
+    padding: 20px;
+    border: 1px solid #dddfe2;
+    border-radius: 12px;
+    background-color: #f7f7f7;
+    width: 100%;
+    max-width: 298px;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
+}
+
+#qr-container img {
+    max-width: 100%;
+    border-radius: 8px;
+}
+
+.radio-options-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    width: 100%;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+}
+
+.radio-options-wrapper label {
+    min-width: auto;
+    margin-bottom: 0;
+    margin-left: 8px;
+}
+
+.gradient-presets {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+.gradient-preset {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color 0.2s;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);
+}
+.gradient-preset.active {
+    border-color: #5856d6;
+}
+.gradient-preset.custom {
+    background: #f0f2f5;
+    border-style: dashed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.gradient-preset.custom svg {
+    width: 18px;
+    height: 18px;
+    stroke: #606770;
+}
+
+.mobile-only-hr {
+    display: none;
+}
+
+/* Smaller screen adjustments */
+@media (max-width: 640px) {
+    body {
+        padding: 10px;
+        align-items: stretch; /* Allow container to fill width */
+    }
+    .settings-panel {
+        padding: 15px;
+    }
+    .preview-panel {
+        max-width: 260px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    h1 {
+        font-size: 2.2em; /* スマートフォン表示のサイズも調整します */
+    }
+    fieldset > div:not(.setting-row):not(.radio-options-wrapper):not(.color-controls):not(.preset-controls) {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    fieldset > div:not(.setting-row):not(.radio-options-wrapper):not(.color-controls):not(.preset-controls) > label {
+        margin-bottom: 8px;
+        min-width: 100%;
+    }
+    .color-controls {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .color-controls > label {
+        min-width: auto;
+        margin-bottom: 0;
+    }
+    input[type="text"],
+    select,
+    button {
+        width: 100%;
+    }
+    .tab-button {
+        padding: 10px 15px;
+        font-size: 15px;
+    }
+    .mobile-only-hr {
+        display: block;
+    }
+}
+
+/* --- Hamburger Menu (from common.css) --- */
+.hamburger-menu {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 30px;
+    height: 21px;
+    cursor: pointer;
+    z-index: 1001; /* Overlayよりも手前に */
+    background-color: transparent;
+    border: none;
+    padding: 0;
+}
+
+.hamburger-menu span {
+    display: block;
+    position: absolute;
+    width: 100%;
+    height: 3px;
+    background-color: #333;
+    border-radius: 2px;
+    transition: all 0.3s ease-in-out;
+}
+
+.hamburger-menu:hover {
+    background-color: transparent;
+    transform: none;
+}
+
+.hamburger-menu span:nth-child(1) { top: 0; }
+.hamburger-menu span:nth-child(2) { top: 9px; }
+.hamburger-menu span:nth-child(3) { top: 18px; }
+
+/* Nav Menu */
+.nav-menu {
+    position: fixed;
+    top: 0;
+    right: -300px; /* Start off-screen */
+    width: 250px;
+    height: 100%;
+    background-color: #fff;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+    padding: 60px 20px 20px;
+    transition: right 0.3s ease-in-out;
+    z-index: 1000;
+}
+
+.nav-menu.open {
+    right: 0; /* Slide in */
+}
+
+.nav-menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.nav-menu li {
+    margin-bottom: 20px;
+}
+
+.nav-menu a {
+    text-decoration: none;
+    color: #333;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.nav-menu a:hover {
+    color: #007bff;
+}
+
+/* Overlay for when menu is open */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+    z-index: 999;
+}
+
+.overlay.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Hamburger animation to "X" */
+.hamburger-menu.open span:nth-child(1) {
+    top: 9px;
+    transform: rotate(45deg);
+}
+
+.hamburger-menu.open span:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger-menu.open span:nth-child(3) {
+    top: 9px;
+    transform: rotate(-45deg);
+}

@@ -159,6 +159,12 @@ label {
     min-width: 150px;
 }
 
+/* URL入力欄のラベル幅を調整 */
+#url-settings label {
+    min-width: auto;
+    flex-shrink: 0; /* ラベルが縮まないように */
+}
+
 input[type="text"],
 select {
     flex-grow: 1;
@@ -366,44 +372,48 @@ button:disabled {
 /* Smaller screen adjustments */
 @media (max-width: 640px) {
     body {
-        padding: 10px;
+        padding: 15px 10px;
         align-items: stretch; /* Allow container to fill width */
     }
     .settings-panel {
-        padding: 15px;
+        padding: 20px 15px;
     }
     .preview-panel {
         max-width: 260px;
         margin-left: auto;
         margin-right: auto;
+        padding-bottom: 25px;
     }
     h1 {
-        font-size: 2.2em; /* スマートフォン表示のサイズも調整します */
+        font-size: 2.2em;
     }
     fieldset > div:not(.setting-row):not(.radio-options-wrapper):not(.color-controls):not(.preset-controls) {
         flex-direction: column;
         align-items: flex-start;
     }
     fieldset > div:not(.setting-row):not(.radio-options-wrapper):not(.color-controls):not(.preset-controls) > label {
-        margin-bottom: 8px;
-        min-width: 100%;
+        margin-bottom: 5px;
+        min-width: auto;
     }
     .color-controls {
         flex-wrap: wrap;
-        gap: 10px;
+        gap: 10px 15px;
     }
     .color-controls > label {
         min-width: auto;
-        margin-bottom: 0;
+        margin-right: 0;
     }
     input[type="text"],
-    select,
-    button {
+    select {
         width: 100%;
+        box-sizing: border-box;
     }
     .tab-button {
         padding: 10px 15px;
         font-size: 15px;
+    }
+    .gradient-presets {
+        flex-wrap: wrap;
     }
     .mobile-only-hr {
         display: block;

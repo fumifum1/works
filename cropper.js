@@ -7,9 +7,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const cropArea = document.getElementById('crop-area');
     const resizeHandle = document.getElementById('resize-handle');
     const cropButton = document.getElementById('crop-button');
-    const shapeRadios = document.querySelectorAll('input[name="shape"]');
+    const shapeSelect = document.getElementById('shape-ratio-select');
     const previewImageContainer = document.getElementById('preview-image-container');
-    const downloadSizeInput = document.getElementById('download-size');
+    const downloadWidthInput = document.getElementById('download-width');
     const downloadButton = document.getElementById('download-button');
 
     // View and Navigation Elements
@@ -22,8 +22,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let isDragging = false;
     let isResizing = false;
     let croppedImageCanvas = null; // To store the high-res cropped canvas
-    let startX, startY, startLeft, startTop, startWidth;
+    let startX, startY, startLeft, startTop, startWidth, startHeight;
     let currentShape = 'square';
+    let aspectRatio = 1;
 
     // --- Functions ---
 
@@ -66,6 +67,39 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
+     * Gets the aspect ratio based on the current shape selection.
+     * @returns {number} The aspect ratio (width/height).
+     */
+    function getAspectRatio() {
+        switch (currentShape) {
+            case 'square':
+            case 'circle':
+                return 1;
+            case 'rectangle-4-3':
+                return 4 / 3;
+            case 'rectangle-16-9':
+                return 16 / 9;
+            default:
+                return 1; // Default to square
+        }
+    }
+
+    /**
+     * Updates the crop area's aspect ratio and size.
+     */
+    function updateCropArea() {
+        aspectRatio = getAspectRatio();
+        const size = Math.min(imageCanvas.width, imageCanvas.height) * 0.5;
+        let newWidth = (imageCanvas.width / imageCanvas.height > aspectRatio) ? size * aspectRatio : size;
+        let newHeight = (imageCanvas.width / imageCanvas.height > aspectRatio) ? size : size / aspectRatio;
+
+        cropArea.style.width = `${newWidth}px`;
+        cropArea.style.height = `${newHeight}px`;
+        cropArea.style.left = `${(imageCanvas.width - newWidth) / 2}px`;
+        cropArea.style.top = `${(imageCanvas.height - newHeight) / 2}px`;
+        cropArea.classList.toggle('circle', currentShape === 'circle');
+    }
+    /**
      * Sets up the canvas and cropper once the image is loaded.
      */
     function setupCanvasAndCropper() {
@@ -78,12 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
         imageCanvas.width = containerWidth;
         imageCanvas.height = originalImage.naturalHeight * scale;
 
-        const size = Math.min(imageCanvas.width, imageCanvas.height) * 0.5;
-        cropArea.style.width = `${size}px`;
-        cropArea.style.height = `${size}px`;
-        cropArea.style.left = `${(imageCanvas.width - size) / 2}px`;
-        cropArea.style.top = `${(imageCanvas.height - size) / 2}px`;
-
+        updateCropArea();
         ctx.drawImage(originalImage, 0, 0, imageCanvas.width, imageCanvas.height);
     }
 
@@ -144,6 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const touch = e.touches ? e.touches[0] : e;
         startX = touch.clientX;
         startWidth = cropArea.offsetWidth;
+        startHeight = cropArea.offsetHeight;
         startLeft = cropArea.offsetLeft;
         startTop = cropArea.offsetTop;
         document.addEventListener('mousemove', onResize);
@@ -158,13 +188,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const touch = e.touches ? e.touches[0] : e;
         const dx = touch.clientX - startX;
         
-        let newSize = startWidth + dx;
+        let newWidth = startWidth + dx;
 
-        const maxSize = Math.min(imageCanvas.width - startLeft, imageCanvas.height - startTop);
-        newSize = clamp(newSize, 50, maxSize); // Min size 50px
+        // 1. Clamp width to min/max
+        newWidth = clamp(newWidth, 50, imageCanvas.width - startLeft);
 
-        cropArea.style.width = `${newSize}px`;
-        cropArea.style.height = `${newSize}px`;
+        // 2. Calculate height based on aspect ratio
+        let newHeight = newWidth / aspectRatio;
+
+        // 3. If height exceeds bounds, recalculate from max height
+        const maxHeight = imageCanvas.height - startTop;
+        if (newHeight > maxHeight) {
+            newHeight = maxHeight;
+            newWidth = newHeight * aspectRatio;
+        }
+
+        cropArea.style.width = `${newWidth}px`;
+        cropArea.style.height = `${newHeight}px`;
     }
 
     function onResizeEnd() {
@@ -180,7 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     function handleShapeChange(e) {
         currentShape = e.target.value;
-        cropArea.classList.toggle('circle', currentShape === 'circle');
+        updateCropArea();
     }
 
     /**
@@ -234,22 +274,25 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const finalSize = parseInt(downloadSizeInput.value, 10);
-        if (isNaN(finalSize) || finalSize <= 0) {
-            alert('有効なダウンロードサイズをピクセル単位で入力してください。');
+        const finalWidth = parseInt(downloadWidthInput.value, 10);
+        if (isNaN(finalWidth) || finalWidth <= 0) {
+            alert('有効なダウンロード幅をピクセル単位で入力してください。');
             return;
         }
 
+        const downloadAspectRatio = croppedImageCanvas.width / croppedImageCanvas.height;
+        const finalHeight = Math.round(finalWidth / downloadAspectRatio);
+
         const finalCanvas = document.createElement('canvas');
         const finalCtx = finalCanvas.getContext('2d');
-        finalCanvas.width = finalSize;
-        finalCanvas.height = finalSize;
+        finalCanvas.width = finalWidth;
+        finalCanvas.height = finalHeight;
 
-        finalCtx.drawImage(croppedImageCanvas, 0, 0, finalSize, finalSize);
+        finalCtx.drawImage(croppedImageCanvas, 0, 0, finalWidth, finalHeight);
 
         const link = document.createElement('a');
         link.href = finalCanvas.toDataURL('image/png');
-        link.download = `cropped_image_${finalSize}px.png`;
+        link.download = `cropped_image_${finalWidth}x${finalHeight}px.png`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -263,7 +306,7 @@ document.addEventListener('DOMContentLoaded', () => {
     resizeHandle.addEventListener('touchstart', onResizeStart, { passive: false });
     cropButton.addEventListener('click', performCrop);
     downloadButton.addEventListener('click', handleDownload);
-    shapeRadios.forEach(radio => radio.addEventListener('change', handleShapeChange));
+    shapeSelect.addEventListener('change', handleShapeChange);
     backToUploadBtn.addEventListener('click', resetApp);
     backToCropBtn.addEventListener('click', () => showView('view-crop'));
 

@@ -61,10 +61,13 @@
                 </div>
                 <div class="controls">
                     <div class="shape-select">
-                        <input type="radio" id="square-radio" name="shape" value="square" checked>
-                        <label for="square-radio">正方形</label>
-                        <input type="radio" id="circle-radio" name="shape" value="circle">
-                        <label for="circle-radio">正円</label>
+                        <label for="shape-ratio-select">形状と比率:</label>
+                        <select id="shape-ratio-select">
+                            <option value="square">正方形 (1:1)</option>
+                            <option value="rectangle-4-3">長方形 (4:3)</option>
+                            <option value="rectangle-16-9">長方形 (16:9)</option>
+                            <option value="circle">円形</option>
+                        </select>
                     </div>
                     <div class="button-group">
                         <button id="back-to-upload-btn" class="secondary-btn arrow-btn">≪</button>
@@ -79,10 +82,9 @@
                     <h2>Preview</h2>
                     <div id="preview-image-container"></div>
                     <div class="download-options">
-                        <label for="download-size">ダウンロードサイズ:</label>
+                        <label for="download-width">幅 (px):</label>
                         <div class="input-with-unit">
-                            <input type="number" id="download-size" value="300" min="50">
-                            <span>px</span>
+                            <input type="number" id="download-width" value="300" min="50">
                         </div>
                     </div>
                     <div class="button-group">
@@ -100,7 +102,7 @@
     <script src="cropper.js"></script>
     <script src="common.js"></script>
     <footer>
-        &copy; 2025 Synapse Creations. Sep.ShapeShifT_ver2.2.1
+        &copy; 2025 Synapse Creations. Sep.ShapeShifT_ver2.2.2
     </footer>
 </body>
 </html>

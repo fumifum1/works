@@ -108,10 +108,21 @@ h2 { /* h1はcommon.cssでスタイル付けされます */
 
 .shape-select {
     display: flex;
-    align-items: center;
+    align-items: baseline;
     gap: 10px;
 }
 
+.shape-select label {
+    font-weight: bold;
+}
+
+.shape-select select {
+    padding: 4px 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    font-size: 0.9em;
+}
 .button-group {
     display: flex;
     flex-direction: row; /* 要素を横並びにします */
@@ -135,11 +146,11 @@ h2 { /* h1はcommon.cssでスタイル付けされます */
 }
 
 input[type="number"] { /* Keep original input styles, but separate from buttons */
-    padding: 12px 15px;
+    padding: 8px 12px;
     border-radius: 5px;
     border: 1px solid #ccc;
     cursor: pointer;
-    font-size: 1.1em;
+    font-size: 1em;
     width: 100%;
 }
 
@@ -195,8 +206,8 @@ button:hover, button:active {
 .download-options {
     margin-top: 15px;
     display: flex;
-    flex-direction: row; /* 縦並びから横並びに変更します */
-    align-items: center;   /* 垂直方向を中央に揃えます */
+    flex-direction: row;
+    align-items: baseline; /* テキストのベースラインを揃えるために center から変更 */
     gap: 10px;
 }
 
@@ -219,9 +230,6 @@ button:hover, button:active {
 .download-action-group span {
     font-weight: bold;
     font-size: 0.9em;
-}
-.shape-select input[type="radio"] {
-    accent-color: black;
 }
 
 footer {

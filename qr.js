@@ -198,9 +198,7 @@ const qrApp = {
 
             const styledCanvas = this._redrawQrWithStyles(baseCanvas, options);
 
-            const finalImageData = options.logoData
-                ? await this._embedLogo(styledCanvas, options)
-                : styledCanvas.toDataURL();
+            const finalImageData = await this._embedLogo(styledCanvas, options);
 
             this._displayQrCode(finalImageData);
         } catch (error) {
@@ -299,38 +297,127 @@ const qrApp = {
     },
 
     async _embedLogo(qrCanvas, options) {
+        if (!options.logoData) {
+            return qrCanvas.toDataURL();
+        }
+
+        const ctx = qrCanvas.getContext('2d');
+        const canvasSize = qrCanvas.width;
+
         try {
-            const qrImage = await Jimp.read(qrCanvas.toDataURL());
-            const logoImage = await Jimp.read(options.logoData);
-
-            if (options.circularLogo) {
-                logoImage.circle();
-            }
-
-            const qrSize = qrImage.bitmap.width;
-            const logoSize = qrSize * options.logoSizeRatio;
-            logoImage.resize(logoSize, logoSize);
-
-            const margin = qrSize * 0.05;
-            let x, y;
-            switch (options.logoPosition) {
-                case 'top-left': x = margin; y = margin; break;
-                case 'top-right': x = qrSize - logoSize - margin; y = margin; break;
-                case 'bottom-left': x = margin; y = qrSize - logoSize - margin; break;
-                case 'bottom-right': x = qrSize - logoSize - margin; y = qrSize - logoSize - margin; break;
-                default: x = (qrSize - logoSize) / 2; y = (qrSize - logoSize) / 2;
-            }
-
-            qrImage.composite(logoImage, x, y, {
-                mode: Jimp.BLEND_SOURCE_OVER,
-                opacitySource: 1,
-                opacityDest: 1
+            const logoImage = await new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = reject;
+                img.src = options.logoData;
             });
 
-            return await qrImage.getBase64Async(Jimp.MIME_PNG);
+            const maxLogoSize = canvasSize * options.logoSizeRatio;
+            
+            // ロゴのコンテナサイズを計算
+            let logoContainerWidth, logoContainerHeight;
+            const aspect = logoImage.width / logoImage.height;
+
+            if (options.circularLogo) {
+                // 円形の場合は常に正方形のコンテナ
+                logoContainerWidth = maxLogoSize;
+                logoContainerHeight = maxLogoSize;
+            } else {
+                // 長方形の場合はアスペクト比を考慮
+                if (aspect > 1) { // 横長
+                    logoContainerWidth = maxLogoSize;
+                    logoContainerHeight = maxLogoSize / aspect;
+                } else { // 縦長 or 正方形
+                    logoContainerWidth = maxLogoSize * aspect;
+                    logoContainerHeight = maxLogoSize;
+                }
+            }
+            
+            // ロゴの描画位置を計算 (ファインダーパターンとの重複を回避)
+            const moduleCount = this.state.qrInstance._oQRCode.getModuleCount();
+            const moduleSize = canvasSize / moduleCount;
+            const cornerSafeZone = 8 * moduleSize;
+            let embedX, embedY;
+
+            switch (options.logoPosition) {
+                case 'top-left':
+                    embedX = cornerSafeZone;
+                    embedY = cornerSafeZone;
+                    break;
+                case 'top-right':
+                    embedX = canvasSize - logoContainerWidth - cornerSafeZone;
+                    embedY = cornerSafeZone;
+                    break;
+                case 'bottom-left':
+                    embedX = cornerSafeZone;
+                    embedY = canvasSize - logoContainerHeight - cornerSafeZone;
+                    break;
+                case 'bottom-right':
+                    embedX = canvasSize - logoContainerWidth - cornerSafeZone;
+                    embedY = canvasSize - logoContainerHeight - cornerSafeZone;
+                    break;
+                default: // 'center'
+                    embedX = (canvasSize - logoContainerWidth) / 2;
+                    embedY = (canvasSize - logoContainerHeight) / 2;
+            }
+
+            // 1. 背景をくり抜く
+            const bgStyle = options.useGradient
+                ? this._createGradient(ctx, options.gradientDirection, canvasSize, options.bgGradientStart, options.bgGradientEnd)
+                : options.colorLight;
+            ctx.fillStyle = bgStyle;
+
+            const clearWidth = logoContainerWidth * 1.25;
+            const clearHeight = logoContainerHeight * 1.25;
+            const clearX = embedX - (clearWidth - logoContainerWidth) / 2;
+            const clearY = embedY - (clearHeight - logoContainerHeight) / 2;
+
+            if (options.circularLogo) {
+                ctx.beginPath();
+                ctx.arc(embedX + logoContainerWidth / 2, embedY + logoContainerHeight / 2, (logoContainerWidth / 2) * 1.25, 0, 2 * Math.PI, false);
+                ctx.fill();
+            } else {
+                const cornerRadius = Math.min(clearWidth, clearHeight) * 0.25;
+                this._roundedRectPath(ctx, clearX, clearY, clearWidth, clearHeight, cornerRadius);
+                ctx.fill();
+            }
+
+            // 2. ロゴを描画
+            ctx.save();
+            if (options.circularLogo) {
+                // 円形にクリップ
+                ctx.beginPath();
+                ctx.arc(embedX + logoContainerWidth / 2, embedY + logoContainerHeight / 2, logoContainerWidth / 2, 0, 2 * Math.PI, false);
+                ctx.clip();
+                
+                // アスペクト比を維持して中央に描画 (contain)
+                let drawWidthInCircle, drawHeightInCircle, offsetX, offsetY;
+                if (aspect > 1) { // wider
+                    drawWidthInCircle = logoContainerWidth;
+                    drawHeightInCircle = logoContainerWidth / aspect;
+                    offsetX = 0;
+                    offsetY = (logoContainerHeight - drawHeightInCircle) / 2;
+                } else { // taller
+                    drawWidthInCircle = logoContainerHeight * aspect;
+                    drawHeightInCircle = logoContainerHeight;
+                    offsetX = (logoContainerWidth - drawWidthInCircle) / 2;
+                    offsetY = 0;
+                }
+                ctx.drawImage(logoImage, embedX + offsetX, embedY + offsetY, drawWidthInCircle, drawHeightInCircle);
+            } else {
+                // 角丸長方形でクリップ
+                const cornerRadius = Math.min(logoContainerWidth, logoContainerHeight) * 0.25;
+                this._roundedRectPath(ctx, embedX, embedY, logoContainerWidth, logoContainerHeight, cornerRadius);
+                ctx.clip();
+                // コンテナいっぱいに描画
+                ctx.drawImage(logoImage, embedX, embedY, logoContainerWidth, logoContainerHeight);
+            }
+            ctx.restore();
+
+            return qrCanvas.toDataURL();
         } catch (error) {
             console.error("Image processing error:", error);
-            alert("Failed to process the logo. Please check the file format.");
+            alert("ロゴの処理に失敗しました。ファイル形式を確認してください。");
             return qrCanvas.toDataURL(); // Return original QR on failure
         }
     },

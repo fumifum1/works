@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE Tailor</title>
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --accent-color: #dc3545;
+            --bg-color: #fcfcfc;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: var(--bg-color);
+            /* 定規の目盛りを模したSVGパターン */
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23cccccc' fill-opacity='0.3'%3E%3Crect x='0' y='0' width='1' height='100' /%3E%3Crect x='0' y='0' width='100' height='1' /%3E%3Crect x='10' y='0' width='0.5' height='8' /%3E%3Crect x='20' y='0' width='0.5' height='8' /%3E%3Crect x='30' y='0' width='0.5' height='8' /%3E%3Crect x='40' y='0' width='0.5' height='8' /%3E%3Crect x='50' y='0' width='1' height='15' /%3E%3Crect x='60' y='0' width='0.5' height='8' /%3E%3Crect x='70' y='0' width='0.5' height='8' /%3E%3Crect x='80' y='0' width='0.5' height='8' /%3E%3Crect x='90' y='0' width='0.5' height='8' /%3E%3Crect x='0' y='10' width='8' height='0.5' /%3E%3Crect x='0' y='20' width='8' height='0.5' /%3E%3Crect x='0' y='30' width='8' height='0.5' /%3E%3Crect x='0' y='40' width='8' height='0.5' /%3E%3Crect x='0' y='50' width='15' height='1' /%3E%3Crect x='0' y='60' width='8' height='0.5' /%3E%3Crect x='0' y='70' width='8' height='0.5' /%3E%3Crect x='0' y='80' width='8' height='0.5' /%3E%3Crect x='0' y='90' width='8' height='0.5' /%3E%3C/g%3E%3C/svg%3E");
+            background-attachment: fixed;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* 画面の左から3/4(75%)の位置にある太い黒の垂直線 */
+        body::after {
+            content: "THE Tailor"; /* 文字を追加 */
+            position: fixed;
+            top: 0;
+            left: 75%;
+            width: 60px; /* 幅を60pxに広げました */
+            height: 100vh;
+            background-color: #000;
+            /* 背景を3層にする: 1層目は短い目盛り(常に表示)、2層目は中央のマスク(長い目盛りを隠す)、3層目は長い目盛り */
+            background-image: 
+                url("data:image/svg+xml,%3Csvg width='60' height='10' viewBox='0 0 60 10' xmlns='http://www.w3.org/2000/svg'%3E%3Cline x1='0' y1='0' x2='15' y2='0' stroke='white' stroke-width='1' /%3E%3C/svg%3E"),
+                linear-gradient(#000, #000), 
+                url("data:image/svg+xml,%3Csvg width='60' height='100' viewBox='0 0 60 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cline x1='0' y1='0' x2='60' y2='0' stroke='white' stroke-width='2' /%3E%3Cline x1='0' y1='50' x2='35' y2='50' stroke='white' stroke-width='1.5' /%3E%3C/svg%3E");
+            background-size: 60px 10px, 100% 280px, 60px 100px;
+            background-position: left top, center center, left top;
+            background-repeat: repeat, no-repeat, repeat;
+            z-index: -1; /* 背景として配置 */
+            opacity: 0.9; /* わずかに透過させて背景に馴染ませる */
+            pointer-events: none;
+
+            /* テキストのスタイル設定 */
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px; /* 幅に合わせて少し大きくしました */
+            font-weight: bold;
+            letter-spacing: 10px; /* 字間を広げて高級感を出しました */
+            writing-mode: vertical-rl; /* 縦書きに設定 */
+            text-transform: uppercase; /* 大文字にしてシンプルさを強調 */
+            font-family: 'Georgia', serif; /* クラシックなセリフ体に変更 */
+        }
+
+        /* おしゃれなメインタイトルのスタイル */
+        h1 {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 40px auto 20px;
+            line-height: 1;
+            padding: 20px 0;
+            border-top: 1px solid #ddd;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+            max-width: 420px;
+        }
+        .brand-name {
+            font-family: 'Georgia', serif;
+            font-size: 48px;
+            font-weight: bold;
+            letter-spacing: 12px;
+            text-transform: uppercase;
+            color: #222;
+            text-indent: 12px; /* 字間による視覚的なズレを補正 */
+        }
+        .record-label {
+            font-size: 12px;
+            color: #999;
+            letter-spacing: 6px;
+            margin-top: 10px;
+            font-weight: 300;
+            text-indent: 6px; /* 字間のバランス調整 */
+        }
+
+        .description { margin-bottom: 20px; color: #666; font-size: 14px; }
+
+        .container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            height: 520px;
+            background: white;
+            padding: 10px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+
+        svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* 入力ボックスとラベルのスタイル */
+        .input-group {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            pointer-events: none;
+        }
+
+        .label {
+            font-size: 11px;
+            font-weight: bold;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 1px 4px;
+            border-radius: 3px;
+            margin-bottom: 2px;
+            pointer-events: auto;
+        }
+
+        .input-field {
+            display: flex;
+            align-items: center;
+            background: white;
+            border: 2px solid var(--primary-color);
+            border-radius: 6px;
+            padding: 2px 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            pointer-events: auto;
+        }
+
+        .input-field input {
+            border: none;
+            width: 45px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            outline: none;
+            background: transparent;
+        }
+
+        .unit { font-size: 11px; color: #555; margin-left: 2px; }
+
+        /* 配置の修正 */
+        #pos-shoulder { top: 45px; left: 50%; transform: translateX(-50%); }
+        #pos-back     { top: 290px; left: 50%; transform: translate(-50%, -50%); } /* 着丈：身幅の下へ移動 */
+        #pos-width    { top: 215px; left: 50%; transform: translate(-50%, -12px); } /* 身幅：ラベルが線上にくるよう調整 */
+        #pos-total    { top: 380px; left: 60%; transform: translate(-50%, -50%); } /* 身丈：矢印の線に重ね、さらに下に配置 */
+        #pos-sleeve   { top: 130px; left: 405px; transform: translate(-50%, -12px); } /* 袖丈：ラベルが線上にくるよう調整 */
+
+        /* 下部エリア */
+        .control-area {
+            width: 100%;
+            max-width: 500px;
+            margin-top: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-send {
+            background: #28a745;
+            margin-top: -5px;
+        }
+
+        .btn-send:hover { background: #218838; }
+
+        .settings-area {
+            background: #eee;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 12px;
+            display: none; /* 初期状態は非表示 */
+        }
+
+        .gas-guide {
+            background: #fff;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+            font-size: 11px;
+            line-height: 1.4;
+            display: none;
+        }
+
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 8px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            margin: 5px 0;
+            color: #333;
+            user-select: all;
+        }
+
+        .guide-btn { color: #007bff; cursor: pointer; text-decoration: underline; font-weight: bold; }
+
+        .settings-toggle {
+            text-align: right;
+            font-size: 11px;
+            color: #007bff;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .btn:hover { background: #555; }
+
+        #result-text {
+            width: 100%;
+            height: 160px;
+            padding: 15px;
+            border: 1px dashed #ccc;
+            border-radius: 10px;
+            background: #fff;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            resize: none;
+            box-sizing: border-box;
+        }
+
+        .copy-hint {
+            font-size: 12px;
+            color: #888;
+            text-align: center;
+            margin-top: -10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>
+        <span class="brand-name">THE Tailor</span>
+        <span class="record-label">Garment Measurement Studio</span>
+    </h1>
+
+    <p class="description">各部位の矢印に合わせて数値を入力してください</p>
+
+    <div class="container">
+        <svg viewBox="0 0 500 500">
+            <!-- 矢印マーカーの定義 (↔ デザイン用) -->
+            <defs>
+                <marker id="arrowhead" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+                    <path d="M0,0 L6,3 L0,6 Z" fill="currentColor" />
+                </marker>
+            </defs>
+
+            <!-- Tシャツのシルエット -->
+            <path d="M150,100 L200,80 Q250,110 300,80 L350,100 L460,160 L410,240 L360,215 L360,420 L140,420 L140,215 L90,240 L40,160 Z" 
+                  fill="#f0f0f0" stroke="#ccc" stroke-width="2"/>
+            
+            <!-- 肩から脇にかけてのライン (アームホール) -->
+            <g stroke="#ccc" stroke-width="1" stroke-dasharray="3">
+                <line x1="150" y1="100" x2="140" y2="215" />
+                <line x1="350" y1="100" x2="360" y2="215" />
+            </g>
+            
+            <!-- 肩幅 (Shoulder) -->
+            <g color="#007bff">
+                <line x1="150" y1="90" x2="350" y2="90" stroke="currentColor" stroke-width="2" marker-start="url(#arrowhead)" marker-end="url(#arrowhead)" />
+            </g>
+            
+            <!-- 身幅 (Width) -->
+            <g color="#007bff">
+                <line x1="140" y1="215" x2="360" y2="215" stroke="currentColor" stroke-width="2" marker-start="url(#arrowhead)" marker-end="url(#arrowhead)" />
+            </g>
+            
+            <!-- 身丈 (Total Length - 赤) -->
+            <g color="#dc3545">
+                <line x1="300" y1="80" x2="300" y2="420" stroke="currentColor" stroke-width="2" marker-start="url(#arrowhead)" marker-end="url(#arrowhead)" />
+            </g>
+            
+            <!-- 着丈 (Back Length - グレー点線) -->
+            <g color="#6c757d">
+                <line x1="250" y1="110" x2="250" y2="420" stroke="currentColor" stroke-width="2" stroke-dasharray="4" marker-start="url(#arrowhead)" marker-end="url(#arrowhead)" />
+            </g>
+
+            <!-- 袖丈 (Sleeve) -->
+            <g color="#007bff">
+                <line x1="355" y1="105" x2="455" y2="155" stroke="currentColor" stroke-width="2" marker-start="url(#arrowhead)" marker-end="url(#arrowhead)" />
+            </g>
+        </svg>
+
+        <!-- 入力フィールド -->
+        <div id="pos-shoulder" class="input-group">
+            <span class="label">肩幅</span>
+            <div class="input-field"><input type="number" id="val-shoulder" placeholder="0"><span class="unit">cm</span></div>
+        </div>
+
+        <div id="pos-width" class="input-group">
+            <span class="label">身幅</span>
+            <div class="input-field"><input type="number" id="val-width" placeholder="0"><span class="unit">cm</span></div>
+        </div>
+
+        <div id="pos-back" class="input-group">
+            <span class="label" style="color:#6c757d">着丈</span>
+            <div class="input-field" style="border-color:#6c757d"><input type="number" id="val-back" placeholder="0"><span class="unit">cm</span></div>
+        </div>
+
+        <div id="pos-total" class="input-group">
+            <span class="label" style="color:#dc3545">身丈</span>
+            <div class="input-field" style="border-color:#dc3545"><input type="number" id="val-total" placeholder="0"><span class="unit">cm</span></div>
+        </div>
+
+        <div id="pos-sleeve" class="input-group">
+            <span class="label">袖丈</span>
+            <div class="input-field"><input type="number" id="val-sleeve" placeholder="0"><span class="unit">cm</span></div>
+        </div>
+    </div>
+
+    <div class="control-area">
+        <div class="settings-toggle" onclick="toggleSettings()">⚙️ 送信先URLを設定する</div>
+        <div id="settings-area" class="settings-area">
+            <strong>Google Apps Script URL:</strong><br>
+            <input type="password" id="gas-url" placeholder="https://script.google.com/macros/s/.../exec" style="width: 100%; margin-top: 5px; box-sizing: border-box;">
+            <p style="margin: 5px 0 0; color: #666;">※設定したURLはこのブラウザに保存されます。</p>
+            <div class="guide-btn" onclick="toggleGuide()" style="margin-top: 10px;">➔ 設定方法・スクリプトの書き方</div>
+            
+            <div id="gas-guide" class="gas-guide">
+                <strong>【設定手順】</strong><br>
+                1. スプレッドシートを作成し「拡張機能」→「Apps Script」を開く<br>
+                2. 元のコードを消して以下のコードを貼り付けて保存<br>
+                <div class="code-block">function doPost(e) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  const data = JSON.parse(e.postData.contents);
+  sheet.appendRow([
+    new Date(),
+    data.userName,
+    data.shoulder,
+    data.width,
+    data.back,
+    data.total,
+    data.sleeve
+  ]);
+  return ContentService.createTextOutput("OK");
+}</div>
+                3. 右上の「デプロイ」→「新しいデプロイ」を選択<br>
+                4. 種類を「ウェブアプリ」にし、アクセスできるユーザーを「全員」にしてデプロイ<br>
+                5. 発行されたURLを上のボックスに貼り付けてください
+            </div>
+        </div>
+
+        <div class="input-field" style="width: 100%; margin-bottom: 10px; border-color: #333;">
+            <span style="font-size: 12px; padding-left: 10px;">計測者名/メモ:</span>
+            <input type="text" id="val-user" placeholder="名前を入力" style="width: 100%; text-align: left; padding-left: 10px;">
+        </div>
+        <button class="btn" onclick="generateText()">サイズをまとめてコピー用に変換</button>
+        <button class="btn btn-send" onclick="sendToGoogleSheet()">Googleスプレッドシートに保存</button>
+        <textarea id="result-text" readonly placeholder="ここに計測結果が表示されます"></textarea>
+        <p class="copy-hint">生成されたテキストをコピーしてメモ帳などに貼り付けてください</p>
+    </div>
+    <script>
+
+        // ページ読み込み時に保存されたURLを復元
+        window.onload = function() {
+            // URLパラメータにurlが含まれている場合、それを優先して保存
+            const params = new URLSearchParams(window.location.search);
+            const urlParam = params.get('url');
+            if (urlParam && urlParam.startsWith('https://')) {
+                localStorage.setItem('tsyatu_gas_url', urlParam);
+                alert('共有された送信先URLを設定しました。');
+            }
+
+            const savedUrl = localStorage.getItem('tsyatu_gas_url');
+            if (savedUrl) {
+                document.getElementById('gas-url').value = savedUrl;
+            }
+
+            // エンターキーで次の入力ボックスへ移動
+            const inputIds = ['val-shoulder', 'val-width', 'val-back', 'val-total', 'val-sleeve'];
+            inputIds.forEach((id, index) => {
+                const el = document.getElementById(id);
+                el.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const nextId = inputIds[index + 1];
+                        if (nextId) {
+                            document.getElementById(nextId).focus();
+                        }
+                    }
+                });
+            });
+        };
+
+        function toggleSettings() {
+            const area = document.getElementById('settings-area');
+            if (area.style.display === 'block') {
+                area.style.display = 'none';
+            } else {
+                area.style.display = 'block';
+            }
+        }
+
+        function toggleGuide() {
+            const guide = document.getElementById('gas-guide');
+            if (guide.style.display === 'block') {
+                guide.style.display = 'none';
+            } else {
+                guide.style.display = 'block';
+            }
+        }
+
+        function generateText() {
+            const data = {
+                shoulder: document.getElementById('val-shoulder').value || '-',
+                width: document.getElementById('val-width').value || '-',
+                total: document.getElementById('val-total').value || '-',
+                back: document.getElementById('val-back').value || '-',
+                sleeve: document.getElementById('val-sleeve').value || '-'
+            };
+
+            const now = new Date();
+            const userName = document.getElementById('val-user').value || '未設定';
+            const timeStr = now.toLocaleString('ja-JP', { 
+                year: 'numeric', month: '2-digit', day: '2-digit', 
+                hour: '2-digit', minute: '2-digit' 
+            });
+
+            const template = 
+`【Tシャツ サイズ記録】
+記録日時：${timeStr}
+計測者　：${userName}
+-----------------------
+-肩幅:${data.shoulder}cm
+-身幅:${data.width}cm
+-着丈:${data.back}cm
+-身丈:${data.total}cm
+-袖丈:${data.sleeve}cm
+-----------------------`;
+
+            document.getElementById('result-text').value = template;
+            document.getElementById('result-text').select();
+        }
+
+        async function sendToGoogleSheet() {
+            const WEB_APP_URL = document.getElementById('gas-url').value;
+
+            if (!WEB_APP_URL || !WEB_APP_URL.startsWith('https://')) {
+                alert('有効なGoogle Apps ScriptのURLを設定してください。');
+                document.getElementById('settings-area').style.display = 'block';
+                return;
+            }
+            localStorage.setItem('tsyatu_gas_url', WEB_APP_URL);
+
+            const data = {
+                userName: document.getElementById('val-user').value || '未設定',
+                shoulder: document.getElementById('val-shoulder').value || '0',
+                width: document.getElementById('val-width').value || '0',
+                total: document.getElementById('val-total').value || '0',
+                back: document.getElementById('val-back').value || '0',
+                sleeve: document.getElementById('val-sleeve').value || '0'
+            };
+
+            try {
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // GASへの単純な送信にはno-corsが一般的です
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                // no-corsモードではレスポンス内容を読み取れませんが、送信自体は成功します
+                alert('スプレッドシートにデータを送信しました。');
+                generateText(); // テキストエリアも更新
+            } catch (error) {
+                console.error('Error:', error);
+                alert('送信に失敗しました。');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Obsidian Bridge</title>
+    <link rel="stylesheet" href="common.css">
+    <style>
+        body { padding: 20px; font-family: sans-serif; }
+        .bridge-container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .header-row h2 { margin: 0; }
+        .icon-btn { background: none; border: none; font-size: 20px; cursor: pointer; padding: 5px; border-radius: 50%; transition: background 0.2s; }
+        .icon-btn:hover { background: #f0f0f0; }
+        .guide-area { background: #f8f9fa; border: 1px solid #e9ecef; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; line-height: 1.6; color: #444; }
+        textarea { width: 100%; height: 300px; margin-top: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 8px; resize: vertical; font-family: monospace; }
+        .config-row { display: flex; gap: 10px; margin-bottom: 15px; }
+        .config-group { flex: 1; display: flex; flex-direction: column; }
+        .config-group label { font-size: 12px; font-weight: bold; color: #666; }
+        .config-group input { padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        .btn-obsidian { background: #7b46f6; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: background 0.3s; }
+        .btn-obsidian:hover { background: #6335d9; }
+        .status-msg { margin-top: 10px; font-size: 12px; color: #28a745; text-align: center; display: none; }
+    </style>
+</head>
+<body>
+    <div class="bridge-container">
+        <div class="header-row">
+            <h2>Obsidian Bridge</h2>
+            <button class="icon-btn" onclick="toggleGuide()" title="使い方を表示">⚙️</button>
+        </div>
+
+        <div id="guideArea" class="guide-area" style="display: none;">
+            <strong style="display: block; margin-bottom: 5px;">【使い方】</strong>
+            <ol style="margin: 0; padding-left: 20px;">
+                <li>AIに「今の内容をMarkdownでまとめて」と指示し、出力されたテキストをコピーします。</li>
+                <li>このページのテキストエリアに貼り付けます。</li>
+                <li>「保管庫名」が正しいことを確認し、「Obsidianに登録」ボタンを押します。</li>
+                <li>ブラウザの確認ダイアログで「許可」または「Obsidianを開く」を選択すると、新しいノートが作成されます。</li>
+            </ol>
+            <p style="margin-top: 10px; font-size: 11px; color: #888;">※ 非常に長い会話は登録できない場合があります。</p>
+        </div>
+
+        <div class="config-row">
+            <div class="config-group">
+                <label for="vaultName">保管庫名:</label>
+                <input type="text" id="vaultName" placeholder="Vault名" value="obsidian">
+            </div>
+            <div class="config-group">
+                <label for="folderPath">保存先フォルダ (任意):</label>
+                <input type="text" id="folderPath" placeholder="例: DevLog" value="">
+            </div>
+        </div>
+
+        <div class="config-group">
+            <label for="noteTitle">ノートのタイトル:</label>
+            <input type="text" id="noteTitle" id="noteTitle" placeholder="例: Gemini_Session_20231027">
+        </div>
+
+        <textarea id="logContent" placeholder="ここにMarkdown形式のログを貼り付けてください..."></textarea>
+        
+        <div style="margin-top: 20px;">
+            <button class="btn-obsidian" onclick="sendToObsidian()">Obsidianに登録</button>
+        </div>
+        <div id="status" class="status-msg">Obsidianを呼び出しています...</div>
+    </div>
+
+    <script>
+        // ページ読み込み時にタイトルに今日の日付を入れる
+        window.onload = () => {
+            const now = new Date();
+            const dateStr = now.getFullYear() + '' + 
+                            String(now.getMonth() + 1).padStart(2, '0') + 
+                            String(now.getDate()).padStart(2, '0') + '_' +
+                            String(now.getHours()).padStart(2, '0') + 
+                            String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('noteTitle').value = 'DevLog_' + dateStr;
+            
+            // 保存された保管庫名があれば復元
+            const savedVault = localStorage.getItem('obsidian_vault_name');
+            if (savedVault) document.getElementById('vaultName').value = savedVault;
+            const savedFolder = localStorage.getItem('obsidian_folder_path');
+            if (savedFolder) document.getElementById('folderPath').value = savedFolder;
+        };
+
+        function toggleGuide() {
+            const guide = document.getElementById('guideArea');
+            guide.style.display = guide.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function sendToObsidian() {
+            const vault = document.getElementById('vaultName').value;
+            const title = document.getElementById('noteTitle').value;
+            const folder = document.getElementById('folderPath').value;
+            const content = document.getElementById('logContent').value;
+
+            if (!vault || !title || !content) {
+                alert('すべての項目を入力してください。');
+                return;
+            }
+
+            // 保管庫名を保存しておく
+            localStorage.setItem('obsidian_vault_name', vault);
+            localStorage.setItem('obsidian_folder_path', folder);
+
+            // フォルダが指定されている場合はパスを結合
+            const fullPath = folder ? `${folder}/${title}` : title;
+
+            // Obsidian URIの作成
+            // format: obsidian://new?vault=my%20vault&name=my%20note&content=my%20content
+            const uri = `obsidian://new?vault=${encodeURIComponent(vault)}&name=${encodeURIComponent(fullPath)}&content=${encodeURIComponent(content)}`;
+
+            // URLの長さ制限チェック（約8000文字を超えると動作しないことが多い）
+            if (uri.length > 8000) {
+                alert(`内容が長すぎます（約${uri.length}文字）。\nブラウザの制限により、数回に分けて登録するか、中身を短くしてください。`);
+                return;
+            }
+
+            // URIを開く（Obsidianを起動）
+            const link = document.createElement('a');
+            link.href = uri;
+            link.click();
+
+            // 登録後にコンテンツをクリア（確実に命令を送るため少しだけ遅延させる）
+            setTimeout(() => {
+                document.getElementById('logContent').value = '';
+                const now = new Date();
+                const dateStr = now.getFullYear() + '' + 
+                                String(now.getMonth() + 1).padStart(2, '0') + 
+                                String(now.getDate()).padStart(2, '0') + '_' +
+                                String(now.getHours()).padStart(2, '0') + 
+                                String(now.getMinutes()).padStart(2, '0');
+                document.getElementById('noteTitle').value = 'DevLog_' + dateStr;
+            }, 100);
+
+            document.getElementById('status').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('status').style.display = 'none';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

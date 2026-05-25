@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>note → Substack ダイレクトクリーン変換ツール</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 30px auto; padding: 0 20px; line-height: 1.6; color: #333; }
+        h2 { border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .editor-box {
+            width: 100%; min-height: 180px; border: 2px solid #ccc; border-radius: 8px;
+            padding: 15px; box-sizing: border-box; overflow-y: auto; margin-bottom: 20px; background-color: #fcfcfc;
+        }
+        #richTextInput:empty:before { content: "ここにnoteの記事をそのままペースト（Ctrl+V / Cmd+V）してください"; color: #999; }
+        
+        button {
+            padding: 14px 24px; font-size: 18px; font-weight: bold; border: none;
+            border-radius: 6px; cursor: pointer; transition: opacity 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: 100%; background-color: #ff6719; color: white; margin-bottom: 15px;
+        }
+        button:hover { opacity: 0.8; }
+        .success-msg { color: #28a745; font-weight: bold; display: none; text-align: center; margin-top: 10px; font-size: 16px; }
+    </style>
+</head>
+<body>
+
+    <h2>note → Substack 変換ツール (Ver.4)</h2>
+    <p>ライブラリによる誤変換を無くし、HTMLを直接クリーンアップする安全な方式に改良しました。</p>
+
+    <label><strong>1. ここにnoteの記事を貼り付け</strong></label>
+    <div id="richTextInput" class="editor-box" contenteditable="true"></div>
+
+    <button id="copyBtn" onclick="convertAndCopy()">📋 Substack用に変換してワンタッチコピー</button>
+    
+    <div id="copyMsg" class="success-msg">
+        ✔ 変換とコピーが完了しました！<br>Substackのエディタでそのまま貼り付け（Ctrl+V / Cmd+V）してください。
+    </div>
+
+    <div id="sandbox" style="display:none;"></div>
+
+    <script>
+        function convertAndCopy() {
+            const inputArea = document.getElementById('richTextInput');
+            
+            // 入力の中身が空、または改行のみの場合は処理しない
+            if (!inputArea.innerHTML.trim() || inputArea.innerHTML === '<br>') {
+                alert('テキストが貼り付けられていません。');
+                return;
+            }
+
+            // 一時的にHTMLを解析するための仮想空間（サンドボックス）を作成
+            const sandbox = document.getElementById('sandbox');
+            sandbox.innerHTML = inputArea.innerHTML;
+
+            // --- 独自のクリーンアップ処理 ---
+            
+            // 1. note独自の不要な属性（class、style、data-*など）をすべて削ぎ落とす
+            const allElements = sandbox.getElementsByTagName('*');
+            for (let el of allElements) {
+                // コピー時に付いてくる不要な装飾属性をリセット
+                el.removeAttribute('class');
+                el.removeAttribute('style');
+                el.removeAttribute('id');
+                // data-で始まる属性も削除
+                for (let attr of [...el.attributes]) {
+                    if (attr.name.startsWith('data-')) {
+                        el.removeAttribute(attr.name);
+                    }
+                }
+            }
+
+            // 2. noteの「箇条書きブロック」を標準的な <ul> <li> 構造に変換・整理する
+            // noteは箇流書きに独自のタグを噛ませることがあるため、一般的なリスト構造に置換します
+            const listItems = sandbox.querySelectorAll('li');
+            listItems.forEach(li => {
+                // もしliの中にさらに不要なpタグなどが埋まっていたら中身のテキストだけにする
+                if(li.querySelector('p')) {
+                    li.innerHTML = li.querySelector('p').innerHTML;
+                }
+            });
+
+            // 3. noteの太字（strong, b）の前後にある不自然なスペースをトリミング
+            const strongElements = sandbox.querySelectorAll('strong, b');
+            strongElements.forEach(str => {
+                // 太字タグの直前・直後にある空白文字を綺麗に掃除
+                str.innerHTML = str.innerHTML.trim();
+            });
+
+            // 最終的に綺麗になったHTMLデータを取り出す
+            let cleanedHtml = sandbox.innerHTML;
+
+            // 4. 改行・段落の調整（連続する空のpタグなどを綺麗にまとめる）
+            cleanedHtml = cleanedHtml.replace(/<p><br><\/p>/g, '<br>'); // 無駄な段落の隙間をシンプルな改行に
+            cleanedHtml = cleanedHtml.replace(/(<br>){3,}/g, '<br><br>'); // 3連続以上の改行は2連続に抑える
+
+            // --- クリップボードへの書き込み処理 ---
+            const htmlBlob = new Blob([cleanedHtml], { type: 'text/html' });
+            const textBlob = new Blob([sandbox.innerText], { type: 'text/plain' });
+
+            const clipboardItem = new ClipboardItem({
+                'text/html': htmlBlob,
+                'text/plain': textBlob
+            });
+
+            navigator.clipboard.write([clipboardItem]).then(() => {
+                // 成功メッセージの表示
+                const msg = document.getElementById('copyMsg');
+                msg.style.display = 'block';
+                setTimeout(() => { msg.style.display = 'none'; }, 6000);
+            }).catch(err => {
+                console.error(err);
+                alert('コピーに失敗しました。ChromeやEdgeなどのブラウザでお試しください。');
+            });
+
+            // サンドボックスの片付け
+            sandbox.innerHTML = '';
+        }
+    </script>
+</body>
+</html>

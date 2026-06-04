@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Visual Graffiti Prompt Studio Pro</title>
+    <link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/fumifum1/main/main/jpg/ico.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Gugi&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; line-height: 1.6; max-width: 1100px; margin: 20px auto; padding: 20px; background-color: #0f0f0f; color: #e0e0e0; }
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('img/Visual Graffiti Prompt Studio.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0.4; /* 背景画像をよりはっきり表示 */
+            filter: invert(1); /* 画像の色を反転させて視認性を向上 */
+            z-index: -1;
+            pointer-events: none;
+        }
+        .card { 
+            background: rgba(20, 20, 20, 0.55); 
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 40px; 
+            border-radius: 24px; 
+            box-shadow: 0 20px 60px rgba(0,0,0,0.9); 
+            position: relative; 
+            border: 1px solid rgba(255, 255, 255, 0.15); 
+            margin-top: 40px;
+        }
+        h1 { color: #00bcd4; text-align: center; margin-bottom: 25px; font-family: 'Gugi', cursive; font-size: 2.8em; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        
+        .tab-nav { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 15px; }
+        .tab-btn { padding: 10px 25px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255, 255, 255, 0.05); color: #888; border-radius: 50px; cursor: pointer; font-weight: bold; transition: 0.3s; font-family: 'Gugi', cursive; }
+        .tab-btn:hover { background: #333; color: #ccc; }
+        .tab-btn.active.btn-multi { background: linear-gradient(135deg, rgba(13, 71, 161, 0.8) 0%, rgba(21, 101, 192, 0.8) 100%); color: #fff; border-color: #1a73e8; box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        .tab-btn.active.btn-single { background: linear-gradient(135deg, rgba(27, 94, 32, 0.8) 0%, rgba(46, 125, 50, 0.8) 100%); color: #fff; border-color: #34a853; box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        .tab-btn.active.btn-custom { background: linear-gradient(135deg, rgba(230, 81, 0, 0.8) 0%, rgba(239, 108, 0, 0.8) 100%); color: #fff; border-color: #f9ab00; box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        .tab-btn.active.btn-single-style { background: linear-gradient(135deg, rgba(74, 20, 140, 0.8) 0%, rgba(123, 31, 162, 0.8) 100%); color: #fff; border-color: #9c27b0; box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        .tab-btn.active.btn-top { background: linear-gradient(135deg, rgba(66, 66, 66, 0.8) 0%, rgba(33, 33, 33, 0.8) 100%); color: #fff; border-color: #666; box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+
+        .section { display: none; margin-bottom: 20px; }
+        .section.active { display: block; }
+        
+        textarea { width: 100%; height: 100px; padding: 12px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; font-size: 15px; resize: vertical; box-sizing: border-box; background: rgba(255, 255, 255, 0.05); color: #fff; }
+        textarea:focus { border-color: #0d47a1; outline: none; }
+        textarea::placeholder { color: #888; }
+        
+        .custom-row input, .custom-row select { padding: 8px; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; font-size: 14px; background: rgba(255, 255, 255, 0.05); color: #fff; }
+        .custom-row input:focus, .custom-row select:focus { border-color: #0d47a1; outline: none; }
+        
+        /* プルダウンの選択肢が見えるように調整 */
+        select option {
+            background-color: #1a1a1a;
+            color: #fff;
+        }
+
+        #customList { max-height: 600px; overflow-y: auto; background: rgba(0, 0, 0, 0.2); padding: 15px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); }
+        .custom-row { display: flex; gap: 15px; margin-bottom: 15px; align-items: center; background: rgba(255, 255, 255, 0.03); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); }
+        .row-num { width: 25px; font-size: 12px; color: #666; }
+
+        /* トップページ用カードスタイル */
+        #topSection {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 10px;
+        }
+        @media (max-width: 600px) {
+            #topSection { grid-template-columns: 1fr; }
+            h1 { font-size: 2em; }
+        }
+
+        .mode-card {
+            background: rgba(45, 45, 45, 0.6);
+            border: 1px solid #333;
+            border-radius: 16px;
+            padding: 0;
+            margin-bottom: 0;
+            transition: 0.3s;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            overflow: hidden;
+            height: 100%;
+            box-sizing: border-box;
+        }
+        .mode-card:hover { background: rgba(80, 80, 80, 0.5); transform: translateY(-8px); border-color: #00bcd4; box-shadow: 0 15px 30px rgba(0,0,0,0.6); }
+        .card-banner { width: 100%; height: 140px; object-fit: cover; border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); }
+        .mode-card-content { padding: 20px; display: flex; flex-direction: column; gap: 12px; flex-grow: 1; }
+        .mode-card h3 { margin: 0; font-family: 'Gugi', cursive; display: flex; align-items: center; gap: 10px; }
+        .mode-card p { margin: 0; color: #ccc; font-size: 0.95em; flex-grow: 1; }
+        .mode-card .start-badge { align-self: flex-end; font-size: 0.8em; color: #aaa; font-weight: bold; border: 1px solid #444; padding: 4px 12px; border-radius: 20px; transition: 0.3s; }
+        .mode-card:hover .start-badge { background: #00bcd4; color: #fff; border-color: #00bcd4; }
+
+        .input-group { flex: 2; display: flex; flex-direction: column; gap: 5px; }
+        
+        .preview-box { width: 120px; height: 80px; background: rgba(0,0,0,0.3); border-radius: 4px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
+        .preview-box img { width: 100%; height: 100%; object-fit: cover; }
+        .preview-box span { font-size: 10px; color: #666; text-align: center; padding: 5px; word-break: break-all; }
+
+        .gen-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, rgba(13, 71, 161, 0.8) 0%, rgba(21, 101, 192, 0.8) 100%); color: white; border: 1px solid rgba(255,255,255,0.1); border-radius: 50px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 15px; transition: 0.3s; font-family: 'Gugi', cursive; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
+        .gen-btn:hover { background: #1976d2; box-shadow: 0 6px 20px rgba(0,0,0,0.6); }
+        .reset-btn { width: 100%; padding: 12px; background: rgba(255, 255, 255, 0.05); color: #aaa; border: 1px solid rgba(255,255,255,0.1); border-radius: 50px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; font-family: 'Gugi', cursive; }
+        .reset-btn:hover { background: #616161; color: #fff; }
+        #resultContainer { margin-top: 25px; display: none; }
+        #result { background: rgba(0, 0, 0, 0.3); color: #00ff41; padding: 20px; border-radius: 8px; white-space: pre-wrap; font-family: 'Consolas', monospace; font-size: 14px; border: 1px solid rgba(255,255,255,0.1); }
+        .copy-btn { margin-top: 10px; padding: 12px; background: linear-gradient(135deg, rgba(27, 94, 32, 0.8) 0%, rgba(46, 125, 50, 0.8) 100%); color: white; border: 1px solid rgba(255,255,255,0.1); border-radius: 50px; cursor: pointer; font-weight: bold; width: 100%; font-family: 'Gugi', cursive; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
+        .copy-btn:hover { background: #388e3c; }
+
+        .unified-glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        
+        /* ヘッダーのランダムスライドショー */
+        .header-slideshow { display: flex; justify-content: center; margin-bottom: 25px; height: 100px; }
+        .header-slideshow img { height: 100%; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); object-fit: contain; background: #181818; border: 1px solid #333; }
+
+        .badge { background: #e8f0fe; color: #1a73e8; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8em; margin-right: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h1>Visual Graffiti Prompt Studio Pro</h1>
+    <p style="text-align: center; color: #aaa; margin-top: -15px; margin-bottom: 25px;">ChatGPT (DALL-E 3) などの画像生成AIで利用できる、高品質なグラフィティ・アートやデザインシート作成用のプロンプトを簡単に生成できるツールです。</p>
+    
+    <div class="header-slideshow" style="background: rgba(0,0,0,0.2); border-radius: 10px; overflow: hidden;">
+        <img id="slideshowImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Style Preview" style="opacity: 0; transition: opacity 0.5s;">
+    </div>
+    
+    <div id="topSection" class="section active">
+        <div style="grid-column: 1 / -1; background: rgba(255, 152, 0, 0.08); border: 1px solid rgba(255, 152, 0, 0.3); border-radius: 16px; padding: 18px 24px; margin-bottom: 10px; font-size: 0.95em; color: #ffb74d; line-height: 1.6;">
+            <span style="font-weight: bold; font-size: 1.1em; display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: #ffa726;">
+                ⚠️ 注意事項 / 生成のヒント
+            </span>
+            <ul style="margin: 0; padding-left: 20px;">
+                <li>掲載されているサンプル画像は作例イメージです。画像生成AIの仕様上、プロンプト入力時にまったく同じ画像が再生成されるわけではありません。</li>
+                <li>サンプル画像と近い質感やスタイルの作品を作りたい場合は、生成されたプロンプトテキストと一緒に、<b>本ツールのサンプル画像を参考画像（イメージプロンプト）として生成AI（ChatGPT、Midjourney等）に添付・アップロード</b>して送信することをお勧めします。</li>
+            </ul>
+        </div>
+
+        <div class="mode-card" onclick="setMode('multi')">
+            <img src="img/1.png" class="card-banner" onerror="this.onerror=null; this.src='https://via.placeholder.com/300x140?text=Multi+Word+Mode'">
+            <div class="mode-card-content">
+                <h3><span class="badge" style="background:#444; color:white;">1</span> 複数単語一括</h3>
+                <p>複数の英単語を カンマ( , ) で区切って入力します。入力された順に異なるスタイルが自動で割り当てられ、コラージュ風のプロンプトを作成します。</p>
+                <span class="start-badge">START</span>
+            </div>
+        </div>
+        <div class="mode-card" onclick="setMode('single')">
+            <img src="img/2.png" class="card-banner" onerror="this.onerror=null; this.src='https://via.placeholder.com/300x140?text=Single+Word+Mode'">
+            <div class="mode-card-content">
+                <h3><span class="badge" style="background:#444; color:white;">2</span> 1単語集中</h3>
+                <p>特定の1単語（自分の名前など）を全50種類以上のスタイルで試したい時に最適です。入力した単語がすべてのスタイルリストに適用されます。</p>
+                <span class="start-badge">START</span>
+            </div>
+        </div>
+        <div class="mode-card" onclick="setMode('singleStyle')">
+            <img src="img/3.png" class="card-banner" onerror="this.onerror=null; this.src='https://via.placeholder.com/300x140?text=Single+Style+Mode'">
+            <div class="mode-card-content">
+                <h3><span class="badge" style="background:#444; color:white;">3</span> 1形式集中</h3>
+                <p>１つのスタイルを選択し、複数の単語に一括適用します。特定のフォントや色味で統一した単語リストを作りたい場合に便利です。</p>
+                <span class="start-badge">START</span>
+            </div>
+        </div>
+        <div class="mode-card" onclick="setMode('custom')">
+            <img src="img/4.png" class="card-banner" onerror="this.onerror=null; this.src='https://via.placeholder.com/300x140?text=Custom+Mode'">
+            <div class="mode-card-content">
+                <h3><span class="badge" style="background:#444; color:white;">4</span> カスタム(画像付)</h3>
+                <p>プレビュー画像を確認しながら、特定のスタイルにだけ文字を指定できます。こだわりたい場合に最適です。</p>
+                <span class="start-badge">START</span>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <div id="toolUI" style="display: none;">
+        <div class="unified-glass">
+            <div class="mode-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid rgba(255,255,255,0.1); padding-bottom: 15px;">
+                <h2 id="currentModeTitle" style="margin: 0; color: #00bcd4; font-family: 'Gugi', cursive; font-size: 1.5em;"></h2>
+                <button class="tab-btn btn-top" onclick="setMode('top')" style="margin: 0;">← TOPに戻る</button>
+            </div>
+
+            <div id="multiSection" class="section">
+                <textarea id="multiInput" placeholder="Hello, Welcome, Tokyo..."></textarea>
+            </div>
+
+            <div id="singleSection" class="section">
+                <textarea id="singleInput" placeholder="DREAM"></textarea>
+            </div>
+
+            <div id="singleStyleSection" class="section">
+                <div style="margin-bottom: 15px; display: flex; align-items: center; gap: 15px; background: rgba(255, 255, 255, 0.03); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                    <span style="font-weight: bold; color: #00bcd4;">固定スタイル:</span>
+                    <div class="preview-box" id="singleStylePreview" style="width: 80px; height: 60px;">
+                        <img src="" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" alt="">
+                        <span style="display:none;">No Image</span>
+                    </div>
+                    <select id="singleStyleSelect" onchange="updatePreview(this, 'singleStylePreview')" style="flex: 1; padding: 8px; border-radius: 4px; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1);"></select>
+                </div>
+                <textarea id="singleStyleInput" placeholder="Apple, Banana, Orange... (すべての単語に上記スタイルを適用)"></textarea>
+            </div>
+
+            <div id="customSection" class="section">
+                <div id="customList"></div>
+            </div>
+
+            <!-- 画像生成 パラメータ設定エリア -->
+            <div style="margin-top: 15px; background: rgba(0, 188, 212, 0.05); padding: 15px; border-radius: 12px; border: 1px solid rgba(0, 188, 212, 0.3); display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
+                <span style="font-weight: bold; color: #00bcd4; font-size: 0.9em; font-family: 'Gugi', cursive;">Image Parameters:</span>
+                <select id="mjAR" style="padding: 6px; border-radius: 4px; background: rgba(255, 255, 255, 0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); cursor: pointer;">
+                    <option value="">Aspect Ratio: Square</option>
+                    <option value="wide">Wide (16:9)</option>
+                    <option value="vertical">Vertical (9:16)</option>
+                </select>
+                <select id="mjV" style="padding: 6px; border-radius: 4px; background: rgba(255, 255, 255, 0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); cursor: pointer;">
+                    <option value="">Style: Default</option>
+                    <option value=" vibrant and colorful">Vibrant & Colorful</option>
+                    <option value=" highly detailed 3D">Deep 3D Effect</option>
+                    <option value=" minimalistic and clean">Minimalistic</option>
+                    <option value=" realistic street art">Photo-realistic</option>
+                </select>
+                <input type="text" id="mjExtra" placeholder="Add custom instructions..." style="flex: 1; min-width: 150px; padding: 6px; border-radius: 4px; background: rgba(255, 255, 255, 0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1);">
+            </div>
+
+            <button class="gen-btn" onclick="generate()">プロンプトを生成</button>
+            <button class="reset-btn" onclick="resetFields()">すべてリセット</button>
+        </div>
+    </div>
+
+    <div id="resultContainer">
+        <div id="result"></div>
+        <button class="copy-btn" onclick="copyText()">コピーする</button>
+    </div>
+</div>
+
+<script>
+    const styleOptions = [
+        { name: "Block letters", desc: "bold 3D block-style graffiti letters, deep volumetric shadows, sharp beveled edges, clean thick outlines, professional street art aesthetic" },
+        { name: "Gold wildstyle", desc: "intricate interlocking letters in polished 24k gold, high-gloss metallic sheen, sharp arrow extensions, deep volumetric shadows, luxury street art" },
+        { name: "Bubble", desc: "iconic rounded bubble letters, glossy vibrant pink-to-purple gradient, realistic plastic highlights, thick clean black outlines" },
+        { name: "Aged copper", desc: "weathered copper letters with green verdigris patina, rustic texture, industrial corrosion details" },
+        { name: "Modern graphic", desc: "sleek vector-style modern graphic letters, clean lines, minimalist geometry, high-contrast flat colors" },
+        { name: "with stars", desc: "graffiti letters with sparkling gold and silver stars, cosmic dust particles, glowing stardust trails, magical whimsical aesthetic" },
+        { name: "Fluid cursive", desc: "elegant fluid cursive graffiti script, smooth flowing lines, sweeping curves, calligraphy-inspired spray strokes" },
+        { name: "Heavy dark", desc: "heavy blocky letters with dark charcoal colors, deep black shadows, ominous bold industrial feel" },
+        { name: "Dark neon", desc: "electrifying neon glow in dark violet and cyan colors, outlined in pitch black, glowing graffiti aesthetic" },
+        { name: "Soft pastels", desc: "soft pastel-colored letters, gentle cream, mint, peach gradients, dreamy and smooth aesthetic" },
+        { name: "Interlocking", desc: "complex interlocking pieces, tightly woven letters overlapping, puzzle-like modern graffiti wildstyle" },
+        { name: "Textured", desc: "rough textured letters resembling cracked concrete and peeling paint, gritty urban wall feel" },
+        { name: "Multi-color chaos", desc: "multi-colored graffiti chaos, splatters, wild drips, explosive rainbow colors layered dynamically" },
+        { name: "Blue 3D", desc: "futuristic 3D letters in electric cobalt blue, deep volumetric shadows, cyan neon edge glow, high-tech digital aesthetic" },
+        { name: "Chrome", desc: "liquid mirror-finish chrome letters, highly reflective surface, distorted sky reflections, metallic silver sheen, cybernetic street art" },
+        { name: "Explosive wildstyle", desc: "explosive wildstyle graffiti, sharp points, outward bursts, high energy, neon orange and yellow accents" },
+        { name: "Light/airy", desc: "light airy letters, semi-transparent wispy spray paint texture, soft light backgrounds, elegant and clean" },
+        { name: "Red/black", desc: "aggressive red and black graffiti letters, high-contrast sharp angles, heavy black outlines, hardcore street style" },
+        { name: "Musical", desc: "graffiti letters integrated with musical notes, fluid wave lines, vinyl grooves, flowing rhythm" },
+        { name: "Purple/gold", desc: "regal royal purple letters with ornate 24k gold trim, metallic gold dust splatters, deep volumetric shadows, luxurious street art fusion" },
+        { name: "Rainbow gradient", desc: "vibrant rainbow gradient lettering, smooth color transitions from red to violet, glossy finish" },
+        { name: "Punishment-style", desc: "gritty raw punk-style letters, chaotic scratches, run-down spray drips, distressed thrash art" },
+        { name: "Abstract", desc: "abstract wispy graffiti art, fluid organic shapes, blending spray mist, experimental street art" },
+        { name: "Bubble/peace sign", desc: "classic bubble letters combined with peace sign symbols, 70s retro colors, daisy details" },
+        { name: "Script style", desc: "custom flowing script graffiti, elegant tag style, calligraphic flourishes, smooth continuous strokes" },
+        { name: "Handtag", desc: "authentic monochrome black ink handstyle tag, raw marker aesthetics, quick fluid strokes, realistic ink drips, simple street signature style" },
+        { name: "Ornate", desc: "ornate Victorian-style graffiti letters, decorative flourishes, gold filigree details, baroque graffiti fusion" },
+        { name: "Sparkles", desc: "glittering graffiti letters with lens flare sparkles, sparkling stardust, magical shiny elements" },
+        { name: "Chill tag", desc: "relaxed laid-back chill tag, casual marker lines, simple and clean handstyle, low-key vibes" },
+        { name: "Funky tag", desc: "funky grooved tag style, retro wavy lines, vibrant contrast colors, energetic handstyle" },
+        { name: "Relaxed script", desc: "relaxed casual script lettering, handwritten aesthetic, smooth spray flows, effortless tag style" },
+        { name: "Winged tag", desc: "graffiti tag flanked by stylized angelic wings, speed lines, soaring energetic lines" },
+        { name: "NY tag", desc: "classic New York subway handstyle, fat cap spray strokes, drips, aggressive street lettering" },
+        { name: "Bold tag", desc: "thick bold marker tag, heavy black ink lines, high impact, minimalist raw street tag" },
+        { name: "Motion blur", desc: "motion blurred graffiti, fast speed streak lines, dynamic action blur, moving train aesthetic" },
+        { name: "Foggy effect", desc: "soft foggy spray paint mist, letters fading into haze, atmospheric cloud outlines, low opacity" },
+        { name: "Crushed metal", desc: "textured crushed metal sheets effect, metallic dents, silver reflections, heavy industrial look" },
+        { name: "Stellar/space", desc: "stellar space theme letters, cosmic nebula fill, small planets, deep stardust background" },
+        { name: "Family crest detail", desc: "heraldic family crest style graffiti, shield borders, intricate gold ribbon details, coat of arms fusion" },
+        { name: "3D optical illusion", desc: "mind-bending 3D optical illusion, impossible geometry, twisted perspective letters, mind-altering shadows" },
+        { name: "Eclipse palette", desc: "eclipse-themed colors, deep solar gold corona, dark obsidian black center, high contrast ring glow" },
+        { name: "Fast-looking", desc: "aerodynamic fast-looking letters, leaning forward, speed lines, racing-style sharp angles" },
+        { name: "Plant-like", desc: "organic plant-like letters wrapped in green vines, sprouting leaves, forest moss details" },
+        { name: "Brain-wave details", desc: "psychedelic brain-wave patterns, flowing neural pathways, intricate neon wavy lines" },
+        { name: "Repeating pattern", desc: "repeating pattern graffiti art, interlocking monogram style, textured wallpaper background" },
+        { name: "Map detail", desc: "cartographic map style, topographic contour lines filled inside letters, vintage paper texture" },
+        { name: "Voice bubble effect", desc: "pop art style voice bubble outline, cartoon halftone dots, comic book style splash" },
+        { name: "Full color spectrum", desc: "spectacular full color spectrum, every hue of the rainbow blended seamlessly, ultra-vibrant fill" },
+        { name: "Blueprint style", desc: "architectural blueprint style, technical draft lines on grid blue paper, white planning lines" },
+        { name: "Glowing effect", desc: "soft ethereal glowing effect, warm backlighting, ambient neon halo radiating outwards" }
+    ];
+
+    let currentMode = 'top';
+
+    // ユーティリティ関数
+    const getSafeFileName = (name) => name.replace(/\//g, '') + ".PNG"; // Ensure matching the capitalized extension in img directory
+    const getEl = (id) => document.getElementById(id);
+
+    const listContainer = document.getElementById('customList');
+    styleOptions.forEach((style, i) => {
+        const row = document.createElement('div');
+        row.className = 'custom-row';
+        const fileName = getSafeFileName(style.name);
+        const options = styleOptions.map((s, idx) => `<option value="${s.name}" ${idx === i ? 'selected' : ''}>(${s.name})</option>`).join('');
+        
+        row.innerHTML = `
+            <span class="row-num">${i + 1}</span>
+            <div class="preview-box" id="prev_box_${i}">
+                <img src="img/${fileName}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" alt="">
+                <span style="display:none;">No Image<br>(img/${fileName})</span>
+            </div>
+            <div class="input-group">
+                <input type="text" class="custom-word" placeholder="表示する文字を入力...">
+                <select class="custom-style" onchange="updatePreview(this, 'prev_box_${i}')">${options}</select>
+            </div>
+        `;
+        listContainer.appendChild(row);
+    });
+
+    // セレクトボックス初期化
+    getEl('singleStyleSelect').innerHTML = styleOptions.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+    updatePreview(getEl('singleStyleSelect'), 'singleStylePreview');
+
+    function updatePreview(selectElement, boxId) {
+        const fileName = getSafeFileName(selectElement.value);
+        const box = getEl(boxId);
+        const img = box.querySelector('img');
+        const span = box.querySelector('span');
+        
+        img.src = "img/" + fileName;
+        img.style.display = 'block';
+        span.style.display = 'none';
+    }
+
+    function setMode(mode) {
+        currentMode = mode;
+        const isTop = mode === 'top';
+        
+        getEl('topSection').style.display = isTop ? 'grid' : 'none';
+        getEl('toolUI').style.display = isTop ? 'none' : 'block';
+        
+        // 結果表示エリアを非表示にする
+        getEl('resultContainer').style.display = 'none';
+
+        if (isTop) return;
+
+        // モードごとのタイトル設定
+        const titles = {
+            'multi': '複数単語一括モード',
+            'single': '1単語集中モード',
+            'singleStyle': '1形式集中モード',
+            'custom': 'カスタム(画像付)モード'
+        };
+        getEl('currentModeTitle').innerText = titles[mode] || '';
+
+        // セクションの表示切り替え
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        const targetSection = getEl(mode + 'Section');
+        if (targetSection) targetSection.classList.add('active');
+    }
+
+    function generate() {
+        const getValue = (id) => getEl(id).value.trim();
+        const arValue = getEl('mjAR').value;
+        const arText = arValue ? ` in a ${arValue} aspect ratio` : "";
+        const stylePreference = getEl('mjV').value || "";
+
+        let prompt = "";
+        
+        const rowDefs = [
+            { title: "Row 1 (Diverse Styles)", size: 8 },
+            { title: "Row 2 (More Styles)", size: 8 },
+            { title: "Row 3 (Even More)", size: 8 },
+            { title: "Row 4 (Handstyles & Tags)", size: 10 },
+            { title: "Row 5 (Unique Materials)", size: 8 },
+            { title: "Row 6 (Final Diverse)", size: 8 }
+        ];
+
+        if (currentMode === 'multi') {
+            const words = getValue('multiInput').split(',').map(w => w.trim()).filter(w => w);
+            if (words.length === 0) return alert("文字を入力してください。");
+            
+            // Repeat the input words to get exactly 50 words
+            const repeatedWords = [];
+            for (let i = 0; i < 50; i++) {
+                repeatedWords.push(words[i % words.length]);
+            }
+
+            let rowsText = "";
+            let currentIndex = 0;
+            rowDefs.forEach(rowDef => {
+                let rowItems = [];
+                for (let j = 0; j < rowDef.size; j++) {
+                    const word = repeatedWords[currentIndex];
+                    const style = styleOptions[currentIndex];
+                    rowItems.push(`[${word.toUpperCase()}] (${style.desc})`);
+                    currentIndex++;
+                }
+                rowsText += `${rowDef.title}: \n${rowItems.join(', ')}.\n`;
+            });
+
+            prompt = `An epic, sprawling digital art collage${arText} featuring over 50 distinct and diverse graffiti art word tags, covering a massive area with individual pieces. The overall composition is a densely packed, multi-row, multi-column grid of diverse graffiti styles, each piece unique and vibrant against a clean white background. This collection includes a vast range of graffiti lettering: from classic wildstyle to bubble letters, 3D block letters, handstyles (tags), and intricate character-infused pieces. Each word is stylized with a unique combination of fill colors (neons, pastels, gradients, metallics, multi-patterns like leopard or digital camo), outlines (thick black, colored, double-lined), 3D effects (deep bevels, block shadows), and detailed embellishments (splatters, drip effects, stars, sparkles, urban-themed micro-illustrations like small spray cans, paint rollers, and stylized faces).
+The grid must contain over 50 words arranged harmoniously. Here are at least 50 specific words to include, each in its own unique graffiti style and placement:
+${rowsText}
+The entire grid is clean, vibrant, and incredibly detailed, with paint drips and splatter elements around the words creating a dynamic, real-world feel. Each letter form is custom-designed, not from standard fonts.${stylePreference} High-resolution photo.`;
+
+        } else if (currentMode === 'single') {
+            const word = getValue('singleInput') || "STYLE";
+            const repeatedWords = Array(50).fill(word);
+
+            let rowsText = "";
+            let currentIndex = 0;
+            rowDefs.forEach(rowDef => {
+                let rowItems = [];
+                for (let j = 0; j < rowDef.size; j++) {
+                    const w = repeatedWords[currentIndex];
+                    const style = styleOptions[currentIndex];
+                    rowItems.push(`[${w.toUpperCase()}] (${style.desc})`);
+                    currentIndex++;
+                }
+                rowsText += `${rowDef.title}: \n${rowItems.join(', ')}.\n`;
+            });
+
+            prompt = `An epic, sprawling digital art collage${arText} featuring over 50 distinct and diverse graffiti art word tags of the word "${word.toUpperCase()}", covering a massive area with individual pieces. The overall composition is a densely packed, multi-row, multi-column grid of diverse graffiti styles, each piece unique and vibrant against a clean white background. This collection includes a vast range of graffiti lettering: from classic wildstyle to bubble letters, 3D block letters, handstyles (tags), and intricate character-infused pieces. Each word is stylized with a unique combination of fill colors (neons, pastels, gradients, metallics, multi-patterns like leopard or digital camo), outlines (thick black, colored, double-lined), 3D effects (deep bevels, block shadows), and detailed embellishments (splatters, drip effects, stars, sparkles, urban-themed micro-illustrations like small spray cans, paint rollers, and stylized faces).
+The grid must contain over 50 variations of the same word arranged harmoniously. Here are at least 50 specific variations to include, each in its own unique graffiti style and placement:
+${rowsText}
+The entire grid is clean, vibrant, and incredibly detailed, with paint drips and splatter elements around the words creating a dynamic, real-world feel. Each letter form is custom-designed, not from standard fonts.${stylePreference} High-resolution photo.`;
+
+        } else if (currentMode === 'singleStyle') {
+            const selectedStyleName = getValue('singleStyleSelect');
+            const selectedStyle = styleOptions.find(s => s.name === selectedStyleName);
+            const styleDesc = selectedStyle ? selectedStyle.desc : selectedStyleName;
+            const words = getValue('singleStyleInput').split(',').map(w => w.trim()).filter(w => w);
+            if (words.length === 0) return alert("文字を入力してください。");
+
+            if (words.length === 1) {
+                const word = words[0].toUpperCase();
+                prompt = `A high-quality professional graffiti art piece${arText} featuring the word "[${word}]". 
+It is rendered strictly in the following style: ${styleDesc}.
+The artwork is isolated on a clean white background, featuring vibrant colors, sharp outlines, and professional spray paint textures. It includes authentic street art elements like subtle paint drips and splatters to enhance the look. Each letter is custom-designed.${stylePreference} High-resolution digital art.`;
+            } else {
+                let rowsText = "";
+                for (let i = 0; i < words.length; i += 8) {
+                    const rowWords = words.slice(i, i + 8);
+                    const rowItems = rowWords.map(w => `[${w.toUpperCase()}] (${styleDesc})`);
+                    rowsText += `Row ${Math.floor(i / 8) + 1}: \n${rowItems.join(', ')}.\n`;
+                }
+
+                prompt = `A high-quality digital art collage${arText} featuring a collection of ${words.length} distinct graffiti art word tags in a unified style. The overall composition is a clean, organized layout against a white background. 
+This collection features all words rendered strictly in the "${styleDesc}" style.
+The collection includes only the following items:
+${rowsText}
+Each piece is vibrant, featuring a combination of fill colors, sharp outlines, and detailed embellishments like splatters and drip effects. The entire grid is clean and incredibly detailed. Each letter form is custom-designed.${stylePreference} High-resolution photo.`;
+            }
+
+        } else if (currentMode === 'custom') {
+            let customItems = [];
+            document.querySelectorAll('.custom-row').forEach(row => {
+                const word = row.querySelector('.custom-word').value.trim();
+                const styleName = row.querySelector('.custom-style').value;
+                const styleObj = styleOptions.find(s => s.name === styleName);
+                const styleDesc = styleObj ? styleObj.desc : styleName;
+                if (word !== "") {
+                    customItems.push({ word: word.toUpperCase(), desc: styleDesc });
+                }
+            });
+
+            if (customItems.length === 0) return alert("文字を入力してください。");
+
+            if (customItems.length === 1) {
+                const item = customItems[0];
+                prompt = `A high-quality professional graffiti art piece${arText} featuring the word "[${item.word}]". 
+It is rendered strictly in the following style: ${item.desc}.
+The artwork is isolated on a clean white background, featuring vibrant colors, sharp outlines, and professional spray paint textures. It includes authentic street art elements like subtle paint drips and splatters to enhance the look. Each letter is custom-designed.${stylePreference} High-resolution digital art.`;
+            } else {
+                let rowsText = "";
+                for (let i = 0; i < customItems.length; i += 8) {
+                    const chunk = customItems.slice(i, i + 8);
+                    const rowItems = chunk.map(item => `[${item.word}] (${item.desc})`);
+                    rowsText += `Row ${Math.floor(i / 8) + 1}: \n${rowItems.join(', ')}.\n`;
+                }
+
+                prompt = `A high-quality digital art collage${arText} featuring a collection of ${customItems.length} distinct graffiti art word tags. The overall composition is a clean, organized layout of diverse graffiti styles against a white background. 
+The collection includes only the following items:
+${rowsText}
+Each piece is unique and vibrant, featuring a combination of fill colors, sharp outlines, and detailed embellishments like splatters and drip effects. The entire grid is clean and incredibly detailed. Each letter form is custom-designed.${stylePreference} High-resolution photo.`;
+            }
+        }
+
+        const extra = getValue('mjExtra');
+        if (extra) prompt += "\nAdditional instructions: " + extra;
+
+        getEl('result').innerText = prompt;
+        getEl('resultContainer').style.display = 'block';
+    }
+
+    function copyText() {
+        navigator.clipboard.writeText(getEl('result').innerText).then(() => alert("コピーしました！"));
+    }
+
+    function resetFields() {
+        if (!confirm("すべての入力内容をリセットしますか？")) return;
+        
+        ['multiInput', 'singleInput', 'singleStyleInput', 'mjExtra'].forEach(id => getEl(id).value = "");
+        document.querySelectorAll('.custom-word').forEach(input => input.value = "");
+        
+        const selects = document.querySelectorAll('.custom-style');
+        selects.forEach((select, i) => {
+            select.value = styleOptions[i].name;
+            updatePreview(select, `prev_box_${i}`);
+        });
+        
+        getEl('singleStyleSelect').selectedIndex = 0;
+        updatePreview(getEl('singleStyleSelect'), 'singleStylePreview');
+
+        // パラメータのクリア
+        getEl('mjAR').selectedIndex = 0;
+        getEl('mjV').selectedIndex = 0;
+
+        // 生成結果の非表示
+        getEl('resultContainer').style.display = 'none';
+        getEl('result').innerText = "";
+    }
+
+    // ヘッダーのランダムスライドショー機能
+    function startHeaderSlideshow() {
+        const img = document.getElementById('slideshowImg');
+        let failCount = 0;
+        let intervalId;
+
+        const updateImage = () => {
+            const randomStyle = styleOptions[Math.floor(Math.random() * styleOptions.length)];
+            img.src = "img/" + getSafeFileName(randomStyle.name);
+        };
+
+        img.onload = () => {
+            img.style.opacity = '1';
+            failCount = 0; // 成功したらカウントリセット
+        };
+
+        img.onerror = () => {
+            img.style.opacity = '0';
+            failCount++;
+            // 画像が10回連続で見つからない場合は、無駄なロードを避けるため停止
+            if (failCount > 10) {
+                console.warn("Slideshow paused: Multiple images missing in img/ folder.");
+                clearInterval(intervalId);
+            }
+        };
+
+        updateImage();
+        intervalId = setInterval(updateImage, 3000); // 3秒ごとに切り替え
+    }
+
+    // 実行
+    startHeaderSlideshow();
+</script>
+</body>
+</html>

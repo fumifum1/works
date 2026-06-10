@@ -82,7 +82,6 @@
 
             /* トップ画面のカード配列を1列に強制 */
             #topSection { 
-                display: grid !important;
                 grid-template-columns: 1fr !important; 
                 gap: 20px !important; 
             }
@@ -228,8 +227,9 @@
                 <span class="start-badge">START</span>
             </div>
         </div>
+    </div>
 
-        <div id="toolUI" style="display: none;">
+    <div id="toolUI" style="display: none;">
         <div class="unified-glass">
             <div class="mode-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid rgba(255,255,255,0.1); padding-bottom: 15px;">
                 <h2 id="currentModeTitle" style="margin: 0; color: #00bcd4; font-family: 'Gugi', cursive; font-size: 1.5em;"></h2>

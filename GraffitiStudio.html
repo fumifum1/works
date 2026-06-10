@@ -74,31 +74,35 @@
         }
         @media (max-width: 850px) {
             body { padding: 10px; margin: 0; }
+            body { font-size: 16px; }
             body::before { opacity: 0.2; }
-            .card { padding: 20px 15px; margin-top: 10px; border-radius: 12px; width: 100% !important; }
-            h1 { font-size: 1.8em; margin-bottom: 10px; line-height: 1.2; }
+            .card { padding: 25px 15px; margin-top: 10px; border-radius: 12px; width: 100% !important; box-sizing: border-box; }
+            h1 { font-size: 2.2em; margin-bottom: 15px; line-height: 1.2; }
 
             /* トップ画面のカード配列を1列に強制 */
             #topSection { 
-                grid-template-columns: 1fr !important;
+                display: grid !important;
+                grid-template-columns: 1fr !important; 
                 gap: 20px !important; 
             }
             
             .mode-card { 
+                width: 100% !important;
                 flex-direction: column !important;
                 min-height: auto !important;
             }
-            .card-banner { height: 180px !important; }
+            .card-banner { height: 200px !important; }
             .mode-card-content { padding: 20px !important; gap: 10px !important; }
-            .mode-card h3 { font-size: 1.5em !important; }
-            .mode-card p { font-size: 1em !important; color: #ddd !important; line-height: 1.4 !important; }
-            .mode-card .start-badge { align-self: stretch !important; text-align: center; padding: 10px; font-size: 1em; margin-top: 5px; }
+            .mode-card h3 { font-size: 1.7em !important; }
+            .mode-card p { font-size: 1.1em !important; color: #eee !important; line-height: 1.5 !important; }
+            .mode-card .start-badge { align-self: stretch !important; text-align: center; padding: 12px; font-size: 1.1em; margin-top: 5px; background: #00bcd4; color: #fff; }
 
             /* タブナビゲーションの調整 */
             .tab-nav { overflow-x: auto; justify-content: flex-start; padding-bottom: 10px; }
             .tab-btn { white-space: nowrap; padding: 10px 16px; font-size: 14px; }
 
             /* ツール入力画面の調整 */
+            textarea { font-size: 16px !important; }
             .mode-header { flex-direction: column; align-items: flex-start !important; gap: 12px; }
             .btn-top { width: 100%; text-align: center; }
             .custom-row { flex-direction: column; align-items: stretch; padding: 15px; }
@@ -281,8 +285,6 @@
     <div id="resultContainer">
         <div id="result"></div>
         <button class="copy-btn" onclick="copyText()">コピーする</button>
-    </div>
-
     </div>
 </div>
 

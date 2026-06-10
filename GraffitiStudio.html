@@ -74,19 +74,17 @@
         }
         @media (max-width: 850px) {
             body { padding: 10px; margin: 0; }
+            body::before { opacity: 0.2; }
             .card { padding: 20px 15px; margin-top: 10px; border-radius: 12px; width: 100% !important; }
             h1 { font-size: 1.8em; margin-bottom: 10px; line-height: 1.2; }
 
             /* トップ画面のカード配列を1列に強制 */
             #topSection { 
-                display: flex !important; 
-                flex-direction: column !important; 
-                grid-template-columns: none !important;
+                grid-template-columns: 1fr !important;
                 gap: 20px !important; 
             }
             
             .mode-card { 
-                width: 100% !important; 
                 flex-direction: column !important;
                 min-height: auto !important;
             }
@@ -98,11 +96,11 @@
 
             /* タブナビゲーションの調整 */
             .tab-nav { overflow-x: auto; justify-content: flex-start; padding-bottom: 10px; }
-            .tab-btn { white-space: nowrap; padding: 8px 16px; font-size: 14px; }
+            .tab-btn { white-space: nowrap; padding: 10px 16px; font-size: 14px; }
 
             /* ツール入力画面の調整 */
-            .mode-header { flex-direction: column; align-items: stretch; gap: 10px; }
-            .btn-top { width: 100%; }
+            .mode-header { flex-direction: column; align-items: flex-start !important; gap: 12px; }
+            .btn-top { width: 100%; text-align: center; }
             .custom-row { flex-direction: column; align-items: stretch; padding: 15px; }
             .preview-box { width: 100% !important; height: 140px !important; }
             .custom-word, .custom-style { width: 100% !important; height: 45px; }
@@ -225,10 +223,8 @@
                 <span class="start-badge">START</span>
             </div>
         </div>
-        </div>
-    </div>
 
-    <div id="toolUI" style="display: none;">
+        <div id="toolUI" style="display: none;">
         <div class="unified-glass">
             <div class="mode-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid rgba(255,255,255,0.1); padding-bottom: 15px;">
                 <h2 id="currentModeTitle" style="margin: 0; color: #00bcd4; font-family: 'Gugi', cursive; font-size: 1.5em;"></h2>
@@ -285,6 +281,8 @@
     <div id="resultContainer">
         <div id="result"></div>
         <button class="copy-btn" onclick="copyText()">コピーする</button>
+    </div>
+
     </div>
 </div>
 

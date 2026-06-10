@@ -95,7 +95,21 @@
             .mode-card-content { padding: 20px !important; gap: 10px !important; }
             .mode-card h3 { font-size: 1.4em !important; }
             .mode-card p { font-size: 1.1em !important; color: #eee !important; line-height: 1.5 !important; }
-            .mode-card .start-badge { align-self: stretch !important; text-align: center; padding: 12px; font-size: 1.1em; margin-top: 5px; background: #00bcd4; color: #fff; }
+            .mode-card .start-badge {
+                align-self: stretch !important;
+                text-align: center;
+                padding: 12px;
+                font-size: 1.3em;
+                font-weight: 900 !important;
+                margin-top: 5px;
+                /* Make it look more like a distinct button on mobile */
+                background: #00bcd4 !important; /* 高明度のシアンで目を引く */
+                color: #000 !important; /* 黒文字にすることで視認性を最大化 */
+                box-shadow: 0 0 25px rgba(0, 188, 212, 0.8) !important; /* ネオン風の発光エフェクト */
+                border: none !important; /* Ensure no conflicting border */
+                text-transform: uppercase;
+                letter-spacing: 2px;
+            }
 
             /* タブナビゲーションの調整 */
             .tab-nav { overflow-x: auto; justify-content: flex-start; padding-bottom: 10px; }

@@ -203,7 +203,7 @@
             try {
                 await fetch(gasUrl, {
                     method: 'POST',
-                    mode: 'no-cors', // 確実に保存させるため no-cors に戻します
+                    mode: 'no-cors', 
                     headers: { 'Content-Type': 'text/plain' }, 
                     body: JSON.stringify({ title, content, folder })
                 });
@@ -231,12 +231,11 @@
             resultsEl.style.display = 'block';
 
             try {
-                // パラメータ名を 'term' に変更
-                // URLの末尾に?があるかどうかをチェックして結合
-                const connector = gasUrl.includes('?') ? '&' : '?';
-                const searchUrl = `${gasUrl}${connector}term=${encodeURIComponent(query)}`;
-                
-                const response = await fetch(searchUrl, { method: 'GET' });
+                // URLの組み立てをより確実に（既存のパラメータを一旦リセット）
+                const baseUrl = gasUrl.split('?')[0]; 
+                const searchUrl = `${baseUrl}?term=${encodeURIComponent(query)}`;
+
+                const response = await fetch(searchUrl);
                 
                 if (!response.ok) throw new Error('Network response was not ok');
                 

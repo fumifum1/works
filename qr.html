@@ -9,6 +9,15 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
+    <style>
+        .hidden { display: none !important; }
+        .content-group { margin-bottom: 15px; }
+        .content-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .vcard-fields, .wifi-fields { display: flex; flex-direction: column; gap: 10px; }
+        .settings-body input[type="text"], .settings-body input[type="tel"], .settings-body input[type="email"], .settings-body textarea, .settings-body select {
+            width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; background: #fff; color: #333;
+        }
+    </style>
 </head>
 <body>
     <!-- Hamburger Menu -->
@@ -42,16 +51,59 @@
 
             <div class="settings-body">
                 <div class="tab-nav">
-                    <button class="tab-button active" data-tab="url">URL</button>
+                    <button class="tab-button active" data-tab="url">コンテンツ</button>
                     <button class="tab-button" data-tab="design">カラー</button>
                     <button class="tab-button" data-tab="style">スタイル</button>
                     <button class="tab-button" data-tab="logo">ロゴ</button>
                 </div>
 
                 <fieldset id="url-settings" class="tab-content active" data-tab-content="url">
-                    <div>
+                    <div class="content-group">
+                        <label for="qr-type-select">種別</label>
+                        <select id="qr-type-select">
+                            <option value="url">URL</option>
+                            <option value="text">テキスト（メッセージ）</option>
+                            <option value="vcard">連絡先 (vCard)</option>
+                            <option value="vcard_link">デジタル名刺リンク（推奨）</option>
+                            <option value="wifi">Wi-Fi接続</option>
+                        </select>
+                    </div>
+
+                    <div id="url-input-container" class="content-group">
+                        <div id="password-group" class="hidden" style="margin-bottom: 10px; background: #fff3f8; padding: 10px; border-radius: 8px; border: 1px solid #ffccd5;">
+                            <p id="local-warning" class="hidden" style="font-size: 11px; color: #d63384; font-weight: bold; margin-bottom: 8px;">【重要】現在ローカルで実行中です。このQRコードをスマホで使うにはGitHub等へのアップロードが必要です。オフラインで使いたい場合は種別を「連絡先 (vCard)」にしてください。</p>
+                            <label for="vcard-pass" style="color: #d63384; font-weight: bold;">閲覧パスワード（任意）</label>
+                            <input type="text" id="vcard-pass" placeholder="未入力なら暗号化なし">
+                        </div>
                         <label for="url-input">URL</label>
-                        <input type="text" id="url-input" value="https://www.google.com" placeholder="ここにURLを入力">
+                        <input type="text" id="url-input" value="https://www.google.com" placeholder="https://example.com">
+                    </div>
+
+                    <div id="text-input-container" class="content-group hidden">
+                        <label for="text-input">メッセージ</label>
+                        <textarea id="text-input" placeholder="表示したいテキストを入力" style="height: 100px;"></textarea>
+                    </div>
+
+                    <div id="vcard-input-container" class="content-group vcard-fields hidden">
+                        <p style="font-size: 11px; color: #d63384; margin-bottom: 10px; line-height: 1.4;">※Googleレンズで認識されない場合は、カラーを「単色」、スタイルを「四角」に設定してください。</p>
+                        <label for="vcard-name">お名前</label><input type="text" id="vcard-name" placeholder="姓名">
+                        <label for="vcard-company">会社名</label><input type="text" id="vcard-company" placeholder="株式会社〇〇">
+                        <label for="vcard-title">役職</label><input type="text" id="vcard-title" placeholder="代表取締役">
+                        <label for="vcard-tel">電話番号</label><input type="tel" id="vcard-tel" placeholder="09000000000">
+                        <label for="vcard-email">メール</label><input type="email" id="vcard-email" placeholder="mail@example.com">
+                        <label for="vcard-url">Webサイト</label><input type="text" id="vcard-url" placeholder="https://...">
+                        <label for="vcard-address">住所</label><input type="text" id="vcard-address" placeholder="東京都... ">
+                    </div>
+
+                    <div id="wifi-input-container" class="content-group wifi-fields hidden">
+                        <label for="wifi-ssid">ネットワーク名(SSID)</label><input type="text" id="wifi-ssid" placeholder="SSIDを入力">
+                        <label for="wifi-pass">パスワード</label><input type="text" id="wifi-pass" placeholder="Passwordを入力">
+                        <label for="wifi-enc">暗号化形式</label>
+                        <select id="wifi-enc">
+                            <option value="WPA">WPA/WPA2</option>
+                            <option value="WEP">WEP</option>
+                            <option value="nopass">なし</option>
+                        </select>
                     </div>
                 </fieldset>
 
@@ -154,5 +206,126 @@
     <script src="qrcode.js"></script>
     <script src="jimp.min.js"></script>
     <script src="qr.js"></script>
+    <script>
+        // 暗号化ユーティリティ
+        async function encryptData(text, password) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(text);
+            const salt = window.crypto.getRandomValues(new Uint8Array(16));
+            const passwordKey = await window.crypto.subtle.importKey("raw", encoder.encode(password), "PBKDF2", false, ["deriveKey"]);
+            const key = await window.crypto.subtle.deriveKey(
+                { name: "PBKDF2", salt: salt, iterations: 100000, hash: "SHA-256" },
+                passwordKey, { name: "AES-GCM", length: 256 }, false, ["encrypt"]
+            );
+            const iv = window.crypto.getRandomValues(new Uint8Array(12));
+            const encrypted = await window.crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, key, data);
+            
+            // [salt(16), iv(12), encryptedData(...)] の形式で結合してBase64化
+            const combined = new Uint8Array(salt.length + iv.length + encrypted.byteLength);
+            combined.set(salt, 0);
+            combined.set(iv, salt.length);
+            combined.set(new Uint8Array(encrypted), salt.length + iv.length);
+            
+            return btoa(String.fromCharCode(...combined));
+        }
+
+        // QRコードのタイプ切り替えとデータ同期ロジック
+        const typeSelect = document.getElementById('qr-type-select');
+        const passGroup = document.getElementById('password-group');
+        const containers = {
+            url: document.getElementById('url-input-container'),
+            text: document.getElementById('text-input-container'),
+            vcard: document.getElementById('vcard-input-container'),
+            wifi: document.getElementById('wifi-input-container')
+        };
+        const mainInput = document.getElementById('url-input');
+
+        const updatePayload = async () => {
+            const type = typeSelect.value;
+            
+            // 入力フォームの表示切り替えロジック
+            containers.url.classList.toggle('hidden', type !== 'url');
+            containers.text.classList.toggle('hidden', type !== 'text');
+            containers.vcard.classList.toggle('hidden', type !== 'vcard' && type !== 'vcard_link');
+            containers.wifi.classList.toggle('hidden', type !== 'wifi');
+            passGroup.classList.toggle('hidden', type !== 'vcard_link');
+            const isLocal = window.location.protocol === 'file:';
+            document.getElementById('local-warning')?.classList.toggle('hidden', !isLocal || type !== 'vcard_link');
+
+            if (type === 'url') return;
+
+            let payload = "";
+            if (type === 'text') {
+                payload = document.getElementById('text-input').value;
+            } else if (type === 'vcard' || type === 'vcard_link') {
+                const getV = (id) => document.getElementById(id).value.trim();
+                const name = getV('vcard-name');
+                const company = getV('vcard-company');
+                const title = getV('vcard-title');
+                const tel = getV('vcard-tel');
+                const email = getV('vcard-email');
+                const url = getV('vcard-url');
+                const address = getV('vcard-address');
+
+                if (type === 'vcard_link') {
+                    const password = document.getElementById('vcard-pass').value;
+                    const cardData = {
+                        n: name, c: company, t: title, 
+                        tel: tel, e: email, u: url, a: address
+                    };
+                    
+                    const jsonStr = JSON.stringify(cardData);
+                    let dataValue;
+                    
+                    if (password) {
+                        // パスワードがある場合は暗号化を実行
+                        dataValue = "enc:" + await encryptData(jsonStr, password);
+                    } else {
+                        dataValue = btoa(unescape(encodeURIComponent(jsonStr)));
+                    }
+
+                    // ファイル名を除いた現在のディレクトリパスを取得
+                    const baseUrl = window.location.href.split(/[?#]/)[0].replace(/[^\/]+$/, '');
+                    payload = `${baseUrl}contact_card.html?d=${dataValue}`;
+                } else {
+                    // 従来のMECARD形式
+                const getV = (id) => document.getElementById(id).value.replace(/[:;]/g, "").trim();
+                const name = getV('vcard-name');
+                const company = getV('vcard-company');
+                const title = getV('vcard-title');
+                const tel = document.getElementById('vcard-tel').value.replace(/[^0-9+]/g, "");
+                const email = getV('vcard-email');
+                const url = getV('vcard-url');
+                const address = getV('vcard-address');
+
+                // Googleレンズでの認識率が最も高いMECARD形式の構築
+                let m = "MECARD:";
+                if (name)    m += `N:${name};`;
+                if (company) m += `ORG:${company};`;
+                if (title)   m += `TIL:${title};`;
+                if (tel)     m += `TEL:${tel};`;
+                if (email)   m += `EMAIL:${email};`;
+                if (url)     m += `URL:${url};`;
+                if (address) m += `ADR:${address};`;
+                m += ";"; // 終端のセミコロン
+
+                payload = m;
+                }
+            } else if (type === 'wifi') {
+                const ssid = document.getElementById('wifi-ssid').value;
+                const pass = document.getElementById('wifi-pass').value;
+                const enc = document.getElementById('wifi-enc').value;
+                payload = `WIFI:T:${enc};S:${ssid};P:${pass};;`;
+            }
+            mainInput.value = payload;
+            mainInput.dispatchEvent(new Event('input', { bubbles: true }));
+        };
+
+        typeSelect.addEventListener('change', updatePayload);
+        ['text-input', 'vcard-name', 'vcard-company', 'vcard-title', 'vcard-tel', 'vcard-email', 'vcard-url', 'vcard-address', 'vcard-pass', 'wifi-ssid', 'wifi-pass', 'wifi-enc'].forEach(id => {
+            document.getElementById(id).addEventListener('input', updatePayload);
+        });
+        document.getElementById('wifi-enc').addEventListener('change', updatePayload);
+    </script>
 </body>
 </html>

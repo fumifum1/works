@@ -215,8 +215,8 @@ const qrApp = {
         const tempDiv = document.createElement('div');
         const qrInstance = new QRCode(tempDiv, {
             text: options.url,
-            width: 256,
-            height: 256,
+            width: 512,
+            height: 512,
             colorDark: options.colorDark,
             colorLight: options.colorLight,
             correctLevel: QRCode.CorrectLevel.H

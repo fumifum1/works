@@ -213,19 +213,34 @@ const qrApp = {
 
     _createBaseQr(options) {
         const tempDiv = document.createElement('div');
-        const qrInstance = new QRCode(tempDiv, {
-            text: options.url,
-            width: 512,
-            height: 512,
-            colorDark: options.colorDark,
-            colorLight: options.colorLight,
-            correctLevel: QRCode.CorrectLevel.H
-        });
-        const canvas = tempDiv.querySelector('canvas');
-        if (!canvas) {
-            throw new Error('QR code canvas generation failed.');
+        
+        // ロゴがある場合はQ以上（復元力優先）、ない場合はM（容量優先）から順に試行
+        const levels = options.logoData 
+            ? [QRCode.CorrectLevel.Q, QRCode.CorrectLevel.M, QRCode.CorrectLevel.L]
+            : [QRCode.CorrectLevel.M, QRCode.CorrectLevel.L];
+            
+        let lastError = null;
+        for (const level of levels) {
+            try {
+                tempDiv.innerHTML = '';
+                const qrInstance = new QRCode(tempDiv, {
+                    text: options.url,
+                    width: 512,
+                    height: 512,
+                    colorDark: options.colorDark,
+                    colorLight: options.colorLight,
+                    correctLevel: level
+                });
+                const canvas = tempDiv.querySelector('canvas');
+                if (canvas) {
+                    return { canvas, qrInstance };
+                }
+            } catch (error) {
+                lastError = error;
+                console.warn(`QR generation failed at level ${level}, retrying with lower level...`);
+            }
         }
-        return { canvas, qrInstance };
+        throw lastError || new Error('QR code canvas generation failed.');
     },
 
     _redrawQrWithStyles(originalCanvas, options) {

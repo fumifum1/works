@@ -252,6 +252,30 @@
             const isLocal = window.location.protocol === 'file:';
             document.getElementById('local-warning')?.classList.toggle('hidden', !isLocal || type !== 'vcard_link');
 
+            if (type === 'vcard') {
+                // 自動的にカラーを「単色」、前景色を黒、背景色を白、スタイルを「四角」にする
+                const solidRadio = document.getElementById('fill-type-solid');
+                if (solidRadio && !solidRadio.checked) {
+                    solidRadio.checked = true;
+                    solidRadio.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+                const colorDark = document.getElementById('color-dark');
+                if (colorDark && colorDark.value !== '#000000') {
+                    colorDark.value = '#000000';
+                    colorDark.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+                const colorLight = document.getElementById('color-light');
+                if (colorLight && colorLight.value !== '#ffffff') {
+                    colorLight.value = '#ffffff';
+                    colorLight.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+                const dotStyleSelect = document.getElementById('dot-style-select');
+                if (dotStyleSelect && dotStyleSelect.value !== 'square') {
+                    dotStyleSelect.value = 'square';
+                    dotStyleSelect.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            }
+
             if (type === 'url') return;
 
             let payload = "";
@@ -269,10 +293,14 @@
 
                 if (type === 'vcard_link') {
                     const password = document.getElementById('vcard-pass').value;
-                    const cardData = {
-                        n: name, c: company, t: title, 
-                        tel: tel, e: email, u: url, a: address
-                    };
+                    const cardData = {};
+                    if (name) cardData.n = name;
+                    if (company) cardData.c = company;
+                    if (title) cardData.t = title;
+                    if (tel) cardData.tel = tel;
+                    if (email) cardData.e = email;
+                    if (url) cardData.u = url;
+                    if (address) cardData.a = address;
                     
                     const jsonStr = JSON.stringify(cardData);
                     let dataValue;

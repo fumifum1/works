@@ -314,7 +314,7 @@
 
                     // ファイル名を除いた現在のディレクトリパスを取得
                     const baseUrl = window.location.href.split(/[?#]/)[0].replace(/[^\/]+$/, '');
-                    payload = `${baseUrl}contact_card.html?d=${dataValue}`;
+                    payload = `${baseUrl}contact_card.html?d=${encodeURIComponent(dataValue)}`;
                 } else {
                     // 従来のMECARD形式
                 const getV = (id) => document.getElementById(id).value.replace(/[:;]/g, "").trim();

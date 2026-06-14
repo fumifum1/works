@@ -53,8 +53,11 @@
         let data = { n: '', c: '', t: '', tel: '', e: '', u: '', a: '' };
 
         async function init() {
-            const packedData = params.get('d');
+            let packedData = params.get('d');
             if (!packedData) return render();
+
+            // URLSearchParamsで「+」が半角スペース「 」に誤デコードされるケースへの対策
+            packedData = packedData.replace(/ /g, "+");
 
             if (packedData.startsWith("enc:")) {
                 const password = prompt("この連絡先は保護されています。パスワードを入力してください：");
@@ -68,27 +71,29 @@
                     return;
                 }
             } else {
-            try {
-                const jsonStr = decodeURIComponent(escape(atob(packedData)));
-                data = JSON.parse(jsonStr);
-            } catch (e) {
-                console.error("データの読み込みに失敗しました", e);
-            }
+                try {
+                    const jsonStr = decodeURIComponent(escape(atob(packedData)));
+                    data = JSON.parse(jsonStr);
+                } catch (e) {
+                    console.error("データの読み込みに失敗しました", e);
+                }
             }
             render();
         }
 
         function render() {
-            // 従来のパラメータも念のため維持
-            if(!data.n) data = {
-                n: params.get('n') || '',
-                c: params.get('c') || '',
-                t: params.get('t') || '',
-                tel: params.get('tel') || '',
-                e: params.get('e') || '',
-                u: params.get('u') || '',
-                a: params.get('a') || ''
-            };
+            // dパラメータ（Base64圧縮データ）が存在しない場合のみ、従来の個別URLパラメータから読み込み
+            if (!params.get('d')) {
+                data = {
+                    n: params.get('n') || '',
+                    c: params.get('c') || '',
+                    t: params.get('t') || '',
+                    tel: params.get('tel') || '',
+                    e: params.get('e') || '',
+                    u: params.get('u') || '',
+                    a: params.get('a') || ''
+                };
+            }
 
         document.getElementById('disp-name').textContent = data.n || 'No Name';
         document.getElementById('disp-title').textContent = (data.c ? data.c + ' ' : '') + data.t;

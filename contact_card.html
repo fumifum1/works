@@ -1,13 +1,13 @@
-﻿<!DOCTYPE html>
-<html lang=ja>
+<!DOCTYPE html>
+<html lang="ja">
 <head>
-    <meta charset=UTF-8>
-    <meta name=viewport content=width=device-width, initial-scale=1.0>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Digital Business Card</title>
-    <meta name=robots content=noindex, nofollow>
-    <link rel=preconnect href=https://fonts.googleapis.com>
-    <link rel=preconnect href=https://fonts.gstatic.com crossorigin>
-    <link href=https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Noto+Sans+JP:wght@300;400;500;700&display=swap rel=stylesheet>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -25,7 +25,6 @@
                 radial-gradient(ellipse 50% 40% at 80% 80%, rgba(0,200,255,0.12) 0%, transparent 55%);
         }
 
-        /* ---- Page wrapper ---- */
         .page {
             display: flex;
             flex-direction: column;
@@ -35,19 +34,17 @@
             max-width: 420px;
         }
 
-        /* ============================================================
-           BUSINESS CARD
-        ============================================================ */
+        /* ---- Business Card ---- */
         .card {
             width: 100%;
-            aspect-ratio: 1.75 / 1;          /* standard business card ratio */
+            aspect-ratio: 1.75 / 1;
             background: linear-gradient(135deg, #111827 0%, #0d1424 60%, #0a1020 100%);
             border-radius: 20px;
             border: 1px solid rgba(255,255,255,0.08);
             box-shadow:
-                0 2px 0  rgba(255,255,255,0.06) inset,   /* top highlight */
+                0 2px 0 rgba(255,255,255,0.06) inset,
                 0 25px 60px rgba(0,0,0,0.7),
-                0  0  35px rgba(0,110,255,0.15);
+                0 0 35px rgba(0,110,255,0.15);
             position: relative;
             overflow: hidden;
             padding: 28px 30px;
@@ -60,7 +57,6 @@
             user-select: none;
         }
 
-        /* Top gradient accent bar */
         .card::before {
             content: '';
             position: absolute;
@@ -69,17 +65,6 @@
             background: linear-gradient(90deg, #0070ff, #00d2ff, #7b5ea7);
         }
 
-        /* Subtle grain / noise texture overlay */
-        .card::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background-image: url(data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E);
-            pointer-events: none;
-            border-radius: inherit;
-        }
-
-        /* Ambient orb top-right */
         .orb {
             position: absolute;
             top: -40px; right: -40px;
@@ -88,7 +73,6 @@
             pointer-events: none;
         }
 
-        /* ---- Card Top Row ---- */
         .card-top {
             display: flex;
             justify-content: space-between;
@@ -105,7 +89,6 @@
             text-transform: uppercase;
         }
 
-        /* Stylised chip decoration */
         .card-chip {
             width: 26px; height: 20px;
             border: 1px solid rgba(255,255,255,0.12);
@@ -117,13 +100,8 @@
             gap: 2px;
             padding: 4px;
         }
-        .card-chip span {
-            display: block;
-            background: rgba(255,255,255,0.15);
-            border-radius: 1px;
-        }
+        .card-chip span { display: block; background: rgba(255,255,255,0.15); border-radius: 1px; }
 
-        /* ---- Card Bottom Row ---- */
         .card-bottom {
             display: flex;
             flex-direction: column;
@@ -149,11 +127,10 @@
             color: #00aaff;
             letter-spacing: 1.5px;
             text-transform: uppercase;
+            min-height: 1em;
         }
 
-        /* ============================================================
-           CONTACT INFO PANEL (below the card)
-        ============================================================ */
+        /* ---- Info Panel ---- */
         .info-panel {
             width: 100%;
             background: rgba(255,255,255,0.025);
@@ -174,13 +151,7 @@
         .info-row:last-child { border-bottom: none; }
         .info-row:hover { background: rgba(255,255,255,0.04); }
 
-        .info-icon {
-            width: 18px; height: 18px;
-            color: #00aaff;
-            flex-shrink: 0;
-            opacity: 0.9;
-        }
-
+        .info-icon { width: 18px; height: 18px; color: #00aaff; flex-shrink: 0; opacity: 0.9; }
         .info-text { display: flex; flex-direction: column; gap: 1px; overflow: hidden; }
         .info-label {
             font-size: 0.6rem;
@@ -197,9 +168,7 @@
             text-overflow: ellipsis;
         }
 
-        /* ============================================================
-           SAVE BUTTON
-        ============================================================ */
+        /* ---- Save Button ---- */
         .btn-save {
             width: 100%;
             display: flex;
@@ -225,161 +194,165 @@
     </style>
 </head>
 <body>
-    <div class=page>
-
-        <!-- ===== CARD ===== -->
-        <div class=card id=biz-card>
-            <div class=orb></div>
-
-            <div class=card-top>
-                <div class=card-company id=disp-company></div>
-                <div class=card-chip>
+    <div class="page">
+        <div class="card" id="biz-card">
+            <div class="orb"></div>
+            <div class="card-top">
+                <div class="card-company" id="disp-company"></div>
+                <div class="card-chip">
                     <span></span><span></span><span></span>
                     <span></span><span></span><span></span>
                     <span></span><span></span><span></span>
                 </div>
             </div>
-
-            <div class=card-bottom>
-                <div class=card-name id=disp-name>Loading...</div>
-                <div class=card-title-line id=disp-title></div>
+            <div class="card-bottom">
+                <div class="card-name" id="disp-name">Loading...</div>
+                <div class="card-title-line" id="disp-title"></div>
             </div>
         </div>
 
-        <!-- ===== CONTACT INFO ===== -->
-        <div class=info-panel id=info-container></div>
+        <div class="info-panel" id="info-container" style="display:none;"></div>
 
-        <!-- ===== SAVE ===== -->
-        <button class=btn-save onclick=downloadVCard()>
-            <svg class=btn-icon viewBox=0 0 24 24 fill=none stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round>
-                <path d=M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z/>
-                <polyline points=17 21 17 13 7 13 7 21/>
-                <polyline points=7 3 7 8 15 8/>
+        <button class="btn-save" onclick="downloadVCard()">
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                <polyline points="17 21 17 13 7 13 7 21"/>
+                <polyline points="7 3 7 8 15 8"/>
             </svg>
             連絡先を保存する
         </button>
     </div>
 
     <script>
-        /* ---- Icon SVGs ---- */
-        const ICONS = {
-            Phone: <svg class=info-icon viewBox=0 0 24 24 fill=none stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round><path d=M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.13 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.08 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 16.92z/></svg>,
-            Email: <svg class=info-icon viewBox=0 0 24 24 fill=none stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round><path d=M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z/><polyline points=22,6 12,13 2,6/></svg>,
-            Web:   <svg class=info-icon viewBox=0 0 24 24 fill=none stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round><circle cx=12 cy=12 r=10/><line x1=2 y1=12 x2=22 y2=12/><path d=M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z/></svg>,
-            Address:<svg class=info-icon viewBox=0 0 24 24 fill=none stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round><path d=M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z/><circle cx=12 cy=10 r=3/></svg>
-        };
+        var PHONE_ICON = '<svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.13 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.08 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 16.92z"/></svg>';
+        var EMAIL_ICON = '<svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>';
+        var WEB_ICON   = '<svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>';
+        var ADDR_ICON  = '<svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
 
-        /* ---- Decrypt ---- */
         async function decryptData(base64Data, password) {
             try {
-                const combined = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
-                const salt = combined.slice(0, 16);
-                const iv   = combined.slice(16, 28);
-                const enc  = combined.slice(28);
-                const encoder = new TextEncoder();
-                const passwordKey = await window.crypto.subtle.importKey(raw, encoder.encode(password), PBKDF2, false, [deriveKey]);
-                const key = await window.crypto.subtle.deriveKey(
-                    { name:PBKDF2, salt, iterations:100000, hash:SHA-256 },
-                    passwordKey, { name:AES-GCM, length:256 }, false, [decrypt]
+                var combined = Uint8Array.from(atob(base64Data), function(c){ return c.charCodeAt(0); });
+                var salt = combined.slice(0, 16);
+                var iv   = combined.slice(16, 28);
+                var enc  = combined.slice(28);
+                var encoder = new TextEncoder();
+                var passwordKey = await window.crypto.subtle.importKey("raw", encoder.encode(password), "PBKDF2", false, ["deriveKey"]);
+                var key = await window.crypto.subtle.deriveKey(
+                    { name: "PBKDF2", salt: salt, iterations: 100000, hash: "SHA-256" },
+                    passwordKey, { name: "AES-GCM", length: 256 }, false, ["decrypt"]
                 );
-                const decrypted = await window.crypto.subtle.decrypt({ name:AES-GCM, iv }, key, enc);
+                var decrypted = await window.crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, enc);
                 return new TextDecoder().decode(decrypted);
-            } catch(e) { throw new Error(パスワードが正しくないか、データが壊れています); }
+            } catch(e) {
+                throw new Error("パスワードが正しくないか、データが壊れています");
+            }
         }
 
-        const params = new URLSearchParams(window.location.search);
-        let data = {};
+        var params = new URLSearchParams(window.location.search);
+        var data = {};
 
         async function init() {
-            let packed = params.get('d');
-            if (!packed) return render();
-            packed = packed.replace(/ /g, +);
+            var packed = params.get('d');
+            if (!packed) { render(); return; }
+            packed = packed.replace(/ /g, '+');
 
-            if (packed.startsWith(enc:)) {
-                const pw = prompt(この連絡先は保護されています。パスワードを入力してください：);
-                if (!pw) return alert(パスワードが必要です);
+            if (packed.startsWith('enc:')) {
+                var pw = prompt("この連絡先は保護されています。パスワードを入力してください：");
+                if (!pw) { alert("パスワードが必要です"); return; }
                 try {
-                    data = JSON.parse(await decryptData(packed.replace(enc:,"), pw));
- } catch(e) { alert(e.message); return; }
- } else {
- try { data = JSON.parse(decodeURIComponent(escape(atob(packed)))); }
- catch(e) { console.error(データの読み込みに失敗しました, e); }
- }
- render();
- }
+                    data = JSON.parse(await decryptData(packed.replace('enc:', ''), pw));
+                } catch(e) { alert(e.message); return; }
+            } else {
+                try {
+                    data = JSON.parse(decodeURIComponent(escape(atob(packed))));
+                } catch(e) {
+                    console.error("データの読み込みに失敗しました", e);
+                }
+            }
+            render();
+        }
 
- function render() {
- if (!params.get('d')) {
- data = {
- n: params.get('n') || '',
- c: params.get('c') || '',
- t: params.get('t') || '',
- tel: params.get('tel') || '',
- e: params.get('e') || '',
- u: params.get('u') || '',
- a: params.get('a') || ''
- };
- }
+        function render() {
+            if (!params.get('d')) {
+                data = {
+                    n:   params.get('n')   || '',
+                    c:   params.get('c')   || '',
+                    t:   params.get('t')   || '',
+                    tel: params.get('tel') || '',
+                    e:   params.get('e')   || '',
+                    u:   params.get('u')   || '',
+                    a:   params.get('a')   || ''
+                };
+            }
 
- document.getElementById('disp-company').textContent = data.c || '';
- document.getElementById('disp-name').textContent = data.n || 'No Name';
- document.getElementById('disp-title').textContent = data.t || '';
+            document.getElementById('disp-company').textContent = data.c || '';
+            document.getElementById('disp-name').textContent    = data.n || 'No Name';
+            document.getElementById('disp-title').textContent   = data.t || '';
 
- const container = document.getElementById('info-container');
- container.innerHTML = '';
- const fields = [
- { label:'Phone', val:data.tel, icon:ICONS.Phone },
- { label:'Email', val:data.e, icon:ICONS.Email },
- { label:'Web', val:data.u, icon:ICONS.Web },
- { label:'Address', val:data.a, icon:ICONS.Address }
- ];
- fields.forEach(f => {
- if (!f.val) return;
- const row = document.createElement('div');
- row.className = 'info-row';
- row.innerHTML = ${f.icon}<div class=info-text><span class=info-label></span><span class=info-value></span></div>;
- container.appendChild(row);
- });
+            var container = document.getElementById('info-container');
+            container.innerHTML = '';
 
- /* Hide panel entirely if no contact fields */
- container.style.display = container.children.length ? '' : 'none';
- }
+            var fields = [
+                { label: 'Phone',   val: data.tel, icon: PHONE_ICON },
+                { label: 'Email',   val: data.e,   icon: EMAIL_ICON },
+                { label: 'Web',     val: data.u,   icon: WEB_ICON   },
+                { label: 'Address', val: data.a,   icon: ADDR_ICON  }
+            ];
 
- function downloadVCard() {
- const vcard = [
- BEGIN:VCARD,VERSION:3.0,
- FN:,N:;;;;,
- data.c ? ORG: : '',
- data.t ? TITLE: : '',
- data.tel ? TEL;TYPE=CELL,VOICE: : '',
- data.e ? EMAIL;TYPE=WORK,INTERNET: : '',
- data.u ? URL: : '',
- data.a ? ADR;TYPE=WORK:;;;;;; : '',
- END:VCARD
- ].filter(l => l).join(\r\n);
+            fields.forEach(function(f) {
+                if (!f.val) return;
+                var row = document.createElement('div');
+                row.className = 'info-row';
+                row.innerHTML = f.icon +
+                    '<div class="info-text">' +
+                    '<span class="info-label">' + f.label + '</span>' +
+                    '<span class="info-value">'  + f.val   + '</span>' +
+                    '</div>';
+                container.appendChild(row);
+            });
 
- const blob = new Blob([vcard], { type:'text/vcard' });
- const url = URL.createObjectURL(blob);
- const a = document.createElement('a');
- a.href = url;
- a.download = ${data.n || 'contact'}.vcf;
- document.body.appendChild(a); a.click(); document.body.removeChild(a);
- URL.revokeObjectURL(url);
- }
+            container.style.display = container.children.length ? '' : 'none';
+        }
 
- /* ---- 3‑D Tilt on mouse / pointer ---- */
- const card = document.getElementById('biz-card');
- document.addEventListener('mousemove', e => {
- const r = card.getBoundingClientRect();
- const x = (e.clientX - r.left - r.width / 2) / (r.width / 2);
- const y = (e.clientY - r.top - r.height / 2) / (r.height / 2);
- card.style.transform = otateX(deg) rotateY(deg) scale(1.01);
- });
- document.addEventListener('mouseleave', () => {
- card.style.transform = 'rotateX(0) rotateY(0) scale(1)';
- });
+        function downloadVCard() {
+            var lines = [
+                'BEGIN:VCARD',
+                'VERSION:3.0',
+                'FN:'  + (data.n || ''),
+                'N:;'  + (data.n || '') + ';;;'
+            ];
+            if (data.c)   lines.push('ORG:'   + data.c);
+            if (data.t)   lines.push('TITLE:' + data.t);
+            if (data.tel) lines.push('TEL;TYPE=CELL,VOICE:' + data.tel);
+            if (data.e)   lines.push('EMAIL;TYPE=WORK,INTERNET:' + data.e);
+            if (data.u)   lines.push('URL:'   + data.u);
+            if (data.a)   lines.push('ADR;TYPE=WORK:;;' + data.a + ';;;;');
+            lines.push('END:VCARD');
 
- init();
- </script>
+            var blob = new Blob([lines.join('\r\n')], { type: 'text/vcard' });
+            var url  = URL.createObjectURL(blob);
+            var a    = document.createElement('a');
+            a.href     = url;
+            a.download = (data.n || 'contact') + '.vcf';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        /* 3-D tilt on mouse move */
+        var card = document.getElementById('biz-card');
+        document.addEventListener('mousemove', function(e) {
+            var r = card.getBoundingClientRect();
+            var x = (e.clientX - r.left  - r.width  / 2) / (r.width  / 2);
+            var y = (e.clientY - r.top   - r.height / 2) / (r.height / 2);
+            card.style.transform = 'rotateX(' + (-y * 8) + 'deg) rotateY(' + (x * 10) + 'deg) scale(1.01)';
+        });
+        document.addEventListener('mouseleave', function() {
+            card.style.transform = 'rotateX(0) rotateY(0) scale(1)';
+        });
+
+        init();
+    </script>
 </body>
 </html>

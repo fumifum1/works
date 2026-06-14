@@ -21,7 +21,15 @@
         .config-group input { padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
         .btn-obsidian { background: #7b46f6; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: background 0.3s; }
         .btn-obsidian:hover { background: #6335d9; }
+        .btn-drive { background: #28a745; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: background 0.3s; margin-top: 10px; }
+        .btn-drive:hover { background: #218838; }
+        .search-area { margin-top: 20px; padding-top: 20px; border-top: 1px dashed #ccc; }
+        .search-row { display: flex; gap: 5px; margin-top: 5px; }
+        .search-results { margin-top: 10px; font-size: 13px; max-height: 150px; overflow-y: auto; background: #f8f9fa; border-radius: 5px; padding: 5px; }
+        .search-item { display: block; padding: 5px; color: #007bff; text-decoration: none; border-bottom: 1px solid #eee; }
+        .search-item:hover { background: #e9ecef; }
         .status-msg { margin-top: 10px; font-size: 12px; color: #28a745; text-align: center; display: none; }
+        .settings-area { background: #f1f3f5; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 12px; }
     </style>
 </head>
 <body>
@@ -29,6 +37,12 @@
         <div class="header-row">
             <h2>Obsidian Bridge</h2>
             <button class="icon-btn" onclick="toggleGuide()" title="使い方を表示">⚙️</button>
+        </div>
+
+        <div id="settingsArea" class="settings-area" style="display: none;">
+            <label for="gasUrl" style="font-weight: bold; display: block; margin-bottom: 5px;">Google Drive保存用GAS URL:</label>
+            <input type="password" id="gasUrl" placeholder="https://script.google.com/macros/s/.../exec" style="width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 4px;">
+            <p style="margin-top: 8px; color: #666;">※ここにGASのURLを入力すると、Googleドライブ経由で保存・同期ができるようになります。</p>
         </div>
 
         <div id="guideArea" class="guide-area" style="display: none;">
@@ -55,14 +69,29 @@
 
         <div class="config-group">
             <label for="noteTitle">ノートのタイトル:</label>
-            <input type="text" id="noteTitle" id="noteTitle" placeholder="例: Gemini_Session_20231027">
+            <input type="text" id="noteTitle" placeholder="例: Gemini_Session_20231027">
         </div>
 
         <textarea id="logContent" placeholder="ここにMarkdown形式のログを貼り付けてください..."></textarea>
         
         <div style="margin-top: 20px;">
             <button class="btn-obsidian" onclick="sendToObsidian()">Obsidianに登録</button>
+            <button class="btn-drive" onclick="sendToGoogleDrive()">Google Driveに保存 (同期用)</button>
         </div>
+
+        <div id="fileLinkArea" style="margin-top: 10px; text-align: center; display: none;">
+            <a id="fileUrl" href="#" target="_blank" style="color: #28a745; font-weight: bold; font-size: 14px;">📄 保存したファイルを開く</a>
+        </div>
+
+        <div class="search-area">
+            <label style="font-size: 12px; font-weight: bold; color: #666;">Drive内のメモを検索:</label>
+            <div class="search-row">
+                <input type="text" id="searchQuery" placeholder="ファイル名の一部..." style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                <button onclick="searchGoogleDrive()" style="padding: 8px 15px; cursor: pointer; border-radius: 4px; border: 1px solid #ccc; background: #fff;">🔍</button>
+            </div>
+            <div id="searchResults" class="search-results" style="display: none;"></div>
+        </div>
+
         <div id="status" class="status-msg">Obsidianを呼び出しています...</div>
     </div>
 
@@ -82,11 +111,18 @@
             if (savedVault) document.getElementById('vaultName').value = savedVault;
             const savedFolder = localStorage.getItem('obsidian_folder_path');
             if (savedFolder) document.getElementById('folderPath').value = savedFolder;
+            
+            // GASのURLを復元
+            const savedGasUrl = localStorage.getItem('obsidian_gas_url');
+            if (savedGasUrl) document.getElementById('gasUrl').value = savedGasUrl;
         };
 
         function toggleGuide() {
             const guide = document.getElementById('guideArea');
-            guide.style.display = guide.style.display === 'none' ? 'block' : 'none';
+            const settings = document.getElementById('settingsArea');
+            const isHidden = guide.style.display === 'none';
+            guide.style.display = isHidden ? 'block' : 'none';
+            settings.style.display = isHidden ? 'block' : 'none';
         }
 
         function sendToObsidian() {
@@ -138,6 +174,88 @@
             setTimeout(() => {
                 document.getElementById('status').style.display = 'none';
             }, 3000);
+        }
+
+        async function sendToGoogleDrive() {
+            const gasUrl = document.getElementById('gasUrl').value.trim();
+            const title = document.getElementById('noteTitle').value;
+            const content = document.getElementById('logContent').value;
+            const folder = document.getElementById('folderPath').value.trim();
+            const statusEl = document.getElementById('status');
+            const fileLinkArea = document.getElementById('fileLinkArea');
+
+            if (!gasUrl) {
+                alert('GASのURLを歯車アイコンから設定してください。');
+                return;
+            }
+            if (!title || !content) {
+                alert('タイトルと内容を入力してください。');
+                return;
+            }
+
+            localStorage.setItem('obsidian_gas_url', gasUrl);
+            
+            statusEl.innerText = 'Google Driveに送信中...';
+            statusEl.style.display = 'block';
+            statusEl.style.color = '#28a745';
+            fileLinkArea.style.display = 'none';
+
+            try {
+                await fetch(gasUrl, {
+                    method: 'POST',
+                    mode: 'no-cors', // 確実に保存させるため no-cors に戻します
+                    headers: { 'Content-Type': 'text/plain' }, 
+                    body: JSON.stringify({ title, content, folder })
+                });
+
+                statusEl.innerText = 'Google Driveに保存リクエストを送信しました！';
+                statusEl.style.color = '#28a745';
+                document.getElementById('logContent').value = ''; 
+            } catch (error) {
+                console.error(error);
+                statusEl.innerText = '送信に失敗しました。URLを確認してください。';
+                statusEl.style.color = '#dc3545';
+            } finally {
+                setTimeout(() => { statusEl.style.display = 'none'; }, 5000);
+            }
+        }
+
+        async function searchGoogleDrive() {
+            const gasUrl = document.getElementById('gasUrl').value.trim();
+            const query = document.getElementById('searchQuery').value.trim();
+            const resultsEl = document.getElementById('searchResults');
+
+            if (!gasUrl || !query) return;
+
+            resultsEl.innerHTML = '検索中...';
+            resultsEl.style.display = 'block';
+
+            try {
+                // パラメータ名を 'term' に変更
+                // URLの末尾に?があるかどうかをチェックして結合
+                const connector = gasUrl.includes('?') ? '&' : '?';
+                const searchUrl = `${gasUrl}${connector}term=${encodeURIComponent(query)}`;
+                
+                const response = await fetch(searchUrl, { method: 'GET' });
+                
+                if (!response.ok) throw new Error('Network response was not ok');
+                
+                const text = await response.text();
+                const files = JSON.parse(text);
+                
+                if (!Array.isArray(files) || files.length === 0) {
+                    resultsEl.innerHTML = '<span style="color:#666;">一致するファイルが見つかりませんでした。保存直後の場合は1分ほど待ってから再度お試しください。</span>';
+                } else {
+                    resultsEl.innerHTML = files.map(f => `<a href="${f.url}" target="_blank" class="search-item">${f.name.includes('.') ? '📄' : '📁'} ${f.name}</a>`).join('');
+                }
+            } catch (error) {
+                console.error(error);
+                if (window.location.protocol === 'file:') {
+                    resultsEl.innerHTML = '<span style="color:#dc3545;">エラー: ローカルファイル(file://)からは検索結果を表示できません。GitHub Pagesなどにアップロードして実行してください。</span>';
+                } else {
+                    resultsEl.innerHTML = '検索中にエラーが発生しました。GASの設定（全員にアクセス許可）を確認してください。';
+                }
+            }
         }
     </script>
 </body>

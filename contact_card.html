@@ -228,6 +228,8 @@
         var EMAIL_ICON = '<svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>';
         var WEB_ICON   = '<svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>';
         var ADDR_ICON  = '<svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
+        var WORK_ICON  = '<svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>';
+        var FAX_ICON   = '<svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 17H2a3 3 0 0 1-3-3V5a3 3 0 0 1 3-3h18a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3z" transform="translate(1,1) scale(0.95)"/><polyline points="8 21 8 13 16 13 16 21"/><rect x="8" y="17" width="8" height="4" rx="1"/><line x1="6" y1="8" x2="6" y2="8"/><line x1="10" y1="8" x2="18" y2="8"/></svg>';
 
         async function decryptData(base64Data, password) {
             try {
@@ -293,7 +295,9 @@
             container.innerHTML = '';
 
             var fields = [
-                { label: 'Phone',   val: data.tel, icon: PHONE_ICON },
+                { label: 'Mobile',  val: data.tel, icon: PHONE_ICON },
+                { label: 'Phone',   val: data.tw,  icon: WORK_ICON  },
+                { label: 'FAX',     val: data.f,   icon: FAX_ICON   },
                 { label: 'Email',   val: data.e,   icon: EMAIL_ICON },
                 { label: 'Web',     val: data.u,   icon: WEB_ICON   },
                 { label: 'Address', val: data.a,   icon: ADDR_ICON  }
@@ -324,6 +328,8 @@
             if (data.c)   lines.push('ORG:'   + data.c);
             if (data.t)   lines.push('TITLE:' + data.t);
             if (data.tel) lines.push('TEL;TYPE=CELL,VOICE:' + data.tel);
+            if (data.tw)  lines.push('TEL;TYPE=WORK,VOICE:' + data.tw);
+            if (data.f)   lines.push('TEL;TYPE=FAX:' + data.f);
             if (data.e)   lines.push('EMAIL;TYPE=WORK,INTERNET:' + data.e);
             if (data.u)   lines.push('URL:'   + data.u);
             if (data.a)   lines.push('ADR;TYPE=WORK:;;' + data.a + ';;;;');

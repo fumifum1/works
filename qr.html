@@ -89,7 +89,9 @@
                         <label for="vcard-name">お名前</label><input type="text" id="vcard-name" placeholder="姓名">
                         <label for="vcard-company">会社名</label><input type="text" id="vcard-company" placeholder="株式会社〇〇">
                         <label for="vcard-title">役職</label><input type="text" id="vcard-title" placeholder="代表取締役">
-                        <label for="vcard-tel">電話番号</label><input type="tel" id="vcard-tel" placeholder="09000000000">
+                        <label for="vcard-tel">携帯電話</label><input type="tel" id="vcard-tel" placeholder="090-0000-0000">
+                        <label for="vcard-tel-work">代表電話</label><input type="tel" id="vcard-tel-work" placeholder="03-0000-0000">
+                        <label for="vcard-fax">FAX</label><input type="tel" id="vcard-fax" placeholder="03-0000-0001">
                         <label for="vcard-email">メール</label><input type="email" id="vcard-email" placeholder="mail@example.com">
                         <label for="vcard-url">Webサイト</label><input type="text" id="vcard-url" placeholder="https://...">
                         <label for="vcard-address">住所</label><input type="text" id="vcard-address" placeholder="東京都... ">
@@ -287,6 +289,8 @@
                 const company = getV('vcard-company');
                 const title = getV('vcard-title');
                 const tel = getV('vcard-tel');
+                const telWork = getV('vcard-tel-work');
+                const fax = getV('vcard-fax');
                 const email = getV('vcard-email');
                 const url = getV('vcard-url');
                 const address = getV('vcard-address');
@@ -298,6 +302,8 @@
                     if (company) cardData.c = company;
                     if (title) cardData.t = title;
                     if (tel) cardData.tel = tel;
+                    if (telWork) cardData.tw = telWork;
+                    if (fax) cardData.f = fax;
                     if (email) cardData.e = email;
                     if (url) cardData.u = url;
                     if (address) cardData.a = address;
@@ -317,24 +323,26 @@
                     payload = `${baseUrl}contact_card.html?d=${encodeURIComponent(dataValue)}`;
                 } else {
                     // 従来のMECARD形式
-                const getV = (id) => document.getElementById(id).value.replace(/[:;]/g, "").trim();
-                const name = getV('vcard-name');
-                const company = getV('vcard-company');
-                const title = getV('vcard-title');
-                const tel = document.getElementById('vcard-tel').value.replace(/[^0-9+]/g, "");
-                const email = getV('vcard-email');
-                const url = getV('vcard-url');
-                const address = getV('vcard-address');
+                const getVm = (id) => document.getElementById(id).value.replace(/[:;]/g, "").trim();
+                const nameM = getVm('vcard-name');
+                const companyM = getVm('vcard-company');
+                const titleM = getVm('vcard-title');
+                const telM = document.getElementById('vcard-tel').value.replace(/[^0-9+]/g, "");
+                const telWorkM = document.getElementById('vcard-tel-work').value.replace(/[^0-9+]/g, "");
+                const emailM = getVm('vcard-email');
+                const urlM = getVm('vcard-url');
+                const addressM = getVm('vcard-address');
 
                 // Googleレンズでの認識率が最も高いMECARD形式の構築
                 let m = "MECARD:";
-                if (name)    m += `N:${name};`;
-                if (company) m += `ORG:${company};`;
-                if (title)   m += `TIL:${title};`;
-                if (tel)     m += `TEL:${tel};`;
-                if (email)   m += `EMAIL:${email};`;
-                if (url)     m += `URL:${url};`;
-                if (address) m += `ADR:${address};`;
+                if (nameM)    m += `N:${nameM};`;
+                if (companyM) m += `ORG:${companyM};`;
+                if (titleM)   m += `TIL:${titleM};`;
+                if (telM)     m += `TEL:${telM};`;
+                if (telWorkM) m += `TEL:${telWorkM};`;
+                if (emailM)   m += `EMAIL:${emailM};`;
+                if (urlM)     m += `URL:${urlM};`;
+                if (addressM) m += `ADR:${addressM};`;
                 m += ";"; // 終端のセミコロン
 
                 payload = m;
@@ -350,7 +358,7 @@
         };
 
         typeSelect.addEventListener('change', updatePayload);
-        ['text-input', 'vcard-name', 'vcard-company', 'vcard-title', 'vcard-tel', 'vcard-email', 'vcard-url', 'vcard-address', 'vcard-pass', 'wifi-ssid', 'wifi-pass', 'wifi-enc'].forEach(id => {
+        ['text-input', 'vcard-name', 'vcard-company', 'vcard-title', 'vcard-tel', 'vcard-tel-work', 'vcard-fax', 'vcard-email', 'vcard-url', 'vcard-address', 'vcard-pass', 'wifi-ssid', 'wifi-pass', 'wifi-enc'].forEach(id => {
             document.getElementById(id).addEventListener('input', updatePayload);
         });
         document.getElementById('wifi-enc').addEventListener('change', updatePayload);

@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="生年月日と今日の日付から導く、1日1枚のタロット占い。入力情報は保存・送信されません。">
+<meta name="theme-color" content="#f7f4ed">
+<title>Celestial Tarot｜今日の一枚</title>
+<link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/fumifum1/main/main/jpg/ico.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=Noto+Sans+JP:wght@300;400&family=Noto+Serif+JP:wght@300;400&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#181713;--paper:#f7f4ed;--white:#fffefb;--line:rgba(24,23,19,.2);--deep:#22202a;--max:1120px}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--ink);background:radial-gradient(circle at 16% 8%,rgba(183,203,215,.33),transparent 30rem),radial-gradient(circle at 85% 25%,rgba(217,209,195,.5),transparent 32rem),var(--paper);font-family:"Noto Sans JP",sans-serif;font-weight:300;line-height:1.9}
+button,input{font:inherit}.header{min-height:92vh;padding:28px clamp(22px,5vw,72px) 70px;border-bottom:1px solid var(--line);position:relative;overflow:hidden;display:flex;flex-direction:column}.header:before,.header:after{content:"";position:absolute;border:1px solid var(--line);border-radius:50%;pointer-events:none}.header:before{width:min(62vw,720px);aspect-ratio:1;right:-22vw;top:-18vw}.header:after{width:min(34vw,400px);aspect-ratio:1;left:-13vw;bottom:-16vw}
+.nav{display:flex;justify-content:space-between;gap:24px}.brand,.nav a,.eyebrow{text-transform:uppercase;letter-spacing:.18em;font-size:11px}.brand,.nav a{color:inherit;text-decoration:none}.nav a{border-bottom:1px solid transparent}.nav a:hover{border-color:var(--ink)}
+.hero{flex:1;width:min(100%,var(--max));margin:auto;display:grid;grid-template-columns:1.05fr .75fr;align-items:center;gap:clamp(44px,7vw,96px);padding-top:74px;position:relative;z-index:1}.eyebrow{margin:0 0 24px;color:rgba(24,23,19,.7)}h1,h2,h3,.card-name,.number{font-family:"Cormorant Garamond","Noto Serif JP",serif;font-weight:300}h1{margin:0;font-size:clamp(58px,9vw,126px);line-height:.86;letter-spacing:-.035em}h1 span{display:block;margin-left:clamp(24px,8vw,118px);font-style:italic}.lead{max-width:520px;margin:42px 0 0 clamp(0px,8vw,118px);font-size:15px}
+.card-orbit{width:min(44vw,520px);height:min(64vw,610px);justify-self:end;position:relative;isolation:isolate}.card-orbit:before{content:"";position:absolute;width:76%;aspect-ratio:1;border:1px solid rgba(24,23,19,.28);border-radius:50%;left:12%;top:13%;box-shadow:0 0 80px rgba(166,136,85,.12),inset 0 0 70px rgba(183,203,215,.12)}.card-orbit:after{content:"✦";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-family:serif;font-size:52px;color:rgba(24,23,19,.72);text-shadow:0 0 32px rgba(166,136,85,.4)}.float-card{position:absolute;width:clamp(86px,10vw,132px);aspect-ratio:2/3;object-fit:cover;border:1px solid rgba(255,255,255,.7);box-shadow:0 20px 50px rgba(35,29,38,.24);filter:saturate(.82) contrast(.94);opacity:.92;will-change:transform;animation:floatCard 8s ease-in-out infinite alternate}.float-card:nth-child(1){left:2%;top:18%;transform:rotate(-12deg);animation-delay:-1s}.float-card:nth-child(2){right:2%;top:8%;transform:rotate(10deg);animation-delay:-4s}.float-card:nth-child(3){left:32%;top:0;transform:rotate(-3deg);animation-delay:-6s}.float-card:nth-child(4){left:16%;bottom:2%;transform:rotate(8deg);animation-delay:-2.5s}.float-card:nth-child(5){right:10%;bottom:8%;transform:rotate(-9deg);animation-delay:-5.5s}.float-card:nth-child(6){left:42%;top:37%;width:clamp(100px,12vw,150px);transform:translateX(-50%) rotate(2deg);z-index:2;animation-delay:-3s}.float-card:nth-child(7){right:25%;top:43%;width:clamp(76px,8vw,108px);transform:rotate(14deg);opacity:.55;animation-delay:-7s}@keyframes floatCard{0%{translate:0 0}50%{translate:8px -14px}100%{translate:-5px 10px}}
+.section{padding:clamp(96px,13vw,170px) clamp(22px,5vw,72px);border-bottom:1px solid var(--line)}.layout{width:min(100%,var(--max));margin:auto;display:grid;grid-template-columns:.48fr 1fr;gap:clamp(54px,9vw,130px)}.intro{position:sticky;top:38px;align-self:start}.section-no{display:block;margin-bottom:28px;font-family:"Cormorant Garamond",serif;font-size:18px}h2{margin:0;font-size:clamp(44px,6vw,76px);line-height:.96}.intro p{max-width:340px;margin:30px 0 0;font-size:14px}.panel{border-top:1px solid var(--ink);padding-top:34px}.group{margin-bottom:42px}.label{display:block;margin-bottom:12px;font-size:12px;letter-spacing:.12em}.date{width:100%;min-height:58px;padding:12px 2px;border:0;border-bottom:1px solid rgba(24,23,19,.55);border-radius:0;background:transparent;color:inherit;font-family:"Cormorant Garamond","Noto Serif JP",serif;font-size:clamp(20px,3vw,28px);outline:none}.date:focus{border-bottom-color:var(--ink)}.categories{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.cat,.draw,.reset{min-height:52px;border:1px solid var(--ink);border-radius:5px;background:transparent;color:inherit;cursor:pointer;font-weight:300;transition:.16s}.cat:hover,.cat[aria-pressed=true],.draw:hover{background:var(--ink);color:var(--white)}.draw{width:100%;min-height:62px;letter-spacing:.12em}.note,.error{font-size:12px}.note{color:rgba(24,23,19,.7)}.error{min-height:1.8em;color:#8a352f}
+.result{display:none;background:var(--deep);color:#f7f3e9;padding-top:clamp(76px,9vw,118px);padding-bottom:clamp(76px,9vw,118px)}.result.show{display:block;animation:up .5s ease both}@keyframes up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}.result-head{display:flex;justify-content:space-between;align-items:end;gap:28px;border-bottom:1px solid rgba(255,255,255,.24);padding-bottom:20px;margin-bottom:46px}.result-date{font-size:12px;letter-spacing:.12em}.result-grid{display:grid;grid-template-columns:minmax(220px,300px) minmax(0,1fr);gap:clamp(42px,6vw,78px);align-items:start;max-width:980px;margin:0 auto}.image-wrap{position:relative;width:100%;max-width:300px;margin:0 auto}.image-wrap:before{content:"";position:absolute;inset:-12px 12px 12px -12px;border:1px solid rgba(255,255,255,.22)}.card-img{display:block;width:100%;max-height:450px;aspect-ratio:2/3;object-fit:contain;background:#15131a;border:1px solid rgba(255,255,255,.42);position:relative}.number{margin:0;color:rgba(247,243,233,.62);font-size:18px}.card-name{margin:4px 0 0;font-size:clamp(52px,7vw,88px);line-height:.94}.english{text-transform:uppercase;letter-spacing:.16em;font-size:11px;color:rgba(247,243,233,.66)}.meta{display:flex;flex-wrap:wrap;gap:10px 28px;margin:28px 0 42px;padding:18px 0;border-top:1px solid rgba(255,255,255,.22);border-bottom:1px solid rgba(255,255,255,.22);font-size:12px}.reading{padding:28px 0;border-bottom:1px solid rgba(255,255,255,.2)}.reading h3{margin:0 0 14px;font-size:29px}.reading p{margin:0;font-size:14px;line-height:2;color:rgba(247,243,233,.9)}.reset{margin-top:38px;padding:0 30px;border-color:rgba(255,255,255,.72);color:#f7f3e9}.reset:hover{background:#f7f3e9;color:var(--deep)}
+.privacy{background:var(--white);text-align:center}.privacy-inner{width:min(100%,850px);margin:auto}.privacy-inner p{max-width:700px;margin:30px auto 0;font-size:14px}.privacy-box{margin-top:46px;padding:30px;border:1px solid var(--ink);text-align:left;background:rgba(217,209,195,.16)}.privacy-box strong{font-weight:400}.footer{padding:38px clamp(22px,5vw,72px);background:var(--white)}.footer-inner{width:min(100%,var(--max));margin:auto;display:flex;justify-content:space-between;gap:24px;font-size:11px;letter-spacing:.08em}
+@media(max-width:840px){.header{min-height:auto}.hero,.layout,.result-grid{grid-template-columns:1fr}.hero{padding-top:86px}.card-orbit{justify-self:center;width:min(86vw,500px);height:min(105vw,590px);margin-top:18px}.intro{position:static}.categories{grid-template-columns:1fr}.result-head{align-items:start;flex-direction:column}.image-wrap{width:min(64vw,270px);margin:auto}.result-grid{max-width:700px}.card-img{max-height:405px}}@media(max-width:520px){.nav .jump{display:none}.lead{margin-left:0}.footer-inner{flex-direction:column}.card-orbit{width:92vw;height:112vw;max-height:520px}.float-card{width:82px}.float-card:nth-child(6){width:105px}.result{padding-top:64px;padding-bottom:64px}.result-head{margin-bottom:38px}.image-wrap{width:min(58vw,230px)}.card-img{max-height:345px}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}.float-card{translate:0 0!important}}
+.hamburger-menu{position:relative;z-index:100}#menu-btn-check{display:none}.menu-btn{display:flex;align-items:center;justify-content:center;width:40px;height:40px;cursor:pointer;position:relative}.menu-btn span,.menu-btn span:before,.menu-btn span:after{content:'';display:block;height:1px;width:24px;background-color:var(--ink);position:absolute;transition:.3s}.menu-btn span:before{bottom:8px}.menu-btn span:after{top:8px}#menu-btn-check:checked ~ .menu-btn span{background-color:transparent}#menu-btn-check:checked ~ .menu-btn span:before{bottom:0;transform:rotate(45deg)}#menu-btn-check:checked ~ .menu-btn span:after{top:0;transform:rotate(-45deg)}.menu-content{display:none;position:absolute;top:50px;right:0;background:var(--paper);border:1px solid var(--line);padding:20px;min-width:150px;box-shadow:0 4px 12px rgba(24,23,19,.1)}#menu-btn-check:checked ~ .menu-content{display:block}.menu-content ul{list-style:none;padding:0;margin:0}.menu-content li{margin-bottom:12px;text-align:right}.menu-content li:last-child{margin-bottom:0}.menu-content a{text-decoration:none;color:var(--ink);font-family:"Cormorant Garamond","Noto Serif JP",serif;letter-spacing:0.1em;transition:opacity .2s}.menu-content a:hover{opacity:0.6}
+</style>
+</head>
+<body>
+<header class="header" id="top">
+<nav class="nav"><a class="brand" href="#top">Celestial Tarot</a><div style="display:flex;align-items:center;gap:24px;"><a class="jump" href="#reading">今日の一枚を引く</a>
+<div class="hamburger-menu">
+  <input type="checkbox" id="menu-btn-check">
+  <label for="menu-btn-check" class="menu-btn"><span></span></label>
+  <div class="menu-content">
+    <ul>
+      <li><a href="https://fumifum1.github.io/main/index.html">Profile</a></li>
+      <li><a href="https://fumifum1.github.io/main/game.html">Games</a></li>
+      <li><a href="https://fumifum1.github.io/main/music.html">Music</a></li>
+      <li><a href="https://fumifum1.github.io/main/other.html">Others</a></li>
+    </ul>
+  </div>
+</div></div></nav>
+<div class="hero">
+<div><p class="eyebrow">A quiet message for today</p><h1>Celestial <span>Tarot</span></h1><p class="lead">生年月日と今日の日付を重ね、あなただけの一枚を導きます。答えを決めつけるためではなく、心の奥にある声へ静かに耳を澄ませるための、小さな時間です。</p></div>
+<div class="card-orbit" aria-hidden="true">
+<img class="float-card" src="https://raw.githubusercontent.com/fumifum1/tarot-images/main/00_THE_FOOL.png" alt="">
+<img class="float-card" src="https://raw.githubusercontent.com/fumifum1/tarot-images/main/17_THE_STAR.png" alt="">
+<img class="float-card" src="https://raw.githubusercontent.com/fumifum1/tarot-images/main/18_THE_MOON.png" alt="">
+<img class="float-card" src="https://raw.githubusercontent.com/fumifum1/tarot-images/main/19_THE_SUN.png" alt="">
+<img class="float-card" src="https://raw.githubusercontent.com/fumifum1/tarot-images/main/21_THE_WORLD.png" alt="">
+<img class="float-card" src="https://raw.githubusercontent.com/fumifum1/tarot-images/main/02_THE_HIGH_PRIESTESS.png" alt="">
+<img class="float-card" src="https://raw.githubusercontent.com/fumifum1/tarot-images/main/10_WHEEL_OFFORTUNE.png" alt="">
+</div>
+</div>
+</header>
+
+<main>
+<section class="section" id="reading">
+<div class="layout">
+<div class="intro"><span class="section-no">01</span><h2>Draw your card</h2><p>生年月日を入力し、占いたいテーマを選んでください。同じ日・同じ生年月日・同じテーマでは、同じカードが現れます。</p></div>
+<div class="panel">
+<form id="form" novalidate>
+<div class="group"><label class="label" for="birth">生年月日</label><input class="date" id="birth" type="date" autocomplete="bday" required><p class="note">入力内容はこの端末内の計算だけに使い、保存・送信しません。</p></div>
+<div class="group"><span class="label">占いたいテーマ</span><div class="categories" role="group" aria-label="占いテーマ">
+<button type="button" class="cat" data-id="general" aria-pressed="true">今日の全体運</button>
+<button type="button" class="cat" data-id="work" aria-pressed="false">仕事運</button>
+<button type="button" class="cat" data-id="wellness" aria-pressed="false">心と体</button>
+<button type="button" class="cat" data-id="relationship" aria-pressed="false">対人運</button>
+<button type="button" class="cat" data-id="money" aria-pressed="false">金運</button>
+<button type="button" class="cat" data-id="challenge" aria-pressed="false">今の課題</button>
+</div></div>
+<button class="draw" type="submit">今日の一枚を引く</button><p class="error" id="error" role="alert"></p>
+</form>
+</div></div>
+</section>
+
+<section class="section result" id="result" aria-live="polite">
+<div class="result-head"><div><span class="section-no">02</span><h2>Today’s message</h2></div><p class="result-date" id="rdate"></p></div>
+<div class="result-grid">
+<div class="image-wrap"><img class="card-img" id="image" alt="" width="800" height="1200"></div>
+<div>
+<p class="number" id="number"></p><h3 class="card-name" id="name"></h3><p class="english" id="english"></p>
+<div class="meta"><span id="orientation"></span><span id="category"></span><span id="keywords"></span></div>
+<article class="reading"><h3>今日のメッセージ</h3><p id="message"></p></article>
+<article class="reading"><h3>意識したいこと</h3><p id="focus"></p></article>
+<article class="reading"><h3>小さな行動</h3><p id="action"></p></article>
+<button class="reset" id="reset" type="button">別のテーマを占う</button>
+</div></div>
+</section>
+
+<section class="section privacy" id="privacy">
+<div class="privacy-inner"><span class="section-no">03</span><h2>Your privacy</h2>
+<p>このページは、ブラウザ上だけで動く静的なタロット占いです。生年月日などの入力情報を、管理者のサーバーや外部サービスへ送信する処理はありません。</p>
+<div class="privacy-box"><strong>入力情報について</strong><br>生年月日は、今日のカードを決めるための計算にのみ一時的に使用します。入力された生年月日、選択したテーマ、占い結果は、Cookie・データベース・Googleフォーム・アクセス解析などへ保存しません。ページを閉じるか再読み込みすると、入力内容は消えます。</div>
+<p>※占いは未来や結果を保証するものではありません。日々を見つめるためのヒントとしてお楽しみください。医療・法律・投資などの重要な判断は、各分野の専門家へご相談ください。</p>
+</div></section>
+</main>
+<footer style="margin-top: 2rem; font-size: 0.7rem; color: #94a3b8; text-align: center; padding-bottom: 2rem;">
+    &copy; 2026 Synapse Creations. Celestial Tarot _ver1.0.1 <a href="https://fumifum1.github.io/main/index.html" style="color: inherit; text-decoration: none;">Creator/fumifumi</a>
+</footer>
+
+<script>
+"use strict";
+const BASE="https://raw.githubusercontent.com/fumifum1/tarot-images/main/";
+const cards=[
+["愚者","The Fool","自由・始まり・冒険","00_THE_FOOL.png","00_Rev_THE_FOOL.png","新しい風が入り始めています。心が軽くなる方向に、小さな可能性が隠れています。","急いで踏み出す前に、足元を確かめたい日です。見落としがないか静かに確認しましょう。"],
+["魔術師","The Magician","行動・才能・可能性","01_THE_MAGICIAN.png","01_Rev_THE_MAGICIAN.png","始めるための材料は、すでに手元にあります。考えてきたことを形に移しましょう。","力を分散させず、一つに絞りたい日です。目的を明確にしてから動きましょう。"],
+["女教皇","The High Priestess","直感・静けさ・洞察","02_THE_HIGH_PRIESTESS.png","02_Rev_THE_HIGH_PRIESTESS.png","外へ答えを探すより、内側の静かな感覚を信じたい日です。","考えすぎで本来の感覚が聞こえにくいかもしれません。情報から少し離れましょう。"],
+["女帝","The Empress","豊かさ・愛情・成長","03_THE_EMPRESS.png","03_Rev_THE_EMPRESS.png","育ててきたものに、やわらかな実りが現れそうです。受け取ることを遠慮しないでください。","人のために注ぎすぎて、自分の余白が少なくなっているかもしれません。"],
+["皇帝","The Emperor","安定・責任・決断","04_THE_EMPEROR.png","04_Rev_THE_EMPEROR.png","曖昧だったものに形と順序を与えられる日です。落ち着いて境界線を決めましょう。","強く管理しようとするほど流れが固くなることがあります。柔軟さを残してください。"],
+["教皇","The Hierophant","信頼・助言・伝統","05_THE_HIEROPHANT.png","05_Rev_THE_HIEROPHANT.png","経験のある人や、長く受け継がれた方法が助けになる日です。","周囲の常識が今のあなたには合わなくなっているかもしれません。自分なりの方法を探しましょう。"],
+["恋人","The Lovers","選択・調和・つながり","06_THE_LOVERS.png","06_Rev_THE_LOVERS.png","心から納得できる選択が良い流れを作ります。素直な気持ちを大切にしてください。","気持ちと行動が少し離れているかもしれません。誰かに合わせすぎず本音を確かめましょう。"],
+["戦車","The Chariot","前進・勝利・意志","07_THE_CHARIOT.png","07_Rev_THE_CHARIOT.png","進む方向を決めることで力がまとまります。今日は勢いを味方につけやすい日です。","急ぐ気持ちと現実の速度が合っていないかもしれません。方向を調整しましょう。"],
+["力","Strength","勇気・忍耐・優しさ","08_STRENGTH.png","08_Rev_STRENGTH.png","強さとは押し切ることではなく、落ち着いて向き合い続けることです。","自信が揺らいでも力が消えたわけではありません。疲れを認めて休みましょう。"],
+["隠者","The Hermit","内省・探求・静かな時間","09_THE_HERMIT.png","09_Rev_THE_HERMIT.png","外の速さから少し離れることで、本当に必要な答えが見えてきます。","一人で考え続けるうちに視野が狭くなっているかもしれません。信頼できる人の視点を借りましょう。"],
+["運命の輪","Wheel of Fortune","転機・変化・チャンス","10_WHEEL_OFFORTUNE.png","10_Rev_WHEEL_OF_FORTUNE.png","流れが切り替わる気配があります。偶然の中に次へ進む入口がありそうです。","思うように進まない時ほど、無理に流れを変えず調整の時間にしましょう。"],
+["正義","Justice","公平・判断・バランス","11_JUSTICE.png","11_Rev_JUSTICE.png","事実を丁寧に見れば、納得できる判断へ近づけます。","不公平さや納得できない気持ちが残っているかもしれません。すぐに白黒を決めないでください。"],
+["吊るされた男","The Hanged Man","視点の転換・待つ・手放す","12_THE_HANGED_MAN.png","12_Rev_THE_HANGED_MAN.png","すぐに動かないことにも意味があります。角度を変えて見てみましょう。","待ち続けることが目的になっていないか確認したい日です。小さな期限を作りましょう。"],
+["死神","Death","終わり・再生・切り替え","13_DEATH.png","13_Rev_DEATH.png","一つの流れを終えることで新しい余白が生まれます。役目を終えたものを送り出しましょう。","変わる必要を感じながら、慣れたものを手放しにくくなっているかもしれません。"],
+["節制","Temperance","調和・回復・適度","14_TEMPERANCE.png","14_Rev_TEMPERANCE.png","極端に走らず少しずつ混ぜ合わせることで、ちょうどよい答えが生まれます。","生活や気持ちの配分が偏っているかもしれません。一つずつ戻しましょう。"],
+["悪魔","The Devil","執着・誘惑・思い込み","15_THE_DEVIL.png","15_Rev_THE_DEVIL.png","魅力的に見えるものほど、自分を縛っていないか確認したい日です。","長く続いていた縛りから少しずつ離れられる兆しがあります。"],
+["塔","The Tower","突然の変化・気づき・解放","16_THE_TOWER.png","16_Rev_THE_TOWER.png","予想外の変化が、古い前提を見直すきっかけになるかもしれません。","大きな変化を避けるため、小さな違和感を見過ごしていないか確認しましょう。"],
+["星","The Star","希望・癒やし・未来","17_THE_STAR.png","17_Rev_THE_STAR.png","遠くに感じていた希望が、少し現実味を帯びてきます。","希望を失ったように感じても、疲れで見えにくくなっているだけかもしれません。"],
+["月","The Moon","不安・迷い・想像力","18_THE_MOON.png","18_Rev_THE_MOON.png","輪郭のはっきりしない気持ちが浮かびやすい日です。不安を事実と決めつけないでください。","霧が少しずつ晴れ、誤解や心配の正体が見えてきそうです。"],
+["太陽","The Sun","成功・喜び・明るさ","19_THE_SUN.png","19_Rev_THE_SUN.png","素直な喜びや手応えを受け取りやすい日です。良いところを明るく認めましょう。","明るい兆しはありますが、期待を大きくしすぎず小さな満足を受け取りましょう。"],
+["審判","Judgement","再出発・目覚め・決断","20_JUDGEMENT.png","20_Rev_JUDGEMENT.png","過去の経験が次の選択へつながる日です。今なら違う答えを出せるでしょう。","決断を先延ばしにしたくなるかもしれません。完全な確信を待たず小さく判断しましょう。"],
+["世界","The World","完成・達成・充実","21_THE_WORLD.png","21_Rev_THE_WORLD.png","一つの区切りへ近づいています。ここまで積み重ねたものを受け取りましょう。","あと少しのところで止まっていることがありそうです。残った部分を整えましょう。"]
+];
+const categories={general:["今日の全体運","一日全体の流れとして"],work:["仕事運","仕事や学びの場面では"],wellness:["心と体","心身を整える視点では"],relationship:["対人運","人との関わりでは"],money:["金運","お金や持ち物との向き合い方では"],challenge:["今の課題","今向き合っている課題については"]};
+let selected="general";
+document.querySelectorAll(".cat").forEach(b=>b.onclick=()=>{selected=b.dataset.id;document.querySelectorAll(".cat").forEach(x=>x.setAttribute("aria-pressed",x===b));document.getElementById("error").textContent=""});
+document.getElementById("form").onsubmit=e=>{e.preventDefault();const v=document.getElementById("birth").value,err=document.getElementById("error");err.textContent="";if(!v){err.textContent="生年月日を入力してください。";return}const bd=new Date(v+"T00:00:00");if(Number.isNaN(bd.getTime())||bd>new Date()){err.textContent="正しい生年月日を入力してください。";return}show(v,selected)};
+document.getElementById("reset").onclick=()=>document.getElementById("reading").scrollIntoView({behavior:"smooth"});
+function hash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+function key(){return new Intl.DateTimeFormat("ja-JP",{timeZone:"Asia/Tokyo",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date()).replaceAll("/","-")}
+function show(b,c){const seed=b+"|"+key()+"|"+c+"|celestial";const i=hash(seed+"|card")%22,rev=hash(seed+"|orientation")%2===1,card=cards[i],cat=categories[c];document.getElementById("rdate").textContent=new Intl.DateTimeFormat("ja-JP",{timeZone:"Asia/Tokyo",year:"numeric",month:"long",day:"numeric",weekday:"long"}).format(new Date());document.getElementById("number").textContent="Major Arcana "+String(i).padStart(2,"0");document.getElementById("name").textContent=card[0];document.getElementById("english").textContent=card[1];document.getElementById("orientation").textContent=rev?"逆位置":"正位置";document.getElementById("category").textContent=cat[0];document.getElementById("keywords").textContent=card[2];const img=document.getElementById("image");img.src=BASE+(rev?card[4]:card[3]);img.alt=card[0]+"（"+(rev?"逆位置":"正位置")+"）のタロットカード";document.getElementById("message").textContent=cat[1]+"、"+card[rev?6:5];document.getElementById("focus").textContent=rev?"焦って答えを出さず、違和感や負担の正体を静かに確かめてください。":"結果を急がず、今の自分が自然に続けられる選択を大切にしてください。";document.getElementById("action").textContent=rev?"予定や習慣を一つ見直し、負担を少し減らしてみましょう。":"今日できる小さな一歩を一つ選び、十五分だけ行動してみましょう。";const r=document.getElementById("result");r.classList.add("show");requestAnimationFrame(()=>r.scrollIntoView({behavior:"smooth"}))}
+</script>
+</body>
+</html>

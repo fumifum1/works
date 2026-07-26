@@ -1090,6 +1090,7 @@ async function updateGeminiMessage(payload) {
 
     const data = await response.json();
     console.log("Tarot GAS response:", data);
+    console.log("Tarot GAS response JSON:", JSON.stringify(data, null, 2));
 
     if (!data.success || !data.result) {
       throw new Error(data.error || "Geminiコメントを取得できませんでした。");

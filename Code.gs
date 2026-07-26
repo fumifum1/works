@@ -19,7 +19,7 @@ function doPost(e) {
 
     const data = JSON.parse(e.postData.contents);
 
-    const result = getTarotReading(
+    const reading = getTarotReading(
       data.cardName,
       data.englishName || "",
       data.orientation,
@@ -33,8 +33,9 @@ function doPost(e) {
       .createTextOutput(
         JSON.stringify({
           success: true,
-          source: "gemini",
-          result: result
+          source: reading.source,
+          result: reading.result,
+          debug: reading.debug || null
         })
       )
       .setMimeType(ContentService.MimeType.JSON);
@@ -104,19 +105,35 @@ function getTarotReading(
   try {
 
     const text = callGemini(prompt);
+    Logger.log("Gemini raw text: " + text);
+
     const jsonText = extractJsonText(text);
     const parsed = JSON.parse(jsonText);
+    const fixed = getFixedReading(cardName, orientation, category);
 
     return {
-      message: parsed.message || getFixedReading(cardName, orientation, category).message,
-      focus: parsed.focus || getFixedReading(cardName, orientation, category).focus,
-      action: parsed.action || getFixedReading(cardName, orientation, category).action
+      source: "gemini",
+      result: {
+        message: parsed.message || fixed.message,
+        focus: parsed.focus || fixed.focus,
+        action: parsed.action || fixed.action
+      },
+      debug: {
+        rawText: text,
+        parsedJson: jsonText
+      }
     };
 
   } catch (err) {
 
-    Logger.log(err);
-    return getFixedReading(cardName, orientation, category);
+    Logger.log("Gemini fallback reason: " + err);
+    return {
+      source: "fallback",
+      result: getFixedReading(cardName, orientation, category),
+      debug: {
+        reason: err.toString()
+      }
+    };
 
   }
 

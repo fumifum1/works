@@ -958,10 +958,14 @@ function executeTarotReading(b, c) {
   img.src = BASE + (rev ? card[4] : card[3]);
   img.alt = card[0] + "（" + (rev ? "逆位置" : "正位置") + "）のタロットカード";
   
-  const fallbackMessage = cat[1] + "、" + card[rev ? 8 : 7];
+  const fallbackReading = {
+    message: cat[1] + "、" + card[rev ? 8 : 7],
+    focus: rev ? "焦って答えを出さず、違和感や負担の正体を静かに確かめてください。" : "結果を急がず、今の自分が自然に続けられる選択を大切にしてください。",
+    action: rev ? "予定や習慣を一つ見直し、負担を少し減らしてみましょう。" : "今日できる小さな一歩を一つ選び、十五分だけ行動してみましょう。"
+  };
   document.getElementById("message").textContent = "星の流れを読み解いています…";
-  document.getElementById("focus").textContent = rev ? "焦って答えを出さず、違和感や負担の正体を静かに確かめてください。" : "結果を急がず、今の自分が自然に続けられる選択を大切にしてください。";
-  document.getElementById("action").textContent = rev ? "予定や習慣を一つ見直し、負担を少し減らしてみましょう。" : "今日できる小さな一歩を一つ選び、十五分だけ行動してみましょう。";
+  document.getElementById("focus").textContent = "今日意識したいことを整えています…";
+  document.getElementById("action").textContent = "小さな行動を選んでいます…";
   
   const r = document.getElementById("result");
   r.classList.add("show");
@@ -977,15 +981,19 @@ function executeTarotReading(b, c) {
     categoryContext: cat[1],
     keywords: card[2],
     baseMessage: card[rev ? 8 : 7],
-    fallbackMessage
+    fallbackReading
   });
 }
 
 async function updateGeminiMessage(payload) {
   const messageEl = document.getElementById("message");
+  const focusEl = document.getElementById("focus");
+  const actionEl = document.getElementById("action");
 
   if (!GAS_ENDPOINT || GAS_ENDPOINT.includes("ここにGAS")) {
-    messageEl.textContent = payload.fallbackMessage;
+    messageEl.textContent = payload.fallbackReading.message;
+    focusEl.textContent = payload.fallbackReading.focus;
+    actionEl.textContent = payload.fallbackReading.action;
     console.warn("GAS_ENDPOINTが未設定のため、固定メッセージを表示しました。");
     return;
   }
@@ -1009,10 +1017,23 @@ async function updateGeminiMessage(payload) {
       throw new Error(data.error || "Geminiコメントを取得できませんでした。");
     }
 
-    messageEl.textContent = data.result;
+    if (typeof data.result === "string") {
+      messageEl.textContent = data.result;
+      focusEl.textContent = payload.fallbackReading.focus;
+      actionEl.textContent = payload.fallbackReading.action;
+      console.log("Tarot comment source:", data.source || "gemini-message-only");
+      return;
+    }
+
+    messageEl.textContent = data.result.message || payload.fallbackReading.message;
+    focusEl.textContent = data.result.focus || payload.fallbackReading.focus;
+    actionEl.textContent = data.result.action || payload.fallbackReading.action;
+    console.log("Tarot comment source:", data.source || "gemini");
   } catch (err) {
     console.warn(err);
-    messageEl.textContent = payload.fallbackMessage;
+    messageEl.textContent = payload.fallbackReading.message;
+    focusEl.textContent = payload.fallbackReading.focus;
+    actionEl.textContent = payload.fallbackReading.action;
   }
 }
 

@@ -242,6 +242,20 @@ h2 { margin: 0; font-size: clamp(44px, 6vw, 76px); line-height: .96; }
   font-size: clamp(20px, 3vw, 28px); outline: none; transition: 0.3s;
 }
 .date:focus { border-bottom-color: var(--gold); }
+.date-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, .62fr);
+  gap: 18px;
+  align-items: end;
+}
+.date-sub-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 11px;
+  letter-spacing: .08em;
+  color: rgba(24,23,19,.65);
+}
+.date::placeholder { color: rgba(24,23,19,.35); }
 .categories { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
 .cat, .draw, .btn-outline {
   min-height: 52px; border: 1px solid var(--ink); border-radius: 5px;
@@ -254,10 +268,10 @@ h2 { margin: 0; font-size: clamp(44px, 6vw, 76px); line-height: .96; }
 }
 .draw {
   width: 100%; min-height: 62px; letter-spacing: .12em;
-  background: var(--ink); color: var(--white); border: none;
+  background: var(--gold); color: var(--deep); border: none;
   font-size: 16px; position: relative; overflow: hidden;
 }
-.draw:hover { background: var(--gold); color: var(--deep); }
+.draw:hover { background: var(--gold); color: var(--deep); opacity: .78; }
 .draw:active { transform: scale(0.99); }
 .note, .error { font-size: 12px; margin-top: 8px; }
 .note { color: rgba(24,23,19,.7); }
@@ -492,6 +506,7 @@ h2 { margin: 0; font-size: clamp(44px, 6vw, 76px); line-height: .96; }
   .hero { padding-top: 86px; }
   .card-orbit { justify-self: center; width: min(86vw, 500px); height: min(105vw, 590px); margin-top: 18px; }
   .intro { position: static; }
+  .date-fields { grid-template-columns: 1fr; gap: 22px; }
   .categories { grid-template-columns: 1fr; }
   .result-head { align-items: start; flex-direction: column; }
   .image-wrap { width: min(64vw, 270px); margin: auto; }
@@ -575,9 +590,18 @@ h2 { margin: 0; font-size: clamp(44px, 6vw, 76px); line-height: .96; }
     <div class="panel">
       <form id="form" novalidate>
         <div class="group">
-          <label class="label" for="birth">生年月日</label>
-          <input class="date" id="birth" type="date" autocomplete="bday" required>
-          <p class="note">入力内容はこの端末内の計算だけに使い、保存・送信しません。</p>
+          <span class="label">生年月日</span>
+          <div class="date-fields">
+            <label>
+              <span class="date-sub-label">手入力</span>
+              <input class="date" id="birthText" type="text" inputmode="numeric" autocomplete="bday" placeholder="例：1990/01/23">
+            </label>
+            <label>
+              <span class="date-sub-label">カレンダー</span>
+              <input class="date" id="birthCalendar" type="date" autocomplete="bday">
+            </label>
+          </div>
+          <p class="note">手入力は「1990/01/23」「1990-01-23」「19900123」「1990/1/23」に対応しています。入力内容はこの端末内の計算だけに使い、保存・送信しません。</p>
         </div>
         <div class="group">
           <span class="label">占いたいテーマ</span>
@@ -853,10 +877,61 @@ function getTodayKey() {
   }).format(new Date()).replaceAll("/", "-");
 }
 
+function normalizeBirthDate(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+
+  const jpMatch = raw.match(/^(\d{4})\s*年\s*(\d{1,2})\s*月\s*(\d{1,2})\s*日?$/);
+  const separatedMatch = raw.match(/^(\d{4})[\/\-. ](\d{1,2})[\/\-. ](\d{1,2})$/);
+  const compactMatch = raw.match(/^(\d{4})(\d{2})(\d{2})$/);
+  const match = jpMatch || separatedMatch || compactMatch;
+
+  if (!match) return "";
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const date = new Date(year, month - 1, day);
+
+  if (
+    date.getFullYear() !== year ||
+    date.getMonth() !== month - 1 ||
+    date.getDate() !== day
+  ) {
+    return "";
+  }
+
+  return [
+    String(year).padStart(4, "0"),
+    String(month).padStart(2, "0"),
+    String(day).padStart(2, "0")
+  ].join("-");
+}
+
+function formatBirthDateForText(value) {
+  const normalized = normalizeBirthDate(value);
+  return normalized ? normalized.replaceAll("-", "/") : value;
+}
+
+const birthText = document.getElementById("birthText");
+const birthCalendar = document.getElementById("birthCalendar");
+
+birthText.addEventListener("change", () => {
+  const normalized = normalizeBirthDate(birthText.value);
+  if (normalized) {
+    birthText.value = formatBirthDateForText(normalized);
+    birthCalendar.value = normalized;
+  }
+});
+
+birthCalendar.addEventListener("change", () => {
+  birthText.value = birthCalendar.value ? formatBirthDateForText(birthCalendar.value) : "";
+});
+
 document.getElementById("form").onsubmit = (e) => {
   e.preventDefault();
   initAudio(); // ユーザー操作起因でAudioContextを初期化
-  const bdate = document.getElementById("birth").value;
+  const bdate = normalizeBirthDate(birthText.value || birthCalendar.value);
   const err = document.getElementById("error");
   err.textContent = "";
 
@@ -870,6 +945,8 @@ document.getElementById("form").onsubmit = (e) => {
     return;
   }
 
+  birthText.value = formatBirthDateForText(bdate);
+  birthCalendar.value = bdate;
   bdateForReading = bdate;
   catForReading = selectedCategory;
 

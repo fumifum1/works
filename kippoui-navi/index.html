@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="九星気学の伝統的な見立てから、一人・複数人・年間の吉方位を確認できるブラウザ内計算ツール">
+  <title>吉方位ナビ-KIPPOUI NAVI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+JP:wght@300;400&family=Noto+Serif+JP:wght@300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./assets/leaflet.css">
+  <link rel="stylesheet" href="./styles.css?v=1.5.3">
+</head>
+<body>
+<header id="top" class="site-header">
+  <nav class="site-nav" aria-label="メインメニュー">
+    <a class="site-brand" href="#top"><span>九</span>吉方位ナビ-KIPPOUI NAVI</a>
+    <div class="desktop-links">
+      <a href="#single">一人判定</a>
+      <a href="#annualSection">年間一覧</a>
+      <a href="#groupSection">複数人</a>
+      <a href="#mapSection">地図</a>
+    </div>
+    <input id="menu-btn-check" class="menu-check" type="checkbox" aria-hidden="true">
+    <label class="menu-button" for="menu-btn-check" aria-label="メニューを開閉"><span></span></label>
+    <aside class="menu-content" aria-label="サイトメニュー">
+      <label class="menu-close" for="menu-btn-check" aria-label="メニューを閉じる">×</label>
+      <p class="eyebrow">CONTENTS</p>
+      <a href="#single"><span>01</span> 一人判定</a>
+      <a href="#annualSection"><span>03</span> 年間一覧</a>
+      <a href="#groupSection"><span>04</span> 複数人判定</a>
+      <a href="#mapSection"><span>05</span> 方位地図</a>
+      <small>生年月日や位置情報はブラウザ内で処理します。</small>
+    </aside>
+  </nav>
+
+  <div class="hero-shell">
+    <div class="hero-copy">
+      <p class="eyebrow">KUSEI KIGAKU DIRECTION GUIDE</p>
+      <h1>Celestial <span>Compass</span></h1>
+      <p class="hero-lead">生年月日と旅立つ日から、八方位の流れを静かに見渡す。九星気学の伝統的な見立てを、わかりやすい地図とことばで。</p>
+      <a class="draw-link" href="#single">今日の方位を見る</a>
+    </div>
+    <div class="hero-compass" aria-hidden="true">
+      <div class="compass-orbit orbit-one"></div>
+      <div class="compass-orbit orbit-two"></div>
+      <div class="compass-disc">
+        <div class="compass-needle"></div>
+        <span class="point north">北</span><span class="point north-east">北東</span>
+        <span class="point east">東</span><span class="point south-east">南東</span>
+        <span class="point south">南</span><span class="point south-west">南西</span>
+        <span class="point west">西</span><span class="point north-west">北西</span>
+        <div class="compass-core"><b>九</b><small>DIRECTION</small></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section id="single" class="site-section basic-section">
+    <div class="section-layout">
+      <header class="section-intro">
+        <span class="section-index">01</span>
+        <p class="eyebrow">BASIC INFORMATION</p>
+        <h2>基本情報</h2>
+        <p>一人分の生年月日と判定日を入力します。本命星・月命星の傾向、方位ごとの判定、年間一覧に使用します。</p>
+      </header>
+      <div class="section-content">
+        <form id="form" class="basic-panel" autocomplete="off">
+          <div class="form-fields">
+            <fieldset class="field-group">
+              <legend>生年月日</legend>
+              <div class="date-selects">
+                <label><span>年</span><select id="birthYear" aria-label="生年月日の年" required><option value="">年</option></select></label>
+                <label><span>月</span><select id="birthMonth" aria-label="生年月日の月" required><option value="">月</option></select></label>
+                <label><span>日</span><select id="birthDay" aria-label="生年月日の日" required disabled><option value="">日</option></select></label>
+              </div>
+            </fieldset>
+            <fieldset class="field-group">
+              <legend>判定日</legend>
+              <label class="target-date-wrap"><span>日付</span><input id="targetDate" class="date-control" type="date" aria-describedby="precisionNote" required></label>
+            </fieldset>
+          </div>
+          <p id="precisionNote" class="form-note">本版は年盤・月盤の参考判定です。時刻は正午として扱い、立春・節入り時刻の直前直後は簡易判定となります。</p>
+          <button class="draw-button" type="submit">一人分の方位を見る</button>
+          <button id="clearBtn" class="text-button" type="button">入力と結果を消去</button>
+          <a class="text-button form-link" href="#groupSection">複数人判定</a>
+          <p id="error" class="error" role="alert"></p>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <section id="results" class="site-section result-section hidden" aria-live="polite" tabindex="-1">
+    <div class="section-layout">
+      <header class="section-intro">
+        <span class="section-index">02</span>
+        <p class="eyebrow">YOUR READING</p>
+        <h2>判定結果</h2>
+        <p>まず九星の基本傾向を確認し、そのあとに今回の結論と方位ごとの理由を読み進めます。</p>
+      </header>
+      <div class="section-content result-content">
+        <p id="resultDate" class="result-date"></p>
+        <div id="resultMeta" class="result-meta"></div>
+        <div class="result-heading-row">
+          <h3>九星気学で見る基本傾向</h3>
+          <small>伝統的な見立てであり、科学的な性格診断ではありません。</small>
+        </div>
+        <div id="personality" class="personality-grid"></div>
+        <div class="reading conclusion-reading">
+          <p class="eyebrow">TODAY'S DIRECTION</p>
+          <h3 id="resultHeadline"></h3>
+          <p id="resultIntro"></p>
+          <div id="resultGroups" class="result-groups"></div>
+        </div>
+        <div id="reasonsSection" class="reading reasons-reading">
+          <div class="result-heading-row">
+            <h3>方位ごとの理由</h3>
+            <small>吉凶は色だけでなく文字でも表示します。</small>
+          </div>
+          <div id="reasons"></div>
+        </div>
+        <a class="btn-dark" href="#mapSection">地図で方位を見る</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="annualSection" class="site-section annual-section">
+    <div class="section-layout">
+      <header class="section-intro">
+        <span class="section-index">03</span>
+        <p class="eyebrow">YEAR COMPASS</p>
+        <h2>年間一覧</h2>
+        <p>基本情報の生年月日を使い、立春から始まる12の節月ごとに、あなたの吉方位候補を一覧表示します。</p>
+      </header>
+      <div class="section-content">
+        <div class="annual-controls line-panel">
+          <label>対象年<select id="annualYear" class="line-select" aria-label="年間一覧の対象年"></select></label>
+          <button id="annualBtn" class="outline-button" type="button">年間一覧を表示</button>
+        </div>
+        <p class="form-note">各節月の中間日時で計算します。月初ではなく、立春・啓蟄などの節入りで月盤が切り替わります。</p>
+        <p id="annualError" class="error" role="alert"></p>
+        <div id="annualSummary" class="annual-summary"></div>
+        <div id="annualResults" class="annual-results"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="groupSection" class="site-section group-section">
+    <div class="section-layout">
+      <header class="section-intro">
+        <span class="section-index">04</span>
+        <p class="eyebrow">SHARED COMPASS</p>
+        <h2>複数人判定</h2>
+        <p>2〜6人の方位を重ねます。誰か一人でも避ける方位は「避ける」、全員が吉候補の方位だけを「全員に吉」と判定します。</p>
+      </header>
+      <div class="section-content">
+        <fieldset class="field-group group-target-field">
+          <legend>共通の判定日</legend>
+          <label><span>日付</span><input id="groupTargetDate" class="date-control" type="date" required></label>
+        </fieldset>
+        <div id="peopleList" class="people-list"></div>
+        <p class="form-note group-name-note">※お名前が未入力の場合は、A、B、C…と表示します。</p>
+        <div class="group-actions">
+          <button id="addPersonBtn" class="outline-button" type="button">＋ 参加者を追加</button>
+          <button id="groupBtn" class="draw-button" type="button">全員分を重ねて判定</button>
+        </div>
+        <p class="form-note">参加者の生年月日は端末内だけで計算し、外部へ送信しません。</p>
+        <p id="groupError" class="error" role="alert"></p>
+        <div id="groupResults" class="group-results hidden" aria-live="polite"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="mapSection" class="site-section map-section">
+    <div class="section-layout">
+      <header class="section-intro">
+        <span class="section-index">05</span>
+        <p class="eyebrow">DIRECTION MAP</p>
+        <h2>方位地図</h2>
+        <p>東京駅・現在地に加え、地図上の任意地点を起点として指定できます。選択モード以外のクリックでは起点は変わりません。</p>
+      </header>
+      <div class="section-content">
+        <div class="map-tools line-panel">
+          <div class="map-actions">
+            <button id="pickOriginBtn" class="outline-button" type="button" aria-pressed="false">地図から起点を選ぶ</button>
+            <button id="gpsBtn" class="outline-button" type="button">現在地</button>
+            <button id="tokyoBtn" class="outline-button" type="button">東京駅</button>
+          </div>
+          <div class="origin-copy">
+            <p id="mapJudgeMode" class="map-judge-mode">表示中：判定前</p>
+            <p id="originStatus">起点：東京駅（デフォルト）</p>
+            <p id="originPickHint" class="form-note" aria-live="polite">任意地点を使う場合は「地図から起点を選ぶ」を押してください。</p>
+          </div>
+        </div>
+        <div class="map-legend" aria-label="地図の色分け">
+          <span><i class="legend-good"></i>吉候補／全員に吉</span>
+          <span><i class="legend-neutral"></i>中立</span>
+          <span><i class="legend-bad"></i>避ける</span>
+          <small>方位線は拡大・縮小しても画面端まで続きます</small>
+        </div>
+        <div id="map" role="region" aria-label="吉方位地図"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="privacy-section">
+    <span class="section-index">06</span>
+    <p class="eyebrow">PRIVACY</p>
+    <h2>入力内容は、端末の中だけで。</h2>
+    <p>生年月日・判定日・GPS座標・判定結果はブラウザ内で計算します。OpenStreetMapには地図タイル表示に必要な通常の通信のみが発生します。</p>
+  </section>
+</main>
+
+<template id="personTemplate">
+  <article class="person-panel">
+    <div class="person-panel-head">
+      <p class="person-number"></p>
+      <button class="remove-person" type="button">削除</button>
+    </div>
+    <label class="name-field">お名前（任意）<input class="person-name line-input" type="text" maxlength="24" placeholder="例：Aさん"></label>
+    <fieldset class="field-group person-birth-field">
+      <legend>生年月日</legend>
+      <div class="date-selects">
+        <label><span>年</span><select class="person-year" required><option value="">年</option></select></label>
+        <label><span>月</span><select class="person-month" required><option value="">月</option></select></label>
+        <label><span>日</span><select class="person-day" required disabled><option value="">日</option></select></label>
+      </div>
+    </fieldset>
+  </article>
+</template>
+
+<footer class="site-footer">
+  <p>© 2026 Synapse Creations</p><p>Creator / fumifumi</p><p>ver1.5.3</p>
+</footer>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="./config.js"></script>
+<script>
+(function(){
+  const id = window.APP_CONFIG && window.APP_CONFIG.gaMeasurementId;
+  if(!id) return;
+  const s=document.createElement("script");
+  s.async=true;s.src="https://www.googletagmanager.com/gtag/js?id="+encodeURIComponent(id);
+  document.head.appendChild(s);
+  window.dataLayer=window.dataLayer||[];
+  window.gtag=function(){dataLayer.push(arguments)};
+  gtag("js",new Date());
+  gtag("config",id,{anonymize_ip:true,allow_google_signals:false,allow_ad_personalization_signals:false});
+})();
+</script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="./app.js?v=1.5.3"></script>
+</body>
+</html>
